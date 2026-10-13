@@ -47,9 +47,12 @@ def build_ingestion_chain(
         return parse_document(state["request"].source_path)
 
     def chunk(state: dict[str, Any]) -> list[Chunk]:
-        return chunk_by_clause(
+        chunks = chunk_by_clause(
             state["elements"], settings.chunk_max_characters, settings.chunk_overlap_characters
         )
+        if not chunks:
+            raise ValueError("Parsed document produced no chunks; refusing to replace stored content")
+        return chunks
 
     def enrich(state: dict[str, Any]) -> dict[str, list[Document]]:
         request: IngestRequest = state["request"]
@@ -71,6 +74,7 @@ def build_ingestion_chain(
             text = f"{header(item.section)}\n{item.text}"
             metadata = {
                 **doc_metadata,
+                "effective_to_search": doc_metadata["effective_to"] or "9999-12-31",
                 "chunk_id": chunk_id,
                 "parent_id": parent_id,
                 "section": item.section,

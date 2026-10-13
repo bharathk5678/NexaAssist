@@ -17,14 +17,14 @@ Create this index manually in Atlas (Atlas UI > Atlas Search > Create Search Ind
     { "type": "filter", "path": "product_id" },
     { "type": "filter", "path": "jurisdiction" },
     { "type": "filter", "path": "effective_date" },
-    { "type": "filter", "path": "effective_to" },
+    { "type": "filter", "path": "effective_to_search" },
     { "type": "filter", "path": "doc_type" },
     { "type": "filter", "path": "confidentiality_level" }
   ]
 }
 ```
 
-`effective_date` and `effective_to` together support an as-of query: `effective_date <= d AND (effective_to is null OR effective_to > d)`. Filter fields can only be used in a query if they are in the index, so adding one later means rebuilding the index.
+`effective_date` and `effective_to_search` support the inclusive as-of query `effective_date <= d AND effective_to_search >= d`. Both are ISO date strings. Open-ended documents keep `effective_to: null` as source metadata and store `effective_to_search: "9999-12-31"` for the index. Rebuild the existing Atlas index with this JSON and re-ingest the document register before using the retrieval API; re-ingestion updates the chunk checksums and metadata. Filter fields can only be used in a query if they are in the index.
 
 Changing the embedding model or dimension means a new index version (`policy_chunks_v2`) and a full re-embed, never a mixed index.
 
