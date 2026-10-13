@@ -2,11 +2,11 @@
 
 A policy, product and lending advisor for the staff of NexaBank (a fictional bank), built as the hands-on codebase for the **Enterprise Agentic RAG** training program. Everything is synthetic.
 
-This repository currently contains **Phase 1, Sessions 1 and 2**: the architecture and the **ingestion (write) path**. It turns the bank's policy PDFs into versioned, clause-level chunks in MongoDB Atlas, keeps each section as a parent document, and re-embeds only what changed. The retrieval (read) path arrives in later sessions.
+This repository contains the Week 1 ingestion path and a FastAPI retrieval path. Ingestion turns policy PDFs into versioned clause chunks and parent sections in MongoDB Atlas; `/retrieve` returns filtered, cited evidence. Answer generation is scheduled for Week 2. The new retrieval path is covered by offline tests; live Atlas and OpenAI verification remains a deployment step.
 
 | | |
 |---|---|
-| Language | Python 3.11 or 3.12 |
+| Language | Python 3.14+ |
 | Orchestration | LangChain (LCEL runnables) |
 | Vector store | MongoDB Atlas Vector Search via `langchain-mongodb` |
 | Embeddings | OpenAI `text-embedding-3-small`, 1536 dimensions |
@@ -49,15 +49,16 @@ flowchart LR
     EMBED --> ATLAS[("MongoDB Atlas<br/>chunks + vector index")]
     ENRICH --> PARENTS[("MongoDB Atlas<br/>parent sections")]
 
-    subgraph READ["Read path: Sessions 4 to 7"]
+    subgraph READ["Read path: Session 4"]
         direction LR
-        UI["Staff UI"] --> RET["Retrieval Service"]
+        CALLER["API caller"] --> RET["FastAPI /retrieve"]
         RET --> QEMB["Embed query<br/>same model"]
         QEMB --> SEARCH["Vector search + filters"]
         SEARCH --> CITED["Cited chunks"]
     end
 
     ATLAS -.-> SEARCH
+    PARENTS -.-> CITED
 ```
 
 Why version metadata matters: a circular can supersede a single clause of a manual. If the write path does not stamp `policy_version` and `effective_date` on every chunk, the read path cannot tell a current clause from a superseded one, and similarity search alone will happily return the old one.
@@ -77,11 +78,11 @@ flowchart TB
 
     classDef built fill:#d1fae5,stroke:#047857,color:#064e3b
     classDef todo fill:#f3f4f6,stroke:#9ca3af,color:#374151
-    class L1 built
-    class L2,L3,L4,L5,L6 todo
+    class L1,L2 built
+    class L3,L4,L5,L6 todo
 ```
 
-Green is implemented. Everything else is future work.
+Green is implemented in code; live Atlas verification is still required.
 
 ---
 
@@ -102,20 +103,26 @@ Green is implemented. Everything else is future work.
 │   │   ├── logging.py              JSON logging setup
 │   │   └── telemetry.py            Datadog APM switch
 │   ├── models/
-│   │   └── ingestion.py            IngestRequest, IngestResponse (the service contract)
+│   │   ├── ingestion.py            IngestRequest, IngestResponse
+│   │   └── retrieval.py            RetrieveRequest, RetrieveResponse, citations
 │   ├── chains/                     Pure LangChain: no web or UI imports
 │   │   ├── parsing.py              PDF to structured elements
 │   │   ├── chunking.py             Clause-aware chunking (structure first, size second)
 │   │   ├── embeddings.py           OpenAI embeddings client
-│   │   └── ingestion.py            The write-path chain: enrich, checksum, compare, upsert
+│   │   ├── ingestion.py            The write-path chain: enrich, checksum, compare, upsert
+│   │   └── retrieval.py            Atlas filters, ranked chunks, parent expansion
 │   ├── database/
 │   │   ├── mongo.py                Vector store, parent store, stale-chunk removal
 │   │   └── indexes.md              The Atlas Vector Search index JSON (created by hand), parent collection
-│   └── services/
-│       └── ingestion.py            Entry point: register to requests, run the chain
+│   ├── services/
+│   │   ├── ingestion.py            Entry point: register to requests, run the chain
+│   │   └── retrieval.py            Retrieval wiring and operational counters
+│   ├── api/                       FastAPI retrieval, health and metrics routes
+│   └── main.py                    FastAPI application
 │
 ├── tests/
-│   └── test_ingestion.py           16 tests, no network needed
+│   ├── test_ingestion.py           Ingestion checks
+│   └── test_retrieval.py           Retrieval and API checks
 │
 └── nexa_synthetic_data/            The corpus (see its own README.md)
     ├── document_register.json      Controlled library: versions, windows, supersession
@@ -129,7 +136,7 @@ Green is implemented. Everything else is future work.
 
 - `chains/` has no FastAPI or Streamlit imports.
 - `database/` is the only place that creates a MongoDB client.
-- `services/` bridges chains to whatever calls them (today, the command line; later, FastAPI).
+- `services/` bridges chains to the ingestion command and FastAPI.
 - Settings are read once through `app/core/config.py`. No other module calls `os.getenv`.
 
 ### Module dependencies
@@ -372,10 +379,11 @@ Session 2 adds:
 | `clause`, `clause_heading`, `section` | The citable unit. The golden Q&A set cites sources as `{doc_id, clause}`. |
 | `parent_id` | Key of the whole section in the parent collection: `{doc_id}_s{NN}`. |
 | `checksum` | SHA-256 of text + metadata (including `embedding_model`). Ingestion skips a chunk whose stored checksum matches. |
+| `effective_to_search` | ISO upper bound for Atlas as-of filtering; `9999-12-31` for open-ended policies while source `effective_to` stays null. |
 
 ### The parent record
 
-Each section is stored once, as plain text, in the collection named by `MONGODB_PARENT_COLLECTION` (default `policy_sections`). It has no embedding. The read path (Session 4) will search the children and return the parent.
+Each section is stored once, as plain text, in the collection named by `MONGODB_PARENT_COLLECTION` (default `policy_sections`). It has no embedding. `/retrieve` searches children and returns the matching parent text.
 
 ```json
 {
@@ -407,14 +415,15 @@ flowchart LR
 
 ### Prerequisites
 
-- [`uv`](https://docs.astral.sh/uv/) installed. It will fetch a compatible Python (3.11 or 3.12) if you do not have one.
+- [`uv`](https://docs.astral.sh/uv/) and Python 3.14+ installed.
 - An **OpenAI API key**.
 - A **MongoDB Atlas** cluster on a tier that supports Vector Search.
 
 ### Step 1: install
 
 ```bash
-uv sync
+uv lock  # refresh the checked-in lock for Python 3.14+ and FastAPI
+uv sync --python 3.14 --locked
 source .venv/bin/activate  # macOS
 .venv\Scripts\activate     # Windows
 ```
@@ -458,21 +467,7 @@ These have defaults and are optional:
 
 ### Step 3: create the Atlas Vector Search index (once, by hand)
 
-In the Atlas UI go to **Atlas Search, Create Search Index, Atlas Vector Search, JSON editor**. Choose your database and collection, name the index `policy_chunks_v1`, and paste:
-
-```json
-{
-  "fields": [
-    { "type": "vector", "path": "embedding", "numDimensions": 1536, "similarity": "cosine" },
-    { "type": "filter", "path": "product_id" },
-    { "type": "filter", "path": "jurisdiction" },
-    { "type": "filter", "path": "effective_date" },
-    { "type": "filter", "path": "confidentiality_level" }
-  ]
-}
-```
-
-The same definition lives in [app/database/indexes.md](app/database/indexes.md). If you change the model or dimension, create a new index version (`policy_chunks_v2`) and re-embed everything.
+In the Atlas UI go to **Atlas Search, Create Search Index, Atlas Vector Search, JSON editor**. Choose your database and collection, name the index `policy_chunks_v1`, and paste the exact JSON from [app/database/indexes.md](app/database/indexes.md). Existing collections need that index rebuilt and the document register re-ingested before `/retrieve` can filter on `effective_to_search`. If you change the model or dimension, create a new index version (`policy_chunks_v2`) and re-embed everything.
 
 ---
 
@@ -508,13 +503,25 @@ python -m app.services.ingestion nexa_synthetic_data/document_register.json
 
 What happens, in order: settings load from `.env`, logging is configured, the register is read, and each of the eight documents is parsed, chunked, embedded and upserted. It finishes after eight `document_ingested` log lines (see below). To ingest a different register or a copy of it, pass its path as the argument.
 
+#### Retrieval API (needs `.env`, re-ingested chunks, and the rebuilt index)
+
+```bash
+uv run uvicorn app.main:app --host 127.0.0.1
+curl -X POST http://127.0.0.1:8000/retrieve -H 'Content-Type: application/json' \
+  -d '{"query":"What is the NexaHome processing fee?","as_of":"2026-10-01","top_k":5,"product_id":"NEXA-HL","jurisdiction":"IN"}'
+```
+
+`/retrieve` returns ranked child passages, citations (`doc_id`, title, version, clause, effective date), parent-section text, and search/parent/total timings in milliseconds. `as_of` is required; `top_k` defaults to 5 and is limited to 1–20. Invalid bodies return 422, and retrieval failures return a generic 503. `GET /health` reports process liveness; `GET /metrics` reports per-process retrieval requests, errors, empty results, and accumulated latency. To enable Datadog APM, run with a Datadog Agent and `DD_SERVICE=nexaassist-retrieval DD_ENV=dev uv run ddtrace-run uvicorn app.main:app --host 127.0.0.1`.
+
+The API has no authentication because this is a synthetic training corpus. Keep it bound to localhost until an access-control contract is defined. The as-of filter handles document effective windows; it does not yet resolve a circular that supersedes only selected clauses in a still-current policy.
+
 #### Option B: run the tests (no credentials)
 
 ```bash
 uv run pytest -q
 ```
 
-Expect `6 passed`.
+The offline suite currently contains 22 tests.
 
 #### Option C: offline dry run (no credentials)
 
@@ -709,10 +716,10 @@ What the tests do **not** cover: real embedding quality, Atlas index behaviour, 
 - The header line is added on top of the size limit, so a chunk can exceed `CHUNK_MAX_CHARACTERS` by the header length.
 - Parent sections are rewritten on every run. They are not embedded, so this costs no model calls.
 - The write is not transactional: a crash between the parent write, the chunk upsert and the stale-chunk delete leaves a mixed state until the next run, which repairs it.
-- Nothing reads the parent collection yet. Parent-document retrieval is shown in the notebook and built into `/retrieve` in Session 4.
+- `/retrieve` falls back to the child passage and logs a warning if a parent section is missing.
 - `section_type` is only `text` or `table`.
-- The Atlas filter fields cover product, jurisdiction, effective date and confidentiality. As-of queries will also need `effective_to` and probably `doc_id`.
-- The pipeline has been tested end to end with fake embeddings and in-memory stores, not against a live Atlas cluster.
+- The Atlas filter fields cover product, jurisdiction, confidentiality and both sides of the effective-date window. The index must be rebuilt and the register re-ingested after this change.
+- The ingestion and retrieval paths have offline tests. Live Atlas, OpenAI, Datadog Agent, and a full Python 3.14 dependency install have not been verified in this workspace.
 - Scaling beyond a loop (queue, worker pool, sharded index) is covered as design in Session 2, not as code.
 
 ---
@@ -733,9 +740,9 @@ flowchart LR
 | Session | Adds |
 |---|---|
 | 2 (done) | Clause-aware chunking with a `clause` field, parent documents, checksum-based incremental re-ingest |
-| 3 | Embedding model and dimension decisions, the Atlas index in depth |
-| 4 | `/retrieve` endpoint (FastAPI) with filters including `as_of`, parent-document expansion, citations and timings |
-| 5 | Failure modes and alerts, Week 1 checkpoint |
+| 3 (implemented offline) | Embedding model and dimension decisions, the Atlas index in depth; Python 3.14 dependency install pending |
+| 4 (implemented offline) | `/retrieve` endpoint (FastAPI) with filters including `as_of`, parent-document expansion, citations and timings |
+| 5 (implemented offline) | Empty/failure logging, `/health`, `/metrics`, and offline Week 1 checkpoint; live alert thresholds pending |
 | Week 2 | BM25 and reciprocal rank fusion, reranking, context assembly with a chat model, RAGAS and LLM-as-judge evaluation against the golden Q&A set, tracing |
 
 Phases 2 to 4 (agents, MCP, production) wrap this service without rewriting it, so the ingestion contract and the chunk record shape should stay stable.
@@ -747,3 +754,4 @@ Phases 2 to 4 (agents, MCP, production) wrap this service without rewriting it, 
 - [CLAUDE.md](CLAUDE.md): coding rules and layer boundaries
 - [nexa_synthetic_data/README.md](nexa_synthetic_data/README.md): the corpus, golden Q&A, customer data and mock API
 - [app/database/indexes.md](app/database/indexes.md): the Atlas index definition
+- [.planning/INTEGRATION-ARCHITECTURE.md](.planning/INTEGRATION-ARCHITECTURE.md): integration landscape, access boundary, and rollout checks

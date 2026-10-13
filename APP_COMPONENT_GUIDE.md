@@ -2,9 +2,9 @@
 
 ## What this application does today
 
-This repository is in **Phase 1: document ingestion** (Sessions 1 and 2). It takes approved bank-policy documents, breaks them into one chunk per numbered clause, creates an embedding (a numeric meaning representation) for every new or changed chunk, and stores those chunks in MongoDB Atlas Vector Search. It also stores each whole section as a "parent" document, so a later retrieval step can return the section around a matching clause.
+This guide explains the **Sessions 1–2 ingestion components**. The repository now also has a Session 4 retrieval API; see [README.md](README.md) for its contract and run instructions. Ingestion takes approved bank-policy documents, breaks them into clause chunks, embeds new or changed chunks, and stores both chunks and parent sections in MongoDB Atlas.
 
-It does **not** yet expose a FastAPI API, a Streamlit interface, or a question-answering/RAG chain. Those are planned later layers. The only executable application flow today is the ingestion command.
+The API returns cited retrieval evidence. Streamlit and answer generation remain later layers.
 
 ### Which session built what
 
@@ -285,7 +285,7 @@ The wrapper is the bridge between LangChain and MongoDB Atlas. It knows:
 
 Returns a `MongoDBDocStore` over the parent collection. It is a plain key-value store: the key is the `parent_id`, the value is the section text and its metadata. Nothing in it is embedded. Its insert does not overwrite an existing key, which is why the chain deletes a document's sections before writing them again.
 
-Nothing reads this collection yet. The read path (Session 4) will search the clause chunks and return the parent section.
+The Session 4 retrieval chain reads this collection after searching the clause chunks.
 
 **Function: `delete_stale_chunks(collection, doc_id, keep_ids)`**
 

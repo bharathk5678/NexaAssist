@@ -131,6 +131,17 @@ def test_version_metadata_is_stamped_on_every_chunk(home_loan_v3: list[Document]
         assert document.metadata["policy_version"] == "3.0"
         assert document.metadata["effective_date"] == "2025-10-01"
         assert document.metadata["supersedes"] == "POL-HL-V2"
+        assert document.metadata["effective_to"] is None
+        assert document.metadata["effective_to_search"] == "9999-12-31"
+
+
+def test_expired_document_keeps_indexable_end_date(
+    settings: Settings, requests: dict[str, IngestRequest]
+) -> None:
+    store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
+    chunks = ingest(store, settings, requests["POL-HL-V2"])
+    assert chunks
+    assert {chunk.metadata["effective_to_search"] for chunk in chunks} == {"2025-09-30"}
 
 
 def test_tables_are_kept_whole(home_loan_v3: list[Document]) -> None:
@@ -278,6 +289,25 @@ def test_reingesting_replaces_parent_sections(
     keys = sorted(parents.yield_keys())
     ingest(store, settings, requests["CIR-2026-07"], parents)
     assert sorted(parents.yield_keys()) == keys
+
+
+def test_empty_parse_preserves_existing_chunks_and_parents(
+    settings: Settings, requests: dict[str, IngestRequest], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
+    parents: InMemoryStore = InMemoryStore()
+    request = requests["CIR-2026-07"]
+    existing = ingest(store, settings, request, parents)
+    parent_keys = sorted(parents.yield_keys())
+    monkeypatch.setattr("app.chains.ingestion.parse_document", lambda _path: [])
+
+    chain = build_ingestion_chain(store, parents, settings)
+    with pytest.raises(ValueError, match="produced no chunks"):
+        asyncio.run(chain.ainvoke({"request": request}))
+
+    ids = [document.id for document in existing if document.id is not None]
+    assert store.get_by_ids(ids) == existing
+    assert sorted(parents.yield_keys()) == parent_keys
 
 
 def test_only_new_or_changed_chunks_are_embedded(

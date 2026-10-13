@@ -2,9 +2,10 @@
 name = "nexaassist"
 version = "0.1.0"
 description = "NexaAssist: enterprise policy and compliance RAG (Phase 1)"
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.14"
 dependencies = [
     "ddtrace",
+    "fastapi",
     "langchain-core",
     "langchain-mongodb",
     "langchain-openai",
@@ -15,10 +16,12 @@ dependencies = [
     "pymongo",
     "structlog",
     "unstructured[md]",
+    "uvicorn",
 ]
 
 [dependency-groups]
 dev = [
+    "httpx",
     "ipykernel",
     "mongomock>=4.3.0",
     "mypy",
@@ -35,10 +38,10 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py314"
 extend-exclude = ["*.ipynb", "notebooks", "nexa_synthetic_data"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.14"
 plugins = ["pydantic.mypy"]
 ignore_missing_imports = true
