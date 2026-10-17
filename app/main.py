@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api.answer import router as answer_router
 from app.api.operations import router as operations_router
 from app.api.retrieval import router as retrieval_router
 from app.core.config import get_settings
@@ -24,6 +25,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="NexaAssist", lifespan=lifespan)
     app.include_router(operations_router)
     app.include_router(retrieval_router)
+    app.include_router(answer_router)
     return app
 
 

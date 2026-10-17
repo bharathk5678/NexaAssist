@@ -2,7 +2,7 @@
 
 A policy, product and lending advisor for the staff of NexaBank (a fictional bank), built as the hands-on codebase for the **Enterprise Agentic RAG** training program. Everything is synthetic.
 
-This repository contains the Week 1 ingestion path and a FastAPI retrieval path. Ingestion turns policy PDFs into versioned clause chunks and parent sections in MongoDB Atlas; `/retrieve` returns filtered, cited evidence. Answer generation is scheduled for Week 2. The new retrieval path is covered by offline tests; live Atlas and OpenAI verification remains a deployment step.
+This repository contains the Week 1 ingestion and retrieval paths, plus the first Week 2 answer-generation slice. Ingestion turns policy PDFs into versioned clause chunks and parent sections in MongoDB Atlas; `/retrieve` returns filtered, cited evidence using vector search. `/answer` uses the same retrieval service and `gpt-6-luna` to generate a response with quoted evidence. Live verification of answer generation remains pending.
 
 | | |
 |---|---|
@@ -515,6 +515,44 @@ curl -X POST http://127.0.0.1:8000/retrieve -H 'Content-Type: application/json' 
 
 The API has no authentication because this is a synthetic training corpus. Keep it bound to localhost until an access-control contract is defined. The as-of filter handles document effective windows; it does not yet resolve a circular that supersedes only selected clauses in a still-current policy.
 
+#### Session 5: RAG production failure modes
+
+Retrieval is already implemented. The next lesson reproduces **retrieval misses, stale indexed chunks, and embedding compatibility failures** using the existing response models and ingestion checksum function:
+
+```bash
+uv run python -m app.evaluation.rag_failure_modes
+```
+
+The command emits one structured JSON log with healthy and deliberately faulty examples. It does not load `.env`, contact Atlas or OpenAI, download a model, or change indexed data.
+
+For thirteen examples using both real Atlas collections (four retrieval, five staleness and four embedding cases), use the [Session 5 instructor guide](SESSION5_RAG_FAILURE_EXAMPLES.md).
+
+The current [20-slide teaching deck](NexaAssist_Session5_RAG_Parent_Child_Examples.pptx) includes the parent-context correction and the S5 parent-failure demonstration.
+
+Run the examples from the project root:
+
+```bash
+uv run python -m app.evaluation.rag_failure_examples       # all 13 cases
+uv run python -m app.evaluation.rag_failure_examples R3    # child citations versus parent context
+uv run python -m app.evaluation.rag_failure_examples S5    # missing/stale parent, local replay
+```
+
+This second runner reads the configured chunk and parent collections and makes OpenAI embedding calls for retrieval. Fault injections modify local copies only. It never changes stored data or indexes. The parent-aware observation in `app/evaluation/datasets/session5_atlas_parent_observation.json` includes 177 chunks, 80 parent sections, source freshness and both explicit-citation and expanded-context coverage. Ranks and scores can vary on another run.
+
+| Function in `app/evaluation/rag_failure_modes.py` | Inputs | What it reports |
+|---|---|---|
+| `diagnose_retrieval` | Existing `RetrieveResponse` and expected document/clause references | Empty results and nonempty results that omit expected evidence |
+| `diagnose_expanded_context` | Response, expected references and stored source chunks | Verbatim required-clause availability inside returned `parent_text`, separately from child citations |
+| `diagnose_parent_links` | Stored child documents and parent map | Missing parents, policy-scope mismatches, missing child bodies and unreferenced parents |
+| `diagnose_staleness` | Current source and stored `ChunkSnapshot` manifests | Missing, changed-checksum, and unexpected chunk IDs |
+| `diagnose_embeddings` | Stored snapshots, expected embedding model and dimension | Model/dimension mismatches; an empty snapshot is not evaluated |
+
+The functions can also consume real snapshots supplied by a caller, but this lesson does not add a live Atlas audit adapter. A source snapshot must be regenerated from current source chunks with the existing `chunk_checksum(text, metadata)` logic, excluding the `checksum` field itself. Compare complete manifests covering the same corpus and configuration; a sample cannot prove the whole index fresh. Stored dimensions must describe the actual vector length. `diagnose_staleness` checks stored chunk freshness, not Atlas Search index readiness or parent-section consistency.
+
+Matching model names and dimensions establishes compatibility, **not absence of statistical embedding drift**. The report explicitly returns `distribution_drift: not_measured`. To investigate behavioral drift, compare the same golden queries and expected citations across versioned runs, then inspect corpus and incoming-query changes. No drift threshold is assumed.
+
+The existing `/metrics` endpoint exposes process-local JSON counters. It cannot establish p95 latency or detect nonempty retrieval misses. Fleet aggregation, latency histograms, alert thresholds, scheduled ingestion and Atlas index-readiness checks remain production work.
+
 #### Option B: run the tests (no credentials)
 
 ```bash
@@ -662,6 +700,93 @@ If `MONGODB_URI` and `OPENAI_API_KEY` are not set, it switches to **offline mode
 
 ---
 
+### Next session: from retrieved evidence to an answer
+
+The earlier R1–R4 questions are executable examples in
+`app/evaluation/rag_failure_examples.py`. The next session adds answer generation
+on top of the same retrieval implementation:
+
+```text
+POST /answer (same request schema as /retrieve)
+  -> app/api/answer.py                 HTTP validation and safe service errors
+  -> app/services/answer.py            Wires the existing retrieval service and chat model
+  -> app/chains/answer.py              Retrieval, context assembly, generation, citation checks
+     -> app/services/retrieval.py     Existing Atlas retrieval and counters
+     -> app/chains/prompts/answer.py  Evidence-only instructions and applicability rules
+     -> app/chains/llm.py             ChatOpenAI with the Responses API
+  -> app/models/answer.py              Structured answer, quotes, sources and timings
+```
+
+`CHAT_MODEL=gpt-6-luna` is the configured default. It uses the existing
+`OPENAI_API_KEY`; the existing embedding model and Atlas index are unchanged.
+The chat model receives the question and retrieved policy context. Optional
+LangChain tracing also records chain inputs and outputs when enabled.
+
+Start the API from the repository root:
+
+```bash
+uv run uvicorn app.main:app --host 127.0.0.1
+```
+
+In another terminal, start with a straightforward fact:
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/answer \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"What is the maximum loan amount for a NexaHome Loan?","as_of":"2026-10-01","product_id":"NEXA-HL","top_k":5}'
+```
+
+Then reuse the Session 5 circular experiment:
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/answer \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"What processing fee does Circular CIR-2026-07 prescribe in revised clause 6.2, and which loans sanctioned from 1 July 2026 does it cover?","as_of":"2026-10-01","product_id":"NEXA-HL","top_k":20}'
+```
+
+Compare it with the generic current-fee question at top 5. Do not assume adding
+generation fixes the known retrieval miss: a model cannot reliably discover a
+missing amendment from evidence it never receives. Exact generated wording and
+the quality of applicability reasoning require live evaluation.
+
+Finish with an unsupported question such as "What is the current NRLR?". Its
+current value comes from the catalog, which the PDF ingestion path does not
+index. The expected behavior is `insufficient_evidence`, rather than guessing a
+rate from policy examples. The ten teaching cases, including the historical
+boundary and abstention cases, are in `evaluation/datasets/answer.jsonl`. They
+are evaluation inputs and expectations, not a claim that generation has passed.
+
+#### Reading the answer response
+
+- `status`: `answered` or `insufficient_evidence`.
+- `answer`: generated text with `[1]`-style evidence markers, or a fixed
+  insufficient-evidence message.
+- `citations`: each has `evidence_id`, an exact supporting `quote`, and the
+  `matched_child` citation from retrieval. The quote can come from another
+  clause in the child's parent section; `matched_child.clause` is not a claim
+  that the quote belongs to that clause.
+- `retrieval_timings`: the existing search and parent-fetch timings.
+- `generation_ms`: prompt/model duration, excluding retrieval; zero for an
+  empty retrieval where no generation call is made.
+
+Repeated parent text is deduplicated within a document/version before prompting.
+The first matching child's citation is retained for that context. Source IDs
+are local to each response and are not MongoDB document IDs.
+
+The application rejects answered drafts with missing/unknown citation IDs,
+unmatched inline markers, or quotes absent from the referenced context. Such
+drafts become `insufficient_evidence`. Empty retrieval also skips generation;
+upstream provider/database/parser failures return a generic HTTP 503.
+
+These are mechanical citation checks, not a semantic correctness guarantee.
+Applicability and amendment handling are prompt instructions, not a deterministic
+policy-precedence engine. The generation slice does not expand retrieval scope
+or repair missing/stale records. Inspect the evidence and compare against the
+golden answers before relying on an answer.
+
+Official integration references: [GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna)
+and [LangChain structured output](https://docs.langchain.com/oss/python/integrations/chat/openai#structured-output).
+
 ## 8. Testing and quality checks
 
 ```bash
@@ -732,7 +857,7 @@ flowchart LR
     S2 --> S3["S3: Embeddings and<br/>vector index"]
     S3 --> S4["S4: Retrieval API<br/>/retrieve"]
     S4 --> S5["S5: Failure modes,<br/>Week 1 checkpoint"]
-    S5 --> W2["Week 2: hybrid retrieval,<br/>rerank, evaluation,<br/>observability"]
+    S5 --> W2["Week 2: answer generation,<br/>evaluation, observability"]
 
     classDef done fill:#d1fae5,stroke:#047857,color:#064e3b
 ```
@@ -742,8 +867,8 @@ flowchart LR
 | 2 (done) | Clause-aware chunking with a `clause` field, parent documents, checksum-based incremental re-ingest |
 | 3 (implemented offline) | Embedding model and dimension decisions, the Atlas index in depth; Python 3.14 dependency install pending |
 | 4 (implemented offline) | `/retrieve` endpoint (FastAPI) with filters including `as_of`, parent-document expansion, citations and timings |
-| 5 (implemented offline) | Empty/failure logging, `/health`, `/metrics`, and offline Week 1 checkpoint; live alert thresholds pending |
-| Week 2 | BM25 and reciprocal rank fusion, reranking, context assembly with a chat model, RAGAS and LLM-as-judge evaluation against the golden Q&A set, tracing |
+| 5 (implemented offline) | Empty/failure logging, `/health`, `/metrics`, and a runnable miss/staleness/embedding-compatibility lab; live alert thresholds and statistical drift detection pending |
+| Week 2 (first slice implemented; live verification pending) | `/answer`, deduplicated parent context, `gpt-6-luna`, quoted citation checks, abstention and ten teaching QAs. Automated semantic evaluation and further observability remain later work. |
 
 Phases 2 to 4 (agents, MCP, production) wrap this service without rewriting it, so the ingestion contract and the chunk record shape should stay stable.
 

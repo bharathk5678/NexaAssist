@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     embedding_model: str = "text-embedding-3-small"
     embedding_dimensions: int = 1536
     embedding_batch_size: int = 100
+    chat_model: str = "gpt-6-luna"
 
     chunk_max_characters: int = 1200
     chunk_overlap_characters: int = 150
