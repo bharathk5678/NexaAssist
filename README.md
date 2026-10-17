@@ -176,7 +176,7 @@ sequenceDiagram
     participant UNS as chunk_by_clause
     participant OAI as OpenAI Embeddings
     participant DB as Atlas: chunks
-    participant PAR as Atlas: parent sections
+    participant PSEC as Atlas: parent sections
 
     CLI->>REG: read entries
     REG-->>CLI: register entries
@@ -190,7 +190,7 @@ sequenceDiagram
         CH->>CH: enrich: header line, metadata, chunk_id, parent_id, checksum
         CH->>DB: compare: read stored checksums by chunk_id
         DB-->>CH: checksums
-        CH->>PAR: clear old sections and write current sections
+        CH->>PSEC: clear old sections and write current sections
         alt changed chunks exist
             CH->>OAI: embed changed chunks
             OAI-->>CH: vectors
@@ -854,13 +854,19 @@ What the tests do **not** cover: real embedding quality, Atlas index behaviour, 
 ```mermaid
 flowchart LR
     S1["S1: Architecture +<br/>ingestion"]:::done --> S2["S2: Clause-aware chunking,<br/>parent docs, checksums"]:::done
-    S2 --> S3["S3: Embeddings and<br/>vector index"]
-    S3 --> S4["S4: Retrieval API<br/>/retrieve"]
-    S4 --> S5["S5: Failure modes,<br/>Week 1 checkpoint"]
-    S5 --> W2["Week 2: answer generation,<br/>evaluation, observability"]
+    S2 --> S3["S3: Embeddings and<br/>vector index"]:::offline
+    S3 --> S4["S4: Retrieval API<br/>/retrieve"]:::offline
+    S4 --> S5["S5: Failure modes,<br/>Week 1 checkpoint"]:::offline
+    S5 --> W2["Week 2: /answer slice done;<br/>evaluation, observability"]:::partial
+    W2 --> P2["Phases 2 to 4: agents,<br/>MCP, production"]:::planned
 
     classDef done fill:#d1fae5,stroke:#047857,color:#064e3b
+    classDef offline fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
+    classDef partial fill:#fef3c7,stroke:#b45309,color:#78350f
+    classDef planned fill:#f3f4f6,stroke:#6b7280,color:#374151
 ```
+
+**Legend:** 🟩 done · 🟦 implemented offline, live verification pending · 🟨 first slice implemented, rest pending · ⬜ planned
 
 | Session | Adds |
 |---|---|
