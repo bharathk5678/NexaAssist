@@ -1,0 +1,2565 @@
+{
+  "captured_at": "2026-10-15T00:15:41.752046+00:00",
+  "target": "nexaassist.policy_chunks",
+  "configured_index": "policy_chunks_v1",
+  "indexes": [
+    {
+      "name": "policy_chunks_v1",
+      "type": "vectorSearch",
+      "status": "READY",
+      "queryable": true,
+      "latestDefinition": {
+        "fields": [
+          {
+            "type": "vector",
+            "path": "embedding",
+            "numDimensions": 1536,
+            "similarity": "cosine"
+          },
+          {
+            "type": "filter",
+            "path": "product_id"
+          },
+          {
+            "type": "filter",
+            "path": "jurisdiction"
+          },
+          {
+            "type": "filter",
+            "path": "effective_date"
+          },
+          {
+            "type": "filter",
+            "path": "effective_to_search"
+          },
+          {
+            "type": "filter",
+            "path": "doc_type"
+          },
+          {
+            "type": "filter",
+            "path": "confidentiality_level"
+          }
+        ]
+      }
+    }
+  ],
+  "chunk_count": 177,
+  "documents": {
+    "CIR-2026-07": 8,
+    "POL-AL-V1": 17,
+    "POL-HL-V1": 31,
+    "POL-HL-V2": 31,
+    "POL-HL-V3": 32,
+    "POL-LAP-V1": 19,
+    "POL-OPS-001": 21,
+    "POL-PL-V1": 18
+  },
+  "embedding_inventory": [
+    {
+      "model": "text-embedding-3-small",
+      "dimensions": 1536,
+      "chunks": 177
+    }
+  ],
+  "embedding_contract": {
+    "status": "pass",
+    "model_mismatch": [],
+    "dimension_mismatch": [],
+    "distribution_drift": "not_measured"
+  },
+  "cases": {
+    "R1": {
+      "mode": "live_queries",
+      "title": "Wrong product filter",
+      "before": {
+        "request": {
+          "query": "What is the current processing fee for a NexaHome Loan?",
+          "as_of": "2026-10-01",
+          "top_k": 5,
+          "product_id": "NEXA-PL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "miss",
+          "returned_count": 5,
+          "empty": false,
+          "missing_evidence": [
+            {
+              "doc_id": "CIR-2026-07",
+              "clause": "3.1"
+            },
+            {
+              "doc_id": "CIR-2026-07",
+              "clause": "5.1"
+            }
+          ]
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.85520339012146,
+            "doc_id": "POL-PL-V1",
+            "title": "NexaFlex Personal Loan Policy",
+            "policy_version": "1.0",
+            "clause": "5.1",
+            "effective_date": "2024-01-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8137505650520325,
+            "doc_id": "POL-PL-V1",
+            "title": "NexaFlex Personal Loan Policy",
+            "policy_version": "1.0",
+            "clause": "7.2",
+            "effective_date": "2024-01-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.8010493516921997,
+            "doc_id": "POL-PL-V1",
+            "title": "NexaFlex Personal Loan Policy",
+            "policy_version": "1.0",
+            "clause": "5.2",
+            "effective_date": "2024-01-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.7915993928909302,
+            "doc_id": "POL-PL-V1",
+            "title": "NexaFlex Personal Loan Policy",
+            "policy_version": "1.0",
+            "clause": "7.3",
+            "effective_date": "2024-01-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.790249764919281,
+            "doc_id": "POL-PL-V1",
+            "title": "NexaFlex Personal Loan Policy",
+            "policy_version": "1.0",
+            "clause": "4.1",
+            "effective_date": "2024-01-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 1047.24,
+          "parent_ms": 44.47,
+          "total_ms": 1091.88
+        }
+      },
+      "after": {
+        "request": {
+          "query": "What is the current processing fee for a NexaHome Loan?",
+          "as_of": "2026-10-01",
+          "top_k": 5,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "miss",
+          "returned_count": 5,
+          "empty": false,
+          "missing_evidence": [
+            {
+              "doc_id": "CIR-2026-07",
+              "clause": "3.1"
+            },
+            {
+              "doc_id": "CIR-2026-07",
+              "clause": "5.1"
+            }
+          ]
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.9019372463226318,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8607708215713501,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.3",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.8587758541107178,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.5",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.8409813642501831,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.8372436761856079,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "1.1",
+            "effective_date": "2025-10-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 427.66,
+          "parent_ms": 45.09,
+          "total_ms": 472.79
+        }
+      },
+      "interpretation": "Correcting the product may leave a separate ranking miss. Inspect both reports."
+    },
+    "R2": {
+      "mode": "live_queries",
+      "title": "Effective-date boundary",
+      "before": {
+        "request": {
+          "query": "What was the minimum part prepayment on a NexaHome Loan on 31 March 2024?",
+          "as_of": "2024-04-01",
+          "top_k": 5,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "miss",
+          "returned_count": 5,
+          "empty": false,
+          "missing_evidence": [
+            {
+              "doc_id": "POL-HL-V1",
+              "clause": "8.3"
+            }
+          ]
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.8678361177444458,
+            "doc_id": "POL-HL-V2",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "2.0",
+            "clause": "8.3",
+            "effective_date": "2024-04-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8295842409133911,
+            "doc_id": "POL-HL-V2",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "2.0",
+            "clause": "4.1",
+            "effective_date": "2024-04-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.8286374807357788,
+            "doc_id": "POL-HL-V2",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "2.0",
+            "clause": "4.2",
+            "effective_date": "2024-04-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.8243591785430908,
+            "doc_id": "POL-HL-V2",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "2.0",
+            "clause": "1.1",
+            "effective_date": "2024-04-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.8191322088241577,
+            "doc_id": "POL-HL-V2",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "2.0",
+            "clause": "7.2",
+            "effective_date": "2024-04-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 470.71,
+          "parent_ms": 44.69,
+          "total_ms": 515.44
+        }
+      },
+      "after": {
+        "request": {
+          "query": "What was the minimum part prepayment on a NexaHome Loan on 31 March 2024?",
+          "as_of": "2024-03-31",
+          "top_k": 5,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "pass",
+          "returned_count": 5,
+          "empty": false,
+          "missing_evidence": []
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.8689125776290894,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "8.3",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8349363207817078,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "4.2",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.8335235118865967,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "4.1",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.8267403841018677,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "1.1",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.8228902816772461,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "7.2",
+            "effective_date": "2023-04-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 421.31,
+          "parent_ms": 43.87,
+          "total_ms": 465.23
+        }
+      }
+    },
+    "R3": {
+      "mode": "live_queries",
+      "title": "Circular evidence below the cutoff",
+      "top1": {
+        "request": {
+          "query": "What is the current processing fee for a NexaHome Loan?",
+          "as_of": "2026-10-01",
+          "top_k": 1,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "miss",
+          "returned_count": 1,
+          "empty": false,
+          "missing_evidence": [
+            {
+              "doc_id": "CIR-2026-07",
+              "clause": "3.1"
+            },
+            {
+              "doc_id": "CIR-2026-07",
+              "clause": "5.1"
+            }
+          ]
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.9019372463226318,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.2",
+            "effective_date": "2025-10-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 463.63,
+          "parent_ms": 43.42,
+          "total_ms": 507.08
+        }
+      },
+      "top20": {
+        "request": {
+          "query": "What is the current processing fee for a NexaHome Loan?",
+          "as_of": "2026-10-01",
+          "top_k": 20,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "miss",
+          "returned_count": 20,
+          "empty": false,
+          "missing_evidence": [
+            {
+              "doc_id": "CIR-2026-07",
+              "clause": "5.1"
+            }
+          ]
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.9019372463226318,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8607708215713501,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.3",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.8587758541107178,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.5",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.8409813642501831,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.8372436761856079,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "1.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 6,
+            "score": 0.8329838514328003,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.4",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 7,
+            "score": 0.8310317397117615,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": null,
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 8,
+            "score": 0.8153151869773865,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "1.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 9,
+            "score": 0.8141032457351685,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "4.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 10,
+            "score": 0.813777506351471,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "5.2",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 11,
+            "score": 0.8106038570404053,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "7.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 12,
+            "score": 0.8064190149307251,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "8.3",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 13,
+            "score": 0.8050206303596497,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "3.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 14,
+            "score": 0.8040012121200562,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "5.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 15,
+            "score": 0.80254065990448,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "3.3",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 16,
+            "score": 0.7972164154052734,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "2.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 17,
+            "score": 0.7892524003982544,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "8.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 18,
+            "score": 0.7891902327537537,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "7.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 19,
+            "score": 0.7886075377464294,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "3.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 20,
+            "score": 0.7878034114837646,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "5.3",
+            "effective_date": "2025-10-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 484.3,
+          "parent_ms": 45.08,
+          "total_ms": 529.47
+        }
+      },
+      "focused": {
+        "request": {
+          "query": "What processing fee does Circular CIR-2026-07 prescribe in revised clause 6.2, and which loans sanctioned from 1 July 2026 does it cover?",
+          "as_of": "2026-10-01",
+          "top_k": 20,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "pass",
+          "returned_count": 20,
+          "empty": false,
+          "missing_evidence": []
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.9246431589126587,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "5.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8990066051483154,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "3.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.8744419813156128,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "2.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.8449792861938477,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "6.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.8334290385246277,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "1.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 6,
+            "score": 0.8233078718185425,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "4.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 7,
+            "score": 0.8208529353141785,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": null,
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 8,
+            "score": 0.7949062585830688,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "5.2",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 9,
+            "score": 0.776526927947998,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 10,
+            "score": 0.7486844062805176,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "10.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 11,
+            "score": 0.7486301064491272,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "10.3",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 12,
+            "score": 0.7403109669685364,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "8.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 13,
+            "score": 0.7387950420379639,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.4",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 14,
+            "score": 0.7350775003433228,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.5",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 15,
+            "score": 0.7346112132072449,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 16,
+            "score": 0.7341282367706299,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "1.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 17,
+            "score": 0.7311931252479553,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.3",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 18,
+            "score": 0.7302290201187134,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "5.4",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 19,
+            "score": 0.7255889773368835,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "2.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 20,
+            "score": 0.7254990339279175,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "8.3",
+            "effective_date": "2025-10-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 525.9,
+          "parent_ms": 43.78,
+          "total_ms": 569.78
+        }
+      },
+      "interpretation": "Focused wording is a debugging experiment, not a general production guarantee."
+    },
+    "R4": {
+      "mode": "live_queries",
+      "title": "Two dated evidence calls",
+      "one_call": {
+        "request": {
+          "query": "What was the maximum tenure for a NexaHome Loan in June 2023, and how does it compare with today?",
+          "as_of": "2023-06-01",
+          "top_k": 5,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "miss",
+          "returned_count": 5,
+          "empty": false,
+          "missing_evidence": [
+            {
+              "doc_id": "POL-HL-V3",
+              "clause": "4.2"
+            }
+          ]
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.8659974336624146,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "4.2",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8411204218864441,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "4.1",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.825766384601593,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "7.2",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.8186928629875183,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "3.1",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.8122795224189758,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "1.1",
+            "effective_date": "2023-04-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 436.3,
+          "parent_ms": 43.33,
+          "total_ms": 479.68
+        }
+      },
+      "historical": {
+        "request": {
+          "query": "What was the maximum tenure for a NexaHome Loan in June 2023, and how does it compare with today?",
+          "as_of": "2023-06-01",
+          "top_k": 5,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "pass",
+          "returned_count": 5,
+          "empty": false,
+          "missing_evidence": []
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.8659974336624146,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "4.2",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8411204218864441,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "4.1",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.825766384601593,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "7.2",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.8186928629875183,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "3.1",
+            "effective_date": "2023-04-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.8122795224189758,
+            "doc_id": "POL-HL-V1",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "1.0",
+            "clause": "1.1",
+            "effective_date": "2023-04-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 436.3,
+          "parent_ms": 43.33,
+          "total_ms": 479.68
+        }
+      },
+      "current": {
+        "request": {
+          "query": "What was the maximum tenure for a NexaHome Loan in June 2023, and how does it compare with today?",
+          "as_of": "2026-10-01",
+          "top_k": 5,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "pass",
+          "returned_count": 5,
+          "empty": false,
+          "missing_evidence": []
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.8637120723724365,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "4.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8435987234115601,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "4.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.8235505819320679,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "7.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.8159966468811035,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "1.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.8128713965415955,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "3.1",
+            "effective_date": "2025-10-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 466.29,
+          "parent_ms": 43.05,
+          "total_ms": 509.4
+        }
+      }
+    },
+    "S1": {
+      "mode": "local_fault_on_live_snapshot",
+      "title": "Changed checksum",
+      "observed": {
+        "status": "pass",
+        "missing_chunks": [],
+        "changed_chunks": [],
+        "unexpected_chunks": [],
+        "atlas_index_readiness": "not_checked"
+      },
+      "injected": {
+        "status": "stale",
+        "missing_chunks": [],
+        "changed_chunks": [
+          "POL-HL-V1_0_c01"
+        ],
+        "unexpected_chunks": [],
+        "atlas_index_readiness": "not_checked"
+      },
+      "note": "Only an in-memory checksum changed. No source file or stored record changed."
+    },
+    "S2": {
+      "mode": "local_fault_on_live_snapshot",
+      "title": "Missing circular",
+      "observed": {
+        "status": "pass",
+        "missing_chunks": [],
+        "changed_chunks": [],
+        "unexpected_chunks": [],
+        "atlas_index_readiness": "not_checked"
+      },
+      "injected": {
+        "status": "stale",
+        "missing_chunks": [
+          "CIR-2026-07_0_c01",
+          "CIR-2026-07_1.1_c01",
+          "CIR-2026-07_2.1_c01",
+          "CIR-2026-07_3.1_c01",
+          "CIR-2026-07_4.1_c01",
+          "CIR-2026-07_5.1_c01",
+          "CIR-2026-07_5.2_c01",
+          "CIR-2026-07_6.1_c01"
+        ],
+        "changed_chunks": [],
+        "unexpected_chunks": [],
+        "atlas_index_readiness": "not_checked"
+      },
+      "note": "All actual circular IDs are omitted from a local copy only."
+    },
+    "S3": {
+      "mode": "local_fault_on_live_snapshot",
+      "title": "Retired chunk remains",
+      "observed": {
+        "status": "pass",
+        "missing_chunks": [],
+        "changed_chunks": [],
+        "unexpected_chunks": [],
+        "atlas_index_readiness": "not_checked"
+      },
+      "injected": {
+        "status": "stale",
+        "missing_chunks": [],
+        "changed_chunks": [],
+        "unexpected_chunks": [
+          "CONTROLLED_RETIRED_COPY"
+        ],
+        "atlas_index_readiness": "not_checked"
+      },
+      "note": "The extra ID exists only in memory. Historical policy versions remain intact."
+    },
+    "S4": {
+      "mode": "live_differential_diagnosis",
+      "title": "Freshness versus ranking",
+      "observed_freshness": {
+        "status": "pass",
+        "missing_chunks": [],
+        "changed_chunks": [],
+        "unexpected_chunks": [],
+        "atlas_index_readiness": "not_checked"
+      },
+      "index_status": [
+        {
+          "name": "policy_chunks_v1",
+          "type": "vectorSearch",
+          "status": "READY",
+          "queryable": true,
+          "latestDefinition": {
+            "fields": [
+              {
+                "type": "vector",
+                "path": "embedding",
+                "numDimensions": 1536,
+                "similarity": "cosine"
+              },
+              {
+                "type": "filter",
+                "path": "product_id"
+              },
+              {
+                "type": "filter",
+                "path": "jurisdiction"
+              },
+              {
+                "type": "filter",
+                "path": "effective_date"
+              },
+              {
+                "type": "filter",
+                "path": "effective_to_search"
+              },
+              {
+                "type": "filter",
+                "path": "doc_type"
+              },
+              {
+                "type": "filter",
+                "path": "confidentiality_level"
+              }
+            ]
+          }
+        }
+      ],
+      "generic": {
+        "request": {
+          "query": "What is the current processing fee for a NexaHome Loan?",
+          "as_of": "2026-10-01",
+          "top_k": 5,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "miss",
+          "returned_count": 5,
+          "empty": false,
+          "missing_evidence": [
+            {
+              "doc_id": "CIR-2026-07",
+              "clause": "3.1"
+            },
+            {
+              "doc_id": "CIR-2026-07",
+              "clause": "5.1"
+            }
+          ]
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.9019372463226318,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8607708215713501,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.3",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.8587758541107178,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.5",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.8409813642501831,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.8372436761856079,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "1.1",
+            "effective_date": "2025-10-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 427.66,
+          "parent_ms": 45.09,
+          "total_ms": 472.79
+        }
+      },
+      "focused": {
+        "request": {
+          "query": "What processing fee does Circular CIR-2026-07 prescribe in revised clause 6.2, and which loans sanctioned from 1 July 2026 does it cover?",
+          "as_of": "2026-10-01",
+          "top_k": 20,
+          "product_id": "NEXA-HL",
+          "jurisdiction": null
+        },
+        "diagnosis": {
+          "status": "pass",
+          "returned_count": 20,
+          "empty": false,
+          "missing_evidence": []
+        },
+        "hits": [
+          {
+            "rank": 1,
+            "score": 0.9246431589126587,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "5.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 2,
+            "score": 0.8990066051483154,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "3.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 3,
+            "score": 0.8744419813156128,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "2.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 4,
+            "score": 0.8449792861938477,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "6.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 5,
+            "score": 0.8334290385246277,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "1.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 6,
+            "score": 0.8233078718185425,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "4.1",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 7,
+            "score": 0.8208529353141785,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": null,
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 8,
+            "score": 0.7949062585830688,
+            "doc_id": "CIR-2026-07",
+            "title": "Circular CIR-2026-07",
+            "policy_version": "1.0",
+            "clause": "5.2",
+            "effective_date": "2026-07-01"
+          },
+          {
+            "rank": 9,
+            "score": 0.776526927947998,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 10,
+            "score": 0.7486844062805176,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "10.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 11,
+            "score": 0.7486301064491272,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "10.3",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 12,
+            "score": 0.7403109669685364,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "8.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 13,
+            "score": 0.7387950420379639,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.4",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 14,
+            "score": 0.7350775003433228,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.5",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 15,
+            "score": 0.7346112132072449,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 16,
+            "score": 0.7341282367706299,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "1.2",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 17,
+            "score": 0.7311931252479553,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "6.3",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 18,
+            "score": 0.7302290201187134,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "5.4",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 19,
+            "score": 0.7255889773368835,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "2.1",
+            "effective_date": "2025-10-01"
+          },
+          {
+            "rank": 20,
+            "score": 0.7254990339279175,
+            "doc_id": "POL-HL-V3",
+            "title": "NexaHome Loan Policy",
+            "policy_version": "3.0",
+            "clause": "8.3",
+            "effective_date": "2025-10-01"
+          }
+        ],
+        "timings": {
+          "search_ms": 525.9,
+          "parent_ms": 43.78,
+          "total_ms": 569.78
+        }
+      },
+      "note": "A focused hit proves this evidence is searchable. Generic misses do not alone prove index lag."
+    },
+    "E1": {
+      "mode": "counterfactual_config_on_live_snapshot",
+      "title": "Wrong query model",
+      "observed": {
+        "status": "pass",
+        "model_mismatch": [],
+        "dimension_mismatch": [],
+        "distribution_drift": "not_measured"
+      },
+      "counterfactual": {
+        "status": "mismatch",
+        "model_mismatch": [
+          "CIR-2026-07_0_c01",
+          "CIR-2026-07_1.1_c01",
+          "CIR-2026-07_2.1_c01",
+          "CIR-2026-07_3.1_c01",
+          "CIR-2026-07_4.1_c01",
+          "CIR-2026-07_5.1_c01",
+          "CIR-2026-07_5.2_c01",
+          "CIR-2026-07_6.1_c01",
+          "POL-AL-V1_0_c01",
+          "POL-AL-V1_1.1_c01",
+          "POL-AL-V1_1.2_c01",
+          "POL-AL-V1_2.1_c01",
+          "POL-AL-V1_2.2_c01",
+          "POL-AL-V1_2.3_c01",
+          "POL-AL-V1_2.4_c01",
+          "POL-AL-V1_3.1_c01",
+          "POL-AL-V1_3.2_c01",
+          "POL-AL-V1_4.1_c01",
+          "POL-AL-V1_5.1_c01",
+          "POL-AL-V1_5.2_c01",
+          "POL-AL-V1_6.1_c01",
+          "POL-AL-V1_6.2_c01",
+          "POL-AL-V1_7.1_c01",
+          "POL-AL-V1_8.1_c01",
+          "POL-AL-V1_9.1_c01",
+          "POL-HL-V1_0_c01",
+          "POL-HL-V1_1.1_c01",
+          "POL-HL-V1_1.2_c01",
+          "POL-HL-V1_10.1_c01",
+          "POL-HL-V1_10.2_c01",
+          "POL-HL-V1_2.1_c01",
+          "POL-HL-V1_3.1_c01",
+          "POL-HL-V1_3.2_c01",
+          "POL-HL-V1_3.3_c01",
+          "POL-HL-V1_3.4_c01",
+          "POL-HL-V1_3.5_c01",
+          "POL-HL-V1_4.1_c01",
+          "POL-HL-V1_4.2_c01",
+          "POL-HL-V1_5.1_c01",
+          "POL-HL-V1_5.2_c01",
+          "POL-HL-V1_5.3_c01",
+          "POL-HL-V1_5.4_c01",
+          "POL-HL-V1_6.1_c01",
+          "POL-HL-V1_6.2_c01",
+          "POL-HL-V1_6.3_c01",
+          "POL-HL-V1_6.4_c01",
+          "POL-HL-V1_6.5_c01",
+          "POL-HL-V1_7.1_c01",
+          "POL-HL-V1_7.2_c01",
+          "POL-HL-V1_7.3_c01",
+          "POL-HL-V1_8.1_c01",
+          "POL-HL-V1_8.2_c01",
+          "POL-HL-V1_8.3_c01",
+          "POL-HL-V1_8.4_c01",
+          "POL-HL-V1_9.1_c01",
+          "POL-HL-V1_9.2_c01",
+          "POL-HL-V2_0_c01",
+          "POL-HL-V2_1.1_c01",
+          "POL-HL-V2_1.2_c01",
+          "POL-HL-V2_10.1_c01",
+          "POL-HL-V2_10.2_c01",
+          "POL-HL-V2_2.1_c01",
+          "POL-HL-V2_3.1_c01",
+          "POL-HL-V2_3.2_c01",
+          "POL-HL-V2_3.3_c01",
+          "POL-HL-V2_3.4_c01",
+          "POL-HL-V2_3.5_c01",
+          "POL-HL-V2_4.1_c01",
+          "POL-HL-V2_4.2_c01",
+          "POL-HL-V2_5.1_c01",
+          "POL-HL-V2_5.2_c01",
+          "POL-HL-V2_5.3_c01",
+          "POL-HL-V2_5.4_c01",
+          "POL-HL-V2_6.1_c01",
+          "POL-HL-V2_6.2_c01",
+          "POL-HL-V2_6.3_c01",
+          "POL-HL-V2_6.4_c01",
+          "POL-HL-V2_6.5_c01",
+          "POL-HL-V2_7.1_c01",
+          "POL-HL-V2_7.2_c01",
+          "POL-HL-V2_7.3_c01",
+          "POL-HL-V2_8.1_c01",
+          "POL-HL-V2_8.2_c01",
+          "POL-HL-V2_8.3_c01",
+          "POL-HL-V2_8.4_c01",
+          "POL-HL-V2_9.1_c01",
+          "POL-HL-V2_9.2_c01",
+          "POL-HL-V3_0_c01",
+          "POL-HL-V3_1.1_c01",
+          "POL-HL-V3_1.2_c01",
+          "POL-HL-V3_10.1_c01",
+          "POL-HL-V3_10.2_c01",
+          "POL-HL-V3_10.3_c01",
+          "POL-HL-V3_2.1_c01",
+          "POL-HL-V3_3.1_c01",
+          "POL-HL-V3_3.2_c01",
+          "POL-HL-V3_3.3_c01",
+          "POL-HL-V3_3.4_c01",
+          "POL-HL-V3_3.5_c01",
+          "POL-HL-V3_4.1_c01",
+          "POL-HL-V3_4.2_c01",
+          "POL-HL-V3_5.1_c01",
+          "POL-HL-V3_5.2_c01",
+          "POL-HL-V3_5.3_c01",
+          "POL-HL-V3_5.4_c01",
+          "POL-HL-V3_6.1_c01",
+          "POL-HL-V3_6.2_c01",
+          "POL-HL-V3_6.3_c01",
+          "POL-HL-V3_6.4_c01",
+          "POL-HL-V3_6.5_c01",
+          "POL-HL-V3_7.1_c01",
+          "POL-HL-V3_7.2_c01",
+          "POL-HL-V3_7.3_c01",
+          "POL-HL-V3_8.1_c01",
+          "POL-HL-V3_8.2_c01",
+          "POL-HL-V3_8.3_c01",
+          "POL-HL-V3_8.4_c01",
+          "POL-HL-V3_9.1_c01",
+          "POL-HL-V3_9.2_c01",
+          "POL-LAP-V1_0_c01",
+          "POL-LAP-V1_1.1_c01",
+          "POL-LAP-V1_1.2_c01",
+          "POL-LAP-V1_2.1_c01",
+          "POL-LAP-V1_2.2_c01",
+          "POL-LAP-V1_2.3_c01",
+          "POL-LAP-V1_2.4_c01",
+          "POL-LAP-V1_3.1_c01",
+          "POL-LAP-V1_3.2_c01",
+          "POL-LAP-V1_4.1_c01",
+          "POL-LAP-V1_5.1_c01",
+          "POL-LAP-V1_5.2_c01",
+          "POL-LAP-V1_5.3_c01",
+          "POL-LAP-V1_6.1_c01",
+          "POL-LAP-V1_6.2_c01",
+          "POL-LAP-V1_7.1_c01",
+          "POL-LAP-V1_7.2_c01",
+          "POL-LAP-V1_8.1_c01",
+          "POL-LAP-V1_9.1_c01",
+          "POL-OPS-001_0_c01",
+          "POL-OPS-001_1.1_c01",
+          "POL-OPS-001_2.1_c01",
+          "POL-OPS-001_2.2_c01",
+          "POL-OPS-001_2.3_c01",
+          "POL-OPS-001_3.1_c01",
+          "POL-OPS-001_3.2_c01",
+          "POL-OPS-001_3.3_c01",
+          "POL-OPS-001_4.1_c01",
+          "POL-OPS-001_4.2_c01",
+          "POL-OPS-001_4.3_c01",
+          "POL-OPS-001_4.4_c01",
+          "POL-OPS-001_5.1_c01",
+          "POL-OPS-001_5.2_c01",
+          "POL-OPS-001_5.3_c01",
+          "POL-OPS-001_6.1_c01",
+          "POL-OPS-001_6.2_c01",
+          "POL-OPS-001_7.1_c01",
+          "POL-OPS-001_7.2_c01",
+          "POL-OPS-001_8.1_c01",
+          "POL-OPS-001_9.1_c01",
+          "POL-PL-V1_0_c01",
+          "POL-PL-V1_1.1_c01",
+          "POL-PL-V1_1.2_c01",
+          "POL-PL-V1_2.1_c01",
+          "POL-PL-V1_2.2_c01",
+          "POL-PL-V1_2.3_c01",
+          "POL-PL-V1_2.4_c01",
+          "POL-PL-V1_3.1_c01",
+          "POL-PL-V1_3.2_c01",
+          "POL-PL-V1_4.1_c01",
+          "POL-PL-V1_5.1_c01",
+          "POL-PL-V1_5.2_c01",
+          "POL-PL-V1_6.1_c01",
+          "POL-PL-V1_7.1_c01",
+          "POL-PL-V1_7.2_c01",
+          "POL-PL-V1_7.3_c01",
+          "POL-PL-V1_8.1_c01",
+          "POL-PL-V1_9.1_c01"
+        ],
+        "dimension_mismatch": [],
+        "distribution_drift": "not_measured"
+      },
+      "note": "No alternate model call or stored-vector change occurs."
+    },
+    "E2": {
+      "mode": "counterfactual_config_on_live_snapshot",
+      "title": "Dimension change",
+      "observed": {
+        "status": "pass",
+        "model_mismatch": [],
+        "dimension_mismatch": [],
+        "distribution_drift": "not_measured"
+      },
+      "counterfactual": {
+        "status": "mismatch",
+        "model_mismatch": [],
+        "dimension_mismatch": [
+          "CIR-2026-07_0_c01",
+          "CIR-2026-07_1.1_c01",
+          "CIR-2026-07_2.1_c01",
+          "CIR-2026-07_3.1_c01",
+          "CIR-2026-07_4.1_c01",
+          "CIR-2026-07_5.1_c01",
+          "CIR-2026-07_5.2_c01",
+          "CIR-2026-07_6.1_c01",
+          "POL-AL-V1_0_c01",
+          "POL-AL-V1_1.1_c01",
+          "POL-AL-V1_1.2_c01",
+          "POL-AL-V1_2.1_c01",
+          "POL-AL-V1_2.2_c01",
+          "POL-AL-V1_2.3_c01",
+          "POL-AL-V1_2.4_c01",
+          "POL-AL-V1_3.1_c01",
+          "POL-AL-V1_3.2_c01",
+          "POL-AL-V1_4.1_c01",
+          "POL-AL-V1_5.1_c01",
+          "POL-AL-V1_5.2_c01",
+          "POL-AL-V1_6.1_c01",
+          "POL-AL-V1_6.2_c01",
+          "POL-AL-V1_7.1_c01",
+          "POL-AL-V1_8.1_c01",
+          "POL-AL-V1_9.1_c01",
+          "POL-HL-V1_0_c01",
+          "POL-HL-V1_1.1_c01",
+          "POL-HL-V1_1.2_c01",
+          "POL-HL-V1_10.1_c01",
+          "POL-HL-V1_10.2_c01",
+          "POL-HL-V1_2.1_c01",
+          "POL-HL-V1_3.1_c01",
+          "POL-HL-V1_3.2_c01",
+          "POL-HL-V1_3.3_c01",
+          "POL-HL-V1_3.4_c01",
+          "POL-HL-V1_3.5_c01",
+          "POL-HL-V1_4.1_c01",
+          "POL-HL-V1_4.2_c01",
+          "POL-HL-V1_5.1_c01",
+          "POL-HL-V1_5.2_c01",
+          "POL-HL-V1_5.3_c01",
+          "POL-HL-V1_5.4_c01",
+          "POL-HL-V1_6.1_c01",
+          "POL-HL-V1_6.2_c01",
+          "POL-HL-V1_6.3_c01",
+          "POL-HL-V1_6.4_c01",
+          "POL-HL-V1_6.5_c01",
+          "POL-HL-V1_7.1_c01",
+          "POL-HL-V1_7.2_c01",
+          "POL-HL-V1_7.3_c01",
+          "POL-HL-V1_8.1_c01",
+          "POL-HL-V1_8.2_c01",
+          "POL-HL-V1_8.3_c01",
+          "POL-HL-V1_8.4_c01",
+          "POL-HL-V1_9.1_c01",
+          "POL-HL-V1_9.2_c01",
+          "POL-HL-V2_0_c01",
+          "POL-HL-V2_1.1_c01",
+          "POL-HL-V2_1.2_c01",
+          "POL-HL-V2_10.1_c01",
+          "POL-HL-V2_10.2_c01",
+          "POL-HL-V2_2.1_c01",
+          "POL-HL-V2_3.1_c01",
+          "POL-HL-V2_3.2_c01",
+          "POL-HL-V2_3.3_c01",
+          "POL-HL-V2_3.4_c01",
+          "POL-HL-V2_3.5_c01",
+          "POL-HL-V2_4.1_c01",
+          "POL-HL-V2_4.2_c01",
+          "POL-HL-V2_5.1_c01",
+          "POL-HL-V2_5.2_c01",
+          "POL-HL-V2_5.3_c01",
+          "POL-HL-V2_5.4_c01",
+          "POL-HL-V2_6.1_c01",
+          "POL-HL-V2_6.2_c01",
+          "POL-HL-V2_6.3_c01",
+          "POL-HL-V2_6.4_c01",
+          "POL-HL-V2_6.5_c01",
+          "POL-HL-V2_7.1_c01",
+          "POL-HL-V2_7.2_c01",
+          "POL-HL-V2_7.3_c01",
+          "POL-HL-V2_8.1_c01",
+          "POL-HL-V2_8.2_c01",
+          "POL-HL-V2_8.3_c01",
+          "POL-HL-V2_8.4_c01",
+          "POL-HL-V2_9.1_c01",
+          "POL-HL-V2_9.2_c01",
+          "POL-HL-V3_0_c01",
+          "POL-HL-V3_1.1_c01",
+          "POL-HL-V3_1.2_c01",
+          "POL-HL-V3_10.1_c01",
+          "POL-HL-V3_10.2_c01",
+          "POL-HL-V3_10.3_c01",
+          "POL-HL-V3_2.1_c01",
+          "POL-HL-V3_3.1_c01",
+          "POL-HL-V3_3.2_c01",
+          "POL-HL-V3_3.3_c01",
+          "POL-HL-V3_3.4_c01",
+          "POL-HL-V3_3.5_c01",
+          "POL-HL-V3_4.1_c01",
+          "POL-HL-V3_4.2_c01",
+          "POL-HL-V3_5.1_c01",
+          "POL-HL-V3_5.2_c01",
+          "POL-HL-V3_5.3_c01",
+          "POL-HL-V3_5.4_c01",
+          "POL-HL-V3_6.1_c01",
+          "POL-HL-V3_6.2_c01",
+          "POL-HL-V3_6.3_c01",
+          "POL-HL-V3_6.4_c01",
+          "POL-HL-V3_6.5_c01",
+          "POL-HL-V3_7.1_c01",
+          "POL-HL-V3_7.2_c01",
+          "POL-HL-V3_7.3_c01",
+          "POL-HL-V3_8.1_c01",
+          "POL-HL-V3_8.2_c01",
+          "POL-HL-V3_8.3_c01",
+          "POL-HL-V3_8.4_c01",
+          "POL-HL-V3_9.1_c01",
+          "POL-HL-V3_9.2_c01",
+          "POL-LAP-V1_0_c01",
+          "POL-LAP-V1_1.1_c01",
+          "POL-LAP-V1_1.2_c01",
+          "POL-LAP-V1_2.1_c01",
+          "POL-LAP-V1_2.2_c01",
+          "POL-LAP-V1_2.3_c01",
+          "POL-LAP-V1_2.4_c01",
+          "POL-LAP-V1_3.1_c01",
+          "POL-LAP-V1_3.2_c01",
+          "POL-LAP-V1_4.1_c01",
+          "POL-LAP-V1_5.1_c01",
+          "POL-LAP-V1_5.2_c01",
+          "POL-LAP-V1_5.3_c01",
+          "POL-LAP-V1_6.1_c01",
+          "POL-LAP-V1_6.2_c01",
+          "POL-LAP-V1_7.1_c01",
+          "POL-LAP-V1_7.2_c01",
+          "POL-LAP-V1_8.1_c01",
+          "POL-LAP-V1_9.1_c01",
+          "POL-OPS-001_0_c01",
+          "POL-OPS-001_1.1_c01",
+          "POL-OPS-001_2.1_c01",
+          "POL-OPS-001_2.2_c01",
+          "POL-OPS-001_2.3_c01",
+          "POL-OPS-001_3.1_c01",
+          "POL-OPS-001_3.2_c01",
+          "POL-OPS-001_3.3_c01",
+          "POL-OPS-001_4.1_c01",
+          "POL-OPS-001_4.2_c01",
+          "POL-OPS-001_4.3_c01",
+          "POL-OPS-001_4.4_c01",
+          "POL-OPS-001_5.1_c01",
+          "POL-OPS-001_5.2_c01",
+          "POL-OPS-001_5.3_c01",
+          "POL-OPS-001_6.1_c01",
+          "POL-OPS-001_6.2_c01",
+          "POL-OPS-001_7.1_c01",
+          "POL-OPS-001_7.2_c01",
+          "POL-OPS-001_8.1_c01",
+          "POL-OPS-001_9.1_c01",
+          "POL-PL-V1_0_c01",
+          "POL-PL-V1_1.1_c01",
+          "POL-PL-V1_1.2_c01",
+          "POL-PL-V1_2.1_c01",
+          "POL-PL-V1_2.2_c01",
+          "POL-PL-V1_2.3_c01",
+          "POL-PL-V1_2.4_c01",
+          "POL-PL-V1_3.1_c01",
+          "POL-PL-V1_3.2_c01",
+          "POL-PL-V1_4.1_c01",
+          "POL-PL-V1_5.1_c01",
+          "POL-PL-V1_5.2_c01",
+          "POL-PL-V1_6.1_c01",
+          "POL-PL-V1_7.1_c01",
+          "POL-PL-V1_7.2_c01",
+          "POL-PL-V1_7.3_c01",
+          "POL-PL-V1_8.1_c01",
+          "POL-PL-V1_9.1_c01"
+        ],
+        "distribution_drift": "not_measured"
+      },
+      "stored_metadata_has_dimensions": false,
+      "stored_checksum_matches_payload": true,
+      "suggested_hash_1536": "sha256:2d34449059fc16bb49112de4732ecab350f4bfaac94a2080bba2faae51340c4d",
+      "suggested_hash_1024": "sha256:978cfed288677e06ff3eb9eb02078a7a7e30e30094e41781cc8240ff2fa60aec",
+      "note": "The proposed hash hardening is demonstrated locally, not applied to ingestion."
+    },
+    "E3": {
+      "mode": "local_metadata_fault_on_live_snapshot",
+      "title": "Mixed-model metadata",
+      "observed": {
+        "status": "pass",
+        "model_mismatch": [],
+        "dimension_mismatch": [],
+        "distribution_drift": "not_measured"
+      },
+      "injected": {
+        "status": "mismatch",
+        "model_mismatch": [
+          "POL-HL-V1_0_c01"
+        ],
+        "dimension_mismatch": [],
+        "distribution_drift": "not_measured"
+      },
+      "note": "This injects a metadata inconsistency locally. It does not simulate numerical vectors from another model."
+    },
+    "E4": {
+      "mode": "live_quality_snapshot",
+      "title": "Compatible vectors and incomplete evidence",
+      "observed": {
+        "status": "pass",
+        "model_mismatch": [],
+        "dimension_mismatch": [],
+        "distribution_drift": "not_measured"
+      },
+      "cohort": [
+        {
+          "request": {
+            "query": "What is the maximum loan amount for a NexaHome Loan?",
+            "as_of": "2026-10-01",
+            "top_k": 5,
+            "product_id": null,
+            "jurisdiction": null
+          },
+          "diagnosis": {
+            "status": "pass",
+            "returned_count": 5,
+            "empty": false,
+            "missing_evidence": []
+          },
+          "hits": [
+            {
+              "rank": 1,
+              "score": 0.8843371272087097,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "4.1",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 2,
+              "score": 0.8524490594863892,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "7.2",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 3,
+              "score": 0.8381813764572144,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "1.1",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 4,
+              "score": 0.8340973854064941,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "3.1",
+              "effective_date": "2024-01-01"
+            },
+            {
+              "rank": 5,
+              "score": 0.8310338854789734,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "4.2",
+              "effective_date": "2025-10-01"
+            }
+          ],
+          "timings": {
+            "search_ms": 475.6,
+            "parent_ms": 43.32,
+            "total_ms": 518.96
+          }
+        },
+        {
+          "request": {
+            "query": "What is the current processing fee for a NexaHome Loan?",
+            "as_of": "2026-10-01",
+            "top_k": 5,
+            "product_id": null,
+            "jurisdiction": null
+          },
+          "diagnosis": {
+            "status": "miss",
+            "returned_count": 5,
+            "empty": false,
+            "missing_evidence": [
+              {
+                "doc_id": "CIR-2026-07",
+                "clause": "3.1"
+              },
+              {
+                "doc_id": "CIR-2026-07",
+                "clause": "5.1"
+              }
+            ]
+          },
+          "hits": [
+            {
+              "rank": 1,
+              "score": 0.9019372463226318,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "6.2",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 2,
+              "score": 0.8607708215713501,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "6.3",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 3,
+              "score": 0.8600393533706665,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "5.1",
+              "effective_date": "2024-06-01"
+            },
+            {
+              "rank": 4,
+              "score": 0.8587758541107178,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "6.5",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 5,
+              "score": 0.85520339012146,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "5.1",
+              "effective_date": "2024-01-01"
+            }
+          ],
+          "timings": {
+            "search_ms": 479.16,
+            "parent_ms": 43.14,
+            "total_ms": 522.35
+          }
+        },
+        {
+          "request": {
+            "query": "What loan to value ratio applies to a NexaHome Loan of ₹80 lakh?",
+            "as_of": "2026-10-01",
+            "top_k": 5,
+            "product_id": null,
+            "jurisdiction": null
+          },
+          "diagnosis": {
+            "status": "pass",
+            "returned_count": 5,
+            "empty": false,
+            "missing_evidence": []
+          },
+          "hits": [
+            {
+              "rank": 1,
+              "score": 0.9038830995559692,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "7.2",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 2,
+              "score": 0.8745729923248291,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "6.2",
+              "effective_date": "2024-06-01"
+            },
+            {
+              "rank": 3,
+              "score": 0.8644338846206665,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "4.1",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 4,
+              "score": 0.8515346050262451,
+              "doc_id": "POL-AL-V1",
+              "title": "NexaDrive Auto Loan Policy",
+              "policy_version": "1.0",
+              "clause": "6.2",
+              "effective_date": "2025-01-01"
+            },
+            {
+              "rank": 5,
+              "score": 0.8343092203140259,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "3.1",
+              "effective_date": "2024-06-01"
+            }
+          ],
+          "timings": {
+            "search_ms": 482.19,
+            "parent_ms": 43.4,
+            "total_ms": 525.64
+          }
+        },
+        {
+          "request": {
+            "query": "Is there a foreclosure charge on a NexaFlex personal loan?",
+            "as_of": "2026-10-01",
+            "top_k": 5,
+            "product_id": null,
+            "jurisdiction": null
+          },
+          "diagnosis": {
+            "status": "pass",
+            "returned_count": 5,
+            "empty": false,
+            "missing_evidence": []
+          },
+          "hits": [
+            {
+              "rank": 1,
+              "score": 0.8788979649543762,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "7.2",
+              "effective_date": "2024-01-01"
+            },
+            {
+              "rank": 2,
+              "score": 0.8353927135467529,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "7.3",
+              "effective_date": "2024-01-01"
+            },
+            {
+              "rank": 3,
+              "score": 0.8315081596374512,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "7.1",
+              "effective_date": "2024-06-01"
+            },
+            {
+              "rank": 4,
+              "score": 0.8289392590522766,
+              "doc_id": "POL-AL-V1",
+              "title": "NexaDrive Auto Loan Policy",
+              "policy_version": "1.0",
+              "clause": "7.1",
+              "effective_date": "2025-01-01"
+            },
+            {
+              "rank": 5,
+              "score": 0.8271938562393188,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "7.1",
+              "effective_date": "2024-01-01"
+            }
+          ],
+          "timings": {
+            "search_ms": 479.85,
+            "parent_ms": 43.57,
+            "total_ms": 523.47
+          }
+        },
+        {
+          "request": {
+            "query": "What LTV does NexaDrive allow for a new car and for a used car?",
+            "as_of": "2026-10-01",
+            "top_k": 5,
+            "product_id": null,
+            "jurisdiction": null
+          },
+          "diagnosis": {
+            "status": "pass",
+            "returned_count": 5,
+            "empty": false,
+            "missing_evidence": []
+          },
+          "hits": [
+            {
+              "rank": 1,
+              "score": 0.8353596329689026,
+              "doc_id": "POL-AL-V1",
+              "title": "NexaDrive Auto Loan Policy",
+              "policy_version": "1.0",
+              "clause": "6.2",
+              "effective_date": "2025-01-01"
+            },
+            {
+              "rank": 2,
+              "score": 0.8312084078788757,
+              "doc_id": "POL-AL-V1",
+              "title": "NexaDrive Auto Loan Policy",
+              "policy_version": "1.0",
+              "clause": "1.1",
+              "effective_date": "2025-01-01"
+            },
+            {
+              "rank": 3,
+              "score": 0.8159133195877075,
+              "doc_id": "POL-AL-V1",
+              "title": "NexaDrive Auto Loan Policy",
+              "policy_version": "1.0",
+              "clause": "3.2",
+              "effective_date": "2025-01-01"
+            },
+            {
+              "rank": 4,
+              "score": 0.8005553483963013,
+              "doc_id": "POL-AL-V1",
+              "title": "NexaDrive Auto Loan Policy",
+              "policy_version": "1.0",
+              "clause": "6.1",
+              "effective_date": "2025-01-01"
+            },
+            {
+              "rank": 5,
+              "score": 0.7957062125205994,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "7.2",
+              "effective_date": "2025-10-01"
+            }
+          ],
+          "timings": {
+            "search_ms": 479.6,
+            "parent_ms": 44.09,
+            "total_ms": 523.82
+          }
+        },
+        {
+          "request": {
+            "query": "How much can I borrow against a commercial property under NexaProperty Plus?",
+            "as_of": "2026-10-01",
+            "top_k": 5,
+            "product_id": null,
+            "jurisdiction": null
+          },
+          "diagnosis": {
+            "status": "pass",
+            "returned_count": 5,
+            "empty": false,
+            "missing_evidence": []
+          },
+          "hits": [
+            {
+              "rank": 1,
+              "score": 0.8454580307006836,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "6.2",
+              "effective_date": "2024-06-01"
+            },
+            {
+              "rank": 2,
+              "score": 0.8419175148010254,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "1.1",
+              "effective_date": "2024-06-01"
+            },
+            {
+              "rank": 3,
+              "score": 0.8271425366401672,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "3.1",
+              "effective_date": "2024-06-01"
+            },
+            {
+              "rank": 4,
+              "score": 0.8215988874435425,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "6.1",
+              "effective_date": "2024-06-01"
+            },
+            {
+              "rank": 5,
+              "score": 0.8123975992202759,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "2.2",
+              "effective_date": "2024-06-01"
+            }
+          ],
+          "timings": {
+            "search_ms": 481.37,
+            "parent_ms": 45.25,
+            "total_ms": 526.84
+          }
+        },
+        {
+          "request": {
+            "query": "What are the age limits for a NexaHome Loan today?",
+            "as_of": "2026-10-01",
+            "top_k": 5,
+            "product_id": null,
+            "jurisdiction": null
+          },
+          "diagnosis": {
+            "status": "pass",
+            "returned_count": 5,
+            "empty": false,
+            "missing_evidence": []
+          },
+          "hits": [
+            {
+              "rank": 1,
+              "score": 0.8771520853042603,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "3.1",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 2,
+              "score": 0.8459643125534058,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "4.1",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 3,
+              "score": 0.8457376956939697,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "2.1",
+              "effective_date": "2024-01-01"
+            },
+            {
+              "rank": 4,
+              "score": 0.8439975380897522,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "2.1",
+              "effective_date": "2024-06-01"
+            },
+            {
+              "rank": 5,
+              "score": 0.8417080640792847,
+              "doc_id": "POL-AL-V1",
+              "title": "NexaDrive Auto Loan Policy",
+              "policy_version": "1.0",
+              "clause": "2.1",
+              "effective_date": "2025-01-01"
+            }
+          ],
+          "timings": {
+            "search_ms": 476.17,
+            "parent_ms": 45.06,
+            "total_ms": 521.34
+          }
+        },
+        {
+          "request": {
+            "query": "How often does the NexaHome floating rate reset?",
+            "as_of": "2026-10-01",
+            "top_k": 5,
+            "product_id": null,
+            "jurisdiction": null
+          },
+          "diagnosis": {
+            "status": "pass",
+            "returned_count": 5,
+            "empty": false,
+            "missing_evidence": []
+          },
+          "hits": [
+            {
+              "rank": 1,
+              "score": 0.8568778038024902,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "5.3",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 2,
+              "score": 0.8032914400100708,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "5.1",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 3,
+              "score": 0.7812725305557251,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "8.1",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 4,
+              "score": 0.7712368965148926,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "4.1",
+              "effective_date": "2024-06-01"
+            },
+            {
+              "rank": 5,
+              "score": 0.7689700126647949,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "2.1",
+              "effective_date": "2025-10-01"
+            }
+          ],
+          "timings": {
+            "search_ms": 496.5,
+            "parent_ms": 43.12,
+            "total_ms": 539.66
+          }
+        },
+        {
+          "request": {
+            "query": "What is the current NRLR?",
+            "as_of": "2026-10-01",
+            "top_k": 5,
+            "product_id": null,
+            "jurisdiction": null
+          },
+          "diagnosis": {
+            "status": "miss",
+            "returned_count": 5,
+            "empty": false,
+            "missing_evidence": [
+              {
+                "doc_id": "CATALOG",
+                "clause": "benchmark_rates.csv: NRLR 2026-02-01"
+              }
+            ]
+          },
+          "hits": [
+            {
+              "rank": 1,
+              "score": 0.7402682304382324,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "2.1",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 2,
+              "score": 0.7165789604187012,
+              "doc_id": "POL-LAP-V1",
+              "title": "NexaProperty Plus Loan Against Property Policy",
+              "policy_version": "1.0",
+              "clause": "4.1",
+              "effective_date": "2024-06-01"
+            },
+            {
+              "rank": 3,
+              "score": 0.7123022079467773,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "5.1",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 4,
+              "score": 0.6981605291366577,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "5.3",
+              "effective_date": "2025-10-01"
+            },
+            {
+              "rank": 5,
+              "score": 0.6972601413726807,
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "5.2",
+              "effective_date": "2025-10-01"
+            }
+          ],
+          "timings": {
+            "search_ms": 463.49,
+            "parent_ms": 42.89,
+            "total_ms": 506.43
+          }
+        },
+        {
+          "request": {
+            "query": "What do I need to qualify for a NexaFlex personal loan?",
+            "as_of": "2026-10-01",
+            "top_k": 5,
+            "product_id": null,
+            "jurisdiction": null
+          },
+          "diagnosis": {
+            "status": "miss",
+            "returned_count": 5,
+            "empty": false,
+            "missing_evidence": [
+              {
+                "doc_id": "POL-OPS-001",
+                "clause": "5.3"
+              }
+            ]
+          },
+          "hits": [
+            {
+              "rank": 1,
+              "score": 0.8596523404121399,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "2.2",
+              "effective_date": "2024-01-01"
+            },
+            {
+              "rank": 2,
+              "score": 0.8575245141983032,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "2.3",
+              "effective_date": "2024-01-01"
+            },
+            {
+              "rank": 3,
+              "score": 0.8522902727127075,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "2.1",
+              "effective_date": "2024-01-01"
+            },
+            {
+              "rank": 4,
+              "score": 0.8441302180290222,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "1.1",
+              "effective_date": "2024-01-01"
+            },
+            {
+              "rank": 5,
+              "score": 0.8376055955886841,
+              "doc_id": "POL-PL-V1",
+              "title": "NexaFlex Personal Loan Policy",
+              "policy_version": "1.0",
+              "clause": "2.4",
+              "effective_date": "2024-01-01"
+            }
+          ],
+          "timings": {
+            "search_ms": 478.12,
+            "parent_ms": 43.24,
+            "total_ms": 521.42
+          }
+        }
+      ],
+      "complete_cases": 7,
+      "total_cases": 10,
+      "historical_baseline": "not_available",
+      "distribution_drift": "not_measured",
+      "note": "Current evidence coverage is measured. Regression over time and embedding drift are unproven."
+    }
+  },
+  "source_freshness": {
+    "status": "pass",
+    "missing_chunks": [],
+    "changed_chunks": [],
+    "unexpected_chunks": [],
+    "atlas_index_readiness": "not_checked"
+  }
+}
