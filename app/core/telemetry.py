@@ -2,7 +2,11 @@ from __future__ import annotations
 
 
 def init_telemetry(enabled: bool) -> None:
-    """Patch PyMongo (and later FastAPI) for Datadog APM. Call once at process startup."""
+    """Patch supported integrations for CLI startup.
+
+    Serve FastAPI with ddtrace-run so instrumentation starts before app creation.
+    Load .env into the process first; the SDK reads its own DD_* configuration.
+    """
     if not enabled:
         return
     from ddtrace import patch_all

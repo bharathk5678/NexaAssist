@@ -1,0 +1,13 @@
+# Allow only the sources required by app/Dockerfile into the build context.
+**
+!pyproject.toml
+!uv.lock
+!app/
+!app/**
+!evaluation/
+!evaluation/datasets/
+!evaluation/datasets/answer.jsonl
+app/**/__pycache__/
+app/evaluation/results/
+app/**/.env
+app/**/.env.*
