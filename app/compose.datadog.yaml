@@ -1,0 +1,24 @@
+name: nexaassist-observability
+
+services:
+  datadog-agent:
+    image: registry.datadoghq.com/agent:7
+    restart: unless-stopped
+    environment:
+      DD_API_KEY: ${DD_API_KEY:?Set DD_API_KEY in the project .env file}
+      DD_SITE: ${DD_SITE:-datadoghq.com}
+      DD_ENV: ${DD_ENV:-dev}
+      DD_HOSTNAME: nexaassist-docker-desktop
+      DD_APM_ENABLED: "true"
+      DD_APM_NON_LOCAL_TRAFFIC: "true"
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+    ports:
+      - "127.0.0.1:18126:8126/tcp"
+      - "127.0.0.1:18125:8125/udp"
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+        bind:
+          create_host_path: false
