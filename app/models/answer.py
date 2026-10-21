@@ -39,3 +39,4 @@ class AnswerResponse(BaseModel):
     citations: list[AnswerCitation]
     retrieval_timings: RetrieveTimings
     generation_ms: float
+    datadog_span_id: str | None = Field(default=None, pattern=r"^[1-9][0-9]{0,19}$")

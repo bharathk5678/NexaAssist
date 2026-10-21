@@ -1,0 +1,233 @@
+version_id,product_id,product_name,attribute,value,effective_from,effective_to,status,source_doc,clause,clause_key
+NHL-2023-04,NEXA-HL,NexaHome Loan,eligibility.age.min,21,2023-04-01,2024-03-31,superseded,POL-HL-V1,3.1,elig.age
+NHL-2023-04,NEXA-HL,NexaHome Loan,eligibility.age.max_at_application_salaried,58,2023-04-01,2024-03-31,superseded,POL-HL-V1,3.1,elig.age
+NHL-2023-04,NEXA-HL,NexaHome Loan,eligibility.age.max_at_application_self_employed,60,2023-04-01,2024-03-31,superseded,POL-HL-V1,3.1,elig.age
+NHL-2023-04,NEXA-HL,NexaHome Loan,eligibility.age.max_at_maturity_salaried,60,2023-04-01,2024-03-31,superseded,POL-HL-V1,3.1,elig.age
+NHL-2023-04,NEXA-HL,NexaHome Loan,eligibility.age.max_at_maturity_self_employed,65,2023-04-01,2024-03-31,superseded,POL-HL-V1,3.1,elig.age
+NHL-2023-04,NEXA-HL,NexaHome Loan,eligibility.income.min_net_monthly_salaried,25000,2023-04-01,2024-03-31,superseded,POL-HL-V1,3.2,elig.income
+NHL-2023-04,NEXA-HL,NexaHome Loan,eligibility.income.min_annual_self_employed_itr,400000,2023-04-01,2024-03-31,superseded,POL-HL-V1,3.2,elig.income
+NHL-2023-04,NEXA-HL,NexaHome Loan,eligibility.bureau.min_score_auto,650,2023-04-01,2024-03-31,superseded,POL-HL-V1,3.3,elig.bureau
+NHL-2023-04,NEXA-HL,NexaHome Loan,eligibility.bureau.below_min_outcome,decline_under_policy,2023-04-01,2024-03-31,superseded,POL-HL-V1,3.3,elig.bureau
+NHL-2023-04,NEXA-HL,NexaHome Loan,eligibility.foir,"[{""income_min"": 0, ""income_max"": null, ""foir_max_pct"": 50}]",2023-04-01,2024-03-31,superseded,POL-HL-V1,3.4,elig.foir
+NHL-2023-04,NEXA-HL,NexaHome Loan,limits.amount.min,500000,2023-04-01,2024-03-31,superseded,POL-HL-V1,4.1,limits.amount
+NHL-2023-04,NEXA-HL,NexaHome Loan,limits.amount.max,50000000,2023-04-01,2024-03-31,superseded,POL-HL-V1,4.1,limits.amount
+NHL-2023-04,NEXA-HL,NexaHome Loan,limits.tenure_months.min,60,2023-04-01,2024-03-31,superseded,POL-HL-V1,4.2,limits.tenure
+NHL-2023-04,NEXA-HL,NexaHome Loan,limits.tenure_months.max,300,2023-04-01,2024-03-31,superseded,POL-HL-V1,4.2,limits.tenure
+NHL-2023-04,NEXA-HL,NexaHome Loan,rate.type,floating,2023-04-01,2024-03-31,superseded,POL-HL-V1,5.1,rate.benchmark
+NHL-2023-04,NEXA-HL,NexaHome Loan,rate.benchmark,NRLR,2023-04-01,2024-03-31,superseded,POL-HL-V1,5.1,rate.benchmark
+NHL-2023-04,NEXA-HL,NexaHome Loan,rate.reset,annual,2023-04-01,2024-03-31,superseded,POL-HL-V1,5.3,rate.reset
+NHL-2023-04,NEXA-HL,NexaHome Loan,rate.spread_table,"[{""min_score"": 800, ""max_score"": 900, ""value_pct"": 2.25}, {""min_score"": 750, ""max_score"": 799, ""value_pct"": 2.55}, {""min_score"": 700, ""max_score"": 749, ""value_pct"": 3.0}, {""min_score"": 650, ""max_score"": 699, ""value_pct"": 3.5}]",2023-04-01,2024-03-31,superseded,POL-HL-V1,5.2,rate.spread
+NHL-2023-04,NEXA-HL,NexaHome Loan,rate.fixed_option.available,True,2023-04-01,2024-03-31,superseded,POL-HL-V1,5.4,rate.fixed
+NHL-2023-04,NEXA-HL,NexaHome Loan,rate.fixed_option.premium_over_floating_pct,0.5,2023-04-01,2024-03-31,superseded,POL-HL-V1,5.4,rate.fixed
+NHL-2023-04,NEXA-HL,NexaHome Loan,rate.fixed_option.fixed_period_months,36,2023-04-01,2024-03-31,superseded,POL-HL-V1,5.4,rate.fixed
+NHL-2023-04,NEXA-HL,NexaHome Loan,fees.processing.pct,0.5,2023-04-01,2024-03-31,superseded,POL-HL-V1,6.2,fees.processing
+NHL-2023-04,NEXA-HL,NexaHome Loan,fees.processing.min,10000,2023-04-01,2024-03-31,superseded,POL-HL-V1,6.2,fees.processing
+NHL-2023-04,NEXA-HL,NexaHome Loan,fees.processing.max,25000,2023-04-01,2024-03-31,superseded,POL-HL-V1,6.2,fees.processing
+NHL-2023-04,NEXA-HL,NexaHome Loan,fees.processing.gst_extra,True,2023-04-01,2024-03-31,superseded,POL-HL-V1,6.2,fees.processing
+NHL-2023-04,NEXA-HL,NexaHome Loan,fees.legal_technical.amount,7500,2023-04-01,2024-03-31,superseded,POL-HL-V1,6.3,fees.legal
+NHL-2023-04,NEXA-HL,NexaHome Loan,fees.legal_technical.gst_extra,True,2023-04-01,2024-03-31,superseded,POL-HL-V1,6.3,fees.legal
+NHL-2023-04,NEXA-HL,NexaHome Loan,fees.penal.basis,per_month_on_overdue_amount,2023-04-01,2024-03-31,superseded,POL-HL-V1,6.4,fees.penal
+NHL-2023-04,NEXA-HL,NexaHome Loan,fees.penal.value_pct,2.0,2023-04-01,2024-03-31,superseded,POL-HL-V1,6.4,fees.penal
+NHL-2023-04,NEXA-HL,NexaHome Loan,prepayment.foreclosure_floating_pct,0.0,2023-04-01,2024-03-31,superseded,POL-HL-V1,8.1,prepay.foreclosure_floating
+NHL-2023-04,NEXA-HL,NexaHome Loan,prepayment.foreclosure_fixed_period_pct,2.0,2023-04-01,2024-03-31,superseded,POL-HL-V1,8.2,prepay.foreclosure_fixed
+NHL-2023-04,NEXA-HL,NexaHome Loan,prepayment.part_prepayment_min,50000,2023-04-01,2024-03-31,superseded,POL-HL-V1,8.3,prepay.part
+NHL-2023-04,NEXA-HL,NexaHome Loan,prepayment.part_prepayment_fee_pct,0.0,2023-04-01,2024-03-31,superseded,POL-HL-V1,8.3,prepay.part
+NHL-2023-04,NEXA-HL,NexaHome Loan,prepayment.notice_days,7,2023-04-01,2024-03-31,superseded,POL-HL-V1,8.4,prepay.notice
+NHL-2023-04,NEXA-HL,NexaHome Loan,collateral.type,first mortgage on the financed residential property,2023-04-01,2024-03-31,superseded,POL-HL-V1,7.1,collateral
+NHL-2023-04,NEXA-HL,NexaHome Loan,ltv,"[{""loan_min"": 0, ""loan_max"": 3000000, ""ltv_pct"": 90}, {""loan_min"": 3000001, ""loan_max"": 7500000, ""ltv_pct"": 80}, {""loan_min"": 7500001, ""loan_max"": null, ""ltv_pct"": 75}]",2023-04-01,2024-03-31,superseded,POL-HL-V1,7.2,ltv
+NHL-2024-04,NEXA-HL,NexaHome Loan,eligibility.age.min,21,2024-04-01,2025-09-30,superseded,POL-HL-V2,3.1,elig.age
+NHL-2024-04,NEXA-HL,NexaHome Loan,eligibility.age.max_at_application_salaried,60,2024-04-01,2025-09-30,superseded,POL-HL-V2,3.1,elig.age
+NHL-2024-04,NEXA-HL,NexaHome Loan,eligibility.age.max_at_application_self_employed,62,2024-04-01,2025-09-30,superseded,POL-HL-V2,3.1,elig.age
+NHL-2024-04,NEXA-HL,NexaHome Loan,eligibility.age.max_at_maturity_salaried,65,2024-04-01,2025-09-30,superseded,POL-HL-V2,3.1,elig.age
+NHL-2024-04,NEXA-HL,NexaHome Loan,eligibility.age.max_at_maturity_self_employed,70,2024-04-01,2025-09-30,superseded,POL-HL-V2,3.1,elig.age
+NHL-2024-04,NEXA-HL,NexaHome Loan,eligibility.income.min_net_monthly_salaried,30000,2024-04-01,2025-09-30,superseded,POL-HL-V2,3.2,elig.income
+NHL-2024-04,NEXA-HL,NexaHome Loan,eligibility.income.min_annual_self_employed_itr,450000,2024-04-01,2025-09-30,superseded,POL-HL-V2,3.2,elig.income
+NHL-2024-04,NEXA-HL,NexaHome Loan,eligibility.bureau.min_score_auto,650,2024-04-01,2025-09-30,superseded,POL-HL-V2,3.3,elig.bureau
+NHL-2024-04,NEXA-HL,NexaHome Loan,eligibility.bureau.below_min_outcome,decline_under_policy,2024-04-01,2025-09-30,superseded,POL-HL-V2,3.3,elig.bureau
+NHL-2024-04,NEXA-HL,NexaHome Loan,eligibility.foir,"[{""income_min"": 0, ""income_max"": 99999, ""foir_max_pct"": 50}, {""income_min"": 100000, ""income_max"": null, ""foir_max_pct"": 55}]",2024-04-01,2025-09-30,superseded,POL-HL-V2,3.4,elig.foir
+NHL-2024-04,NEXA-HL,NexaHome Loan,limits.amount.min,500000,2024-04-01,2025-09-30,superseded,POL-HL-V2,4.1,limits.amount
+NHL-2024-04,NEXA-HL,NexaHome Loan,limits.amount.max,50000000,2024-04-01,2025-09-30,superseded,POL-HL-V2,4.1,limits.amount
+NHL-2024-04,NEXA-HL,NexaHome Loan,limits.tenure_months.min,60,2024-04-01,2025-09-30,superseded,POL-HL-V2,4.2,limits.tenure
+NHL-2024-04,NEXA-HL,NexaHome Loan,limits.tenure_months.max,360,2024-04-01,2025-09-30,superseded,POL-HL-V2,4.2,limits.tenure
+NHL-2024-04,NEXA-HL,NexaHome Loan,rate.type,floating,2024-04-01,2025-09-30,superseded,POL-HL-V2,5.1,rate.benchmark
+NHL-2024-04,NEXA-HL,NexaHome Loan,rate.benchmark,NRLR,2024-04-01,2025-09-30,superseded,POL-HL-V2,5.1,rate.benchmark
+NHL-2024-04,NEXA-HL,NexaHome Loan,rate.reset,quarterly,2024-04-01,2025-09-30,superseded,POL-HL-V2,5.3,rate.reset
+NHL-2024-04,NEXA-HL,NexaHome Loan,rate.spread_table,"[{""min_score"": 800, ""max_score"": 900, ""value_pct"": 2.0}, {""min_score"": 750, ""max_score"": 799, ""value_pct"": 2.3}, {""min_score"": 725, ""max_score"": 749, ""value_pct"": 2.75}, {""min_score"": 700, ""max_score"": 724, ""value_pct"": 3.1}, {""min_score"": 650, ""max_score"": 699, ""value_pct"": 3.6}]",2024-04-01,2025-09-30,superseded,POL-HL-V2,5.2,rate.spread
+NHL-2024-04,NEXA-HL,NexaHome Loan,rate.fixed_option.available,True,2024-04-01,2025-09-30,superseded,POL-HL-V2,5.4,rate.fixed
+NHL-2024-04,NEXA-HL,NexaHome Loan,rate.fixed_option.premium_over_floating_pct,0.4,2024-04-01,2025-09-30,superseded,POL-HL-V2,5.4,rate.fixed
+NHL-2024-04,NEXA-HL,NexaHome Loan,rate.fixed_option.fixed_period_months,36,2024-04-01,2025-09-30,superseded,POL-HL-V2,5.4,rate.fixed
+NHL-2024-04,NEXA-HL,NexaHome Loan,fees.processing.pct,0.4,2024-04-01,2025-09-30,superseded,POL-HL-V2,6.2,fees.processing
+NHL-2024-04,NEXA-HL,NexaHome Loan,fees.processing.min,7500,2024-04-01,2025-09-30,superseded,POL-HL-V2,6.2,fees.processing
+NHL-2024-04,NEXA-HL,NexaHome Loan,fees.processing.max,20000,2024-04-01,2025-09-30,superseded,POL-HL-V2,6.2,fees.processing
+NHL-2024-04,NEXA-HL,NexaHome Loan,fees.processing.gst_extra,True,2024-04-01,2025-09-30,superseded,POL-HL-V2,6.2,fees.processing
+NHL-2024-04,NEXA-HL,NexaHome Loan,fees.legal_technical.amount,6500,2024-04-01,2025-09-30,superseded,POL-HL-V2,6.3,fees.legal
+NHL-2024-04,NEXA-HL,NexaHome Loan,fees.legal_technical.gst_extra,True,2024-04-01,2025-09-30,superseded,POL-HL-V2,6.3,fees.legal
+NHL-2024-04,NEXA-HL,NexaHome Loan,fees.penal.basis,per_annum_over_contractual_rate_on_overdue_amount,2024-04-01,2025-09-30,superseded,POL-HL-V2,6.4,fees.penal
+NHL-2024-04,NEXA-HL,NexaHome Loan,fees.penal.value_pct,2.0,2024-04-01,2025-09-30,superseded,POL-HL-V2,6.4,fees.penal
+NHL-2024-04,NEXA-HL,NexaHome Loan,prepayment.foreclosure_floating_pct,0.0,2024-04-01,2025-09-30,superseded,POL-HL-V2,8.1,prepay.foreclosure_floating
+NHL-2024-04,NEXA-HL,NexaHome Loan,prepayment.foreclosure_fixed_period_pct,1.5,2024-04-01,2025-09-30,superseded,POL-HL-V2,8.2,prepay.foreclosure_fixed
+NHL-2024-04,NEXA-HL,NexaHome Loan,prepayment.part_prepayment_min,25000,2024-04-01,2025-09-30,superseded,POL-HL-V2,8.3,prepay.part
+NHL-2024-04,NEXA-HL,NexaHome Loan,prepayment.part_prepayment_fee_pct,0.0,2024-04-01,2025-09-30,superseded,POL-HL-V2,8.3,prepay.part
+NHL-2024-04,NEXA-HL,NexaHome Loan,prepayment.notice_days,3,2024-04-01,2025-09-30,superseded,POL-HL-V2,8.4,prepay.notice
+NHL-2024-04,NEXA-HL,NexaHome Loan,collateral.type,first mortgage on the financed residential property,2024-04-01,2025-09-30,superseded,POL-HL-V2,7.1,collateral
+NHL-2024-04,NEXA-HL,NexaHome Loan,ltv,"[{""loan_min"": 0, ""loan_max"": 3000000, ""ltv_pct"": 90}, {""loan_min"": 3000001, ""loan_max"": 7500000, ""ltv_pct"": 80}, {""loan_min"": 7500001, ""loan_max"": null, ""ltv_pct"": 75}]",2024-04-01,2025-09-30,superseded,POL-HL-V2,7.2,ltv
+NHL-2025-10,NEXA-HL,NexaHome Loan,eligibility.age.min,21,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,3.1,elig.age
+NHL-2025-10,NEXA-HL,NexaHome Loan,eligibility.age.max_at_application_salaried,62,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,3.1,elig.age
+NHL-2025-10,NEXA-HL,NexaHome Loan,eligibility.age.max_at_application_self_employed,65,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,3.1,elig.age
+NHL-2025-10,NEXA-HL,NexaHome Loan,eligibility.age.max_at_maturity_salaried,70,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,3.1,elig.age
+NHL-2025-10,NEXA-HL,NexaHome Loan,eligibility.age.max_at_maturity_self_employed,75,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,3.1,elig.age
+NHL-2025-10,NEXA-HL,NexaHome Loan,eligibility.income.min_net_monthly_salaried,30000,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,3.2,elig.income
+NHL-2025-10,NEXA-HL,NexaHome Loan,eligibility.income.min_annual_self_employed_itr,500000,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,3.2,elig.income
+NHL-2025-10,NEXA-HL,NexaHome Loan,eligibility.bureau.min_score_auto,675,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,3.3,elig.bureau
+NHL-2025-10,NEXA-HL,NexaHome Loan,eligibility.bureau.below_min_outcome,manual_underwriting_referral,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,3.3,elig.bureau
+NHL-2025-10,NEXA-HL,NexaHome Loan,eligibility.foir,"[{""income_min"": 0, ""income_max"": 99999, ""foir_max_pct"": 50}, {""income_min"": 100000, ""income_max"": 249999, ""foir_max_pct"": 55}, {""income_min"": 250000, ""income_max"": null, ""foir_max_pct"": 60}]",2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,3.4,elig.foir
+NHL-2025-10,NEXA-HL,NexaHome Loan,limits.amount.min,500000,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,4.1,limits.amount
+NHL-2025-10,NEXA-HL,NexaHome Loan,limits.amount.max,75000000,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,4.1,limits.amount
+NHL-2025-10,NEXA-HL,NexaHome Loan,limits.tenure_months.min,60,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,4.2,limits.tenure
+NHL-2025-10,NEXA-HL,NexaHome Loan,limits.tenure_months.max,360,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,4.2,limits.tenure
+NHL-2025-10,NEXA-HL,NexaHome Loan,rate.type,floating,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,5.1,rate.benchmark
+NHL-2025-10,NEXA-HL,NexaHome Loan,rate.benchmark,NRLR,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,5.1,rate.benchmark
+NHL-2025-10,NEXA-HL,NexaHome Loan,rate.reset,quarterly,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,5.3,rate.reset
+NHL-2025-10,NEXA-HL,NexaHome Loan,rate.spread_table,"[{""min_score"": 800, ""max_score"": 900, ""value_pct"": 1.9}, {""min_score"": 750, ""max_score"": 799, ""value_pct"": 2.2}, {""min_score"": 700, ""max_score"": 749, ""value_pct"": 2.7}, {""min_score"": 675, ""max_score"": 699, ""value_pct"": 3.25}]",2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,5.2,rate.spread
+NHL-2025-10,NEXA-HL,NexaHome Loan,rate.fixed_option.available,False,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,5.4,rate.fixed
+NHL-2025-10,NEXA-HL,NexaHome Loan,rate.fixed_option.premium_over_floating_pct,,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,5.4,rate.fixed
+NHL-2025-10,NEXA-HL,NexaHome Loan,rate.fixed_option.fixed_period_months,,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,5.4,rate.fixed
+NHL-2025-10,NEXA-HL,NexaHome Loan,fees.processing.pct,0.35,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,6.2,fees.processing
+NHL-2025-10,NEXA-HL,NexaHome Loan,fees.processing.min,5000,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,6.2,fees.processing
+NHL-2025-10,NEXA-HL,NexaHome Loan,fees.processing.max,15000,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,6.2,fees.processing
+NHL-2025-10,NEXA-HL,NexaHome Loan,fees.processing.gst_extra,True,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,6.2,fees.processing
+NHL-2025-10,NEXA-HL,NexaHome Loan,fees.legal_technical.amount,6000,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,6.3,fees.legal
+NHL-2025-10,NEXA-HL,NexaHome Loan,fees.legal_technical.gst_extra,True,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,6.3,fees.legal
+NHL-2025-10,NEXA-HL,NexaHome Loan,fees.penal.basis,per_annum_over_contractual_rate_on_overdue_amount,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,6.4,fees.penal
+NHL-2025-10,NEXA-HL,NexaHome Loan,fees.penal.value_pct,2.0,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,6.4,fees.penal
+NHL-2025-10,NEXA-HL,NexaHome Loan,prepayment.foreclosure_floating_pct,0.0,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,8.1,prepay.foreclosure_floating
+NHL-2025-10,NEXA-HL,NexaHome Loan,prepayment.foreclosure_fixed_period_pct,,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,8.2,prepay.foreclosure_fixed
+NHL-2025-10,NEXA-HL,NexaHome Loan,prepayment.part_prepayment_min,25000,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,8.3,prepay.part
+NHL-2025-10,NEXA-HL,NexaHome Loan,prepayment.part_prepayment_fee_pct,0.0,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,8.3,prepay.part
+NHL-2025-10,NEXA-HL,NexaHome Loan,prepayment.notice_days,3,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,8.4,prepay.notice
+NHL-2025-10,NEXA-HL,NexaHome Loan,collateral.type,first mortgage on the financed residential property,2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,7.1,collateral
+NHL-2025-10,NEXA-HL,NexaHome Loan,ltv,"[{""loan_min"": 0, ""loan_max"": 3000000, ""ltv_pct"": 90}, {""loan_min"": 3000001, ""loan_max"": 7500000, ""ltv_pct"": 80}, {""loan_min"": 7500001, ""loan_max"": null, ""ltv_pct"": 75}]",2025-10-01,2026-06-30,superseded_in_part,POL-HL-V3,7.2,ltv
+NHL-2026-07,NEXA-HL,NexaHome Loan,eligibility.age.min,21,2026-07-01,,in_force,POL-HL-V3,3.1,elig.age
+NHL-2026-07,NEXA-HL,NexaHome Loan,eligibility.age.max_at_application_salaried,62,2026-07-01,,in_force,POL-HL-V3,3.1,elig.age
+NHL-2026-07,NEXA-HL,NexaHome Loan,eligibility.age.max_at_application_self_employed,65,2026-07-01,,in_force,POL-HL-V3,3.1,elig.age
+NHL-2026-07,NEXA-HL,NexaHome Loan,eligibility.age.max_at_maturity_salaried,70,2026-07-01,,in_force,POL-HL-V3,3.1,elig.age
+NHL-2026-07,NEXA-HL,NexaHome Loan,eligibility.age.max_at_maturity_self_employed,75,2026-07-01,,in_force,POL-HL-V3,3.1,elig.age
+NHL-2026-07,NEXA-HL,NexaHome Loan,eligibility.income.min_net_monthly_salaried,30000,2026-07-01,,in_force,POL-HL-V3,3.2,elig.income
+NHL-2026-07,NEXA-HL,NexaHome Loan,eligibility.income.min_annual_self_employed_itr,500000,2026-07-01,,in_force,POL-HL-V3,3.2,elig.income
+NHL-2026-07,NEXA-HL,NexaHome Loan,eligibility.bureau.min_score_auto,675,2026-07-01,,in_force,POL-HL-V3,3.3,elig.bureau
+NHL-2026-07,NEXA-HL,NexaHome Loan,eligibility.bureau.below_min_outcome,manual_underwriting_referral,2026-07-01,,in_force,POL-HL-V3,3.3,elig.bureau
+NHL-2026-07,NEXA-HL,NexaHome Loan,eligibility.foir,"[{""income_min"": 0, ""income_max"": 99999, ""foir_max_pct"": 50}, {""income_min"": 100000, ""income_max"": 249999, ""foir_max_pct"": 55}, {""income_min"": 250000, ""income_max"": null, ""foir_max_pct"": 60}]",2026-07-01,,in_force,POL-HL-V3,3.4,elig.foir
+NHL-2026-07,NEXA-HL,NexaHome Loan,limits.amount.min,500000,2026-07-01,,in_force,POL-HL-V3,4.1,limits.amount
+NHL-2026-07,NEXA-HL,NexaHome Loan,limits.amount.max,75000000,2026-07-01,,in_force,POL-HL-V3,4.1,limits.amount
+NHL-2026-07,NEXA-HL,NexaHome Loan,limits.tenure_months.min,60,2026-07-01,,in_force,POL-HL-V3,4.2,limits.tenure
+NHL-2026-07,NEXA-HL,NexaHome Loan,limits.tenure_months.max,360,2026-07-01,,in_force,POL-HL-V3,4.2,limits.tenure
+NHL-2026-07,NEXA-HL,NexaHome Loan,rate.type,floating,2026-07-01,,in_force,POL-HL-V3,5.1,rate.benchmark
+NHL-2026-07,NEXA-HL,NexaHome Loan,rate.benchmark,NRLR,2026-07-01,,in_force,POL-HL-V3,5.1,rate.benchmark
+NHL-2026-07,NEXA-HL,NexaHome Loan,rate.reset,quarterly,2026-07-01,,in_force,POL-HL-V3,5.3,rate.reset
+NHL-2026-07,NEXA-HL,NexaHome Loan,rate.spread_table,"[{""min_score"": 800, ""max_score"": 900, ""value_pct"": 1.9}, {""min_score"": 750, ""max_score"": 799, ""value_pct"": 2.2}, {""min_score"": 700, ""max_score"": 749, ""value_pct"": 2.7}, {""min_score"": 675, ""max_score"": 699, ""value_pct"": 3.25}]",2026-07-01,,in_force,POL-HL-V3,5.2,rate.spread
+NHL-2026-07,NEXA-HL,NexaHome Loan,rate.fixed_option.available,False,2026-07-01,,in_force,POL-HL-V3,5.4,rate.fixed
+NHL-2026-07,NEXA-HL,NexaHome Loan,rate.fixed_option.premium_over_floating_pct,,2026-07-01,,in_force,POL-HL-V3,5.4,rate.fixed
+NHL-2026-07,NEXA-HL,NexaHome Loan,rate.fixed_option.fixed_period_months,,2026-07-01,,in_force,POL-HL-V3,5.4,rate.fixed
+NHL-2026-07,NEXA-HL,NexaHome Loan,fees.processing.pct,0.3,2026-07-01,,in_force,CIR-2026-07,3.1,circ.fee
+NHL-2026-07,NEXA-HL,NexaHome Loan,fees.processing.min,5000,2026-07-01,,in_force,CIR-2026-07,3.1,circ.fee
+NHL-2026-07,NEXA-HL,NexaHome Loan,fees.processing.max,10000,2026-07-01,,in_force,CIR-2026-07,3.1,circ.fee
+NHL-2026-07,NEXA-HL,NexaHome Loan,fees.processing.gst_extra,True,2026-07-01,,in_force,CIR-2026-07,3.1,circ.fee
+NHL-2026-07,NEXA-HL,NexaHome Loan,fees.legal_technical.amount,6000,2026-07-01,,in_force,POL-HL-V3,6.3,fees.legal
+NHL-2026-07,NEXA-HL,NexaHome Loan,fees.legal_technical.gst_extra,True,2026-07-01,,in_force,POL-HL-V3,6.3,fees.legal
+NHL-2026-07,NEXA-HL,NexaHome Loan,fees.penal.basis,per_annum_over_contractual_rate_on_overdue_amount,2026-07-01,,in_force,POL-HL-V3,6.4,fees.penal
+NHL-2026-07,NEXA-HL,NexaHome Loan,fees.penal.value_pct,2.0,2026-07-01,,in_force,POL-HL-V3,6.4,fees.penal
+NHL-2026-07,NEXA-HL,NexaHome Loan,prepayment.foreclosure_floating_pct,0.0,2026-07-01,,in_force,POL-HL-V3,8.1,prepay.foreclosure_floating
+NHL-2026-07,NEXA-HL,NexaHome Loan,prepayment.foreclosure_fixed_period_pct,,2026-07-01,,in_force,POL-HL-V3,8.2,prepay.foreclosure_fixed
+NHL-2026-07,NEXA-HL,NexaHome Loan,prepayment.part_prepayment_min,10000,2026-07-01,,in_force,CIR-2026-07,4.1,circ.partprepay
+NHL-2026-07,NEXA-HL,NexaHome Loan,prepayment.part_prepayment_fee_pct,0.0,2026-07-01,,in_force,POL-HL-V3,8.3,prepay.part
+NHL-2026-07,NEXA-HL,NexaHome Loan,prepayment.notice_days,3,2026-07-01,,in_force,POL-HL-V3,8.4,prepay.notice
+NHL-2026-07,NEXA-HL,NexaHome Loan,collateral.type,first mortgage on the financed residential property,2026-07-01,,in_force,POL-HL-V3,7.1,collateral
+NHL-2026-07,NEXA-HL,NexaHome Loan,ltv,"[{""loan_min"": 0, ""loan_max"": 3000000, ""ltv_pct"": 90}, {""loan_min"": 3000001, ""loan_max"": 7500000, ""ltv_pct"": 80}, {""loan_min"": 7500001, ""loan_max"": null, ""ltv_pct"": 75}]",2026-07-01,,in_force,POL-HL-V3,7.2,ltv
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,eligibility.age.min,23,2024-01-01,,in_force,POL-PL-V1,2.1,elig.age
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,eligibility.age.max_at_application,58,2024-01-01,,in_force,POL-PL-V1,2.1,elig.age
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,eligibility.age.max_at_maturity,60,2024-01-01,,in_force,POL-PL-V1,2.1,elig.age
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,eligibility.income.min_net_monthly_salaried,25000,2024-01-01,,in_force,POL-PL-V1,2.2,elig.income
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,eligibility.income.min_annual_self_employed_itr,300000,2024-01-01,,in_force,POL-PL-V1,2.2,elig.income
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,eligibility.bureau.min_score_auto,700,2024-01-01,,in_force,POL-PL-V1,2.3,elig.bureau
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,eligibility.bureau.below_min_outcome,not_eligible_under_standard_criteria,2024-01-01,,in_force,POL-PL-V1,2.3,elig.bureau
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,eligibility.foir,"[{""income_min"": 0, ""income_max"": null, ""foir_max_pct"": 50}]",2024-01-01,,in_force,POL-PL-V1,2.4,elig.foir
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,limits.amount.min,50000,2024-01-01,,in_force,POL-PL-V1,3.1,limits.amount
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,limits.amount.max,2500000,2024-01-01,,in_force,POL-PL-V1,3.1,limits.amount
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,limits.tenure_months.min,12,2024-01-01,,in_force,POL-PL-V1,3.2,limits.tenure
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,limits.tenure_months.max,60,2024-01-01,,in_force,POL-PL-V1,3.2,limits.tenure
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,rate.type,fixed,2024-01-01,,in_force,POL-PL-V1,4.1,rate.fixed
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,rate.benchmark,,2024-01-01,,in_force,POL-PL-V1,4.1,rate.fixed
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,rate.reset,none,2024-01-01,,in_force,POL-PL-V1,4.1,rate.fixed
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,rate.rate_table,"[{""min_score"": 800, ""max_score"": 900, ""value_pct"": 11.5}, {""min_score"": 750, ""max_score"": 799, ""value_pct"": 13.25}, {""min_score"": 725, ""max_score"": 749, ""value_pct"": 15.0}, {""min_score"": 700, ""max_score"": 724, ""value_pct"": 17.5}]",2024-01-01,,in_force,POL-PL-V1,4.1,rate.fixed
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,fees.processing.pct,2.0,2024-01-01,,in_force,POL-PL-V1,5.1,fees.processing
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,fees.processing.min,2000,2024-01-01,,in_force,POL-PL-V1,5.1,fees.processing
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,fees.processing.max,,2024-01-01,,in_force,POL-PL-V1,5.1,fees.processing
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,fees.processing.gst_extra,True,2024-01-01,,in_force,POL-PL-V1,5.1,fees.processing
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,fees.penal.basis,per_month_on_overdue_emi,2024-01-01,,in_force,POL-PL-V1,5.2,fees.penal
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,fees.penal.value_pct,2.0,2024-01-01,,in_force,POL-PL-V1,5.2,fees.penal
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,fees.penal.min_amount,500,2024-01-01,,in_force,POL-PL-V1,5.2,fees.penal
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,prepayment.lock_in_emis,6,2024-01-01,,in_force,POL-PL-V1,7.1,prepay.lockin
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,prepayment.foreclosure_pct_of_outstanding,4.0,2024-01-01,,in_force,POL-PL-V1,7.2,prepay.foreclosure
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,prepayment.part_prepayment_fee_pct_of_amount,4.0,2024-01-01,,in_force,POL-PL-V1,7.3,prepay.part
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,prepayment.part_prepayment_min_emis,1,2024-01-01,,in_force,POL-PL-V1,7.3,prepay.part
+NPL-2024-01,NEXA-PL,NexaFlex Personal Loan,collateral.type,none (unsecured),2024-01-01,,in_force,POL-PL-V1,6.1,collateral
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),eligibility.age.min,25,2024-06-01,,in_force,POL-LAP-V1,2.1,elig.age
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),eligibility.age.max_at_application,60,2024-06-01,,in_force,POL-LAP-V1,2.1,elig.age
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),eligibility.age.max_at_maturity_salaried,65,2024-06-01,,in_force,POL-LAP-V1,2.1,elig.age
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),eligibility.age.max_at_maturity_self_employed,70,2024-06-01,,in_force,POL-LAP-V1,2.1,elig.age
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),eligibility.income.min_net_monthly_salaried,40000,2024-06-01,,in_force,POL-LAP-V1,2.2,elig.income
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),eligibility.income.min_annual_self_employed_itr,600000,2024-06-01,,in_force,POL-LAP-V1,2.2,elig.income
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),eligibility.bureau.min_score_auto,675,2024-06-01,,in_force,POL-LAP-V1,2.3,elig.bureau
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),eligibility.bureau.below_min_outcome,not_eligible_under_standard_criteria,2024-06-01,,in_force,POL-LAP-V1,2.3,elig.bureau
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),eligibility.foir,"[{""income_min"": 0, ""income_max"": null, ""foir_max_pct"": 50}]",2024-06-01,,in_force,POL-LAP-V1,2.4,elig.foir
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),limits.amount.min,1000000,2024-06-01,,in_force,POL-LAP-V1,3.1,limits.amount
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),limits.amount.max,100000000,2024-06-01,,in_force,POL-LAP-V1,3.1,limits.amount
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),limits.tenure_months.min,36,2024-06-01,,in_force,POL-LAP-V1,3.2,limits.tenure
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),limits.tenure_months.max,180,2024-06-01,,in_force,POL-LAP-V1,3.2,limits.tenure
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),rate.type,floating,2024-06-01,,in_force,POL-LAP-V1,4.1,rate.floating
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),rate.benchmark,NRLR,2024-06-01,,in_force,POL-LAP-V1,4.1,rate.floating
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),rate.reset,quarterly,2024-06-01,,in_force,POL-LAP-V1,4.1,rate.floating
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),rate.spread_table,"[{""min_score"": 800, ""max_score"": 900, ""value_pct"": 3.5}, {""min_score"": 750, ""max_score"": 799, ""value_pct"": 3.9}, {""min_score"": 700, ""max_score"": 749, ""value_pct"": 4.5}, {""min_score"": 675, ""max_score"": 699, ""value_pct"": 5.0}]",2024-06-01,,in_force,POL-LAP-V1,4.1,rate.floating
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),fees.processing.pct,1.0,2024-06-01,,in_force,POL-LAP-V1,5.1,fees.processing
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),fees.processing.min,15000,2024-06-01,,in_force,POL-LAP-V1,5.1,fees.processing
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),fees.processing.max,100000,2024-06-01,,in_force,POL-LAP-V1,5.1,fees.processing
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),fees.processing.gst_extra,True,2024-06-01,,in_force,POL-LAP-V1,5.1,fees.processing
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),fees.legal_technical.amount,10000,2024-06-01,,in_force,POL-LAP-V1,5.2,fees.legal
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),fees.legal_technical.gst_extra,True,2024-06-01,,in_force,POL-LAP-V1,5.2,fees.legal
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),fees.penal.basis,per_annum_over_contractual_rate_on_overdue_amount,2024-06-01,,in_force,POL-LAP-V1,5.3,fees.penal
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),fees.penal.value_pct,2.0,2024-06-01,,in_force,POL-LAP-V1,5.3,fees.penal
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),prepayment.foreclosure_floating_pct,0.0,2024-06-01,,in_force,POL-LAP-V1,7.1,prepay.foreclosure
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),prepayment.part_prepayment_min,100000,2024-06-01,,in_force,POL-LAP-V1,7.2,prepay.part
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),prepayment.part_prepayment_fee_pct,0.0,2024-06-01,,in_force,POL-LAP-V1,7.2,prepay.part
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),prepayment.notice_days,5,2024-06-01,,in_force,POL-LAP-V1,7.2,prepay.part
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),collateral.type,"first mortgage on an owned, unencumbered property",2024-06-01,,in_force,POL-LAP-V1,6.1,collateral
+NLAP-2024-06,NEXA-LAP,NexaProperty Plus (Loan Against Property),ltv,"[{""property_type"": ""residential_self_occupied"", ""ltv_pct"": 60}, {""property_type"": ""commercial"", ""ltv_pct"": 55}, {""property_type"": ""industrial"", ""ltv_pct"": 50}]",2024-06-01,,in_force,POL-LAP-V1,6.2,ltv
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,eligibility.age.min,21,2025-01-01,,in_force,POL-AL-V1,2.1,elig.age
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,eligibility.age.max_at_application,60,2025-01-01,,in_force,POL-AL-V1,2.1,elig.age
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,eligibility.age.max_at_maturity,65,2025-01-01,,in_force,POL-AL-V1,2.1,elig.age
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,eligibility.income.min_net_monthly_salaried,30000,2025-01-01,,in_force,POL-AL-V1,2.2,elig.income
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,eligibility.income.min_annual_self_employed_itr,360000,2025-01-01,,in_force,POL-AL-V1,2.2,elig.income
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,eligibility.bureau.min_score_auto,675,2025-01-01,,in_force,POL-AL-V1,2.3,elig.bureau
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,eligibility.bureau.below_min_outcome,not_eligible_under_standard_criteria,2025-01-01,,in_force,POL-AL-V1,2.3,elig.bureau
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,eligibility.foir,"[{""income_min"": 0, ""income_max"": null, ""foir_max_pct"": 50}]",2025-01-01,,in_force,POL-AL-V1,2.4,elig.foir
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,limits.amount.min,100000,2025-01-01,,in_force,POL-AL-V1,3.1,limits.amount
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,limits.amount.max,15000000,2025-01-01,,in_force,POL-AL-V1,3.1,limits.amount
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,limits.tenure_months.min,12,2025-01-01,,in_force,POL-AL-V1,3.2,limits.tenure
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,limits.tenure_months.max_new_vehicle,84,2025-01-01,,in_force,POL-AL-V1,3.2,limits.tenure
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,limits.tenure_months.max_used_vehicle,60,2025-01-01,,in_force,POL-AL-V1,3.2,limits.tenure
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,limits.vehicle_age_at_maturity_max_years,12,2025-01-01,,in_force,POL-AL-V1,3.2,limits.tenure
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,rate.type,fixed,2025-01-01,,in_force,POL-AL-V1,4.1,rate.fixed
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,rate.benchmark,,2025-01-01,,in_force,POL-AL-V1,4.1,rate.fixed
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,rate.reset,none,2025-01-01,,in_force,POL-AL-V1,4.1,rate.fixed
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,rate.rate_table,"[{""min_score"": 800, ""max_score"": 900, ""value_pct"": 8.9}, {""min_score"": 750, ""max_score"": 799, ""value_pct"": 9.5}, {""min_score"": 700, ""max_score"": 749, ""value_pct"": 10.75}, {""min_score"": 675, ""max_score"": 699, ""value_pct"": 12.5}]",2025-01-01,,in_force,POL-AL-V1,4.1,rate.fixed
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,rate.used_vehicle_premium_pct,1.0,2025-01-01,,in_force,POL-AL-V1,4.1,rate.fixed
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,fees.processing.pct,1.0,2025-01-01,,in_force,POL-AL-V1,5.1,fees.processing
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,fees.processing.min,3500,2025-01-01,,in_force,POL-AL-V1,5.1,fees.processing
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,fees.processing.max,10000,2025-01-01,,in_force,POL-AL-V1,5.1,fees.processing
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,fees.processing.gst_extra,True,2025-01-01,,in_force,POL-AL-V1,5.1,fees.processing
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,fees.penal.basis,per_month_on_overdue_emi,2025-01-01,,in_force,POL-AL-V1,5.2,fees.penal
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,fees.penal.value_pct,2.0,2025-01-01,,in_force,POL-AL-V1,5.2,fees.penal
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,fees.penal.min_amount,500,2025-01-01,,in_force,POL-AL-V1,5.2,fees.penal
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,prepayment.foreclosure_schedule,"[{""from_month"": 1, ""to_month"": 12, ""pct_of_outstanding"": 3.0}, {""from_month"": 13, ""to_month"": 24, ""pct_of_outstanding"": 2.0}, {""from_month"": 25, ""to_month"": null, ""pct_of_outstanding"": 0.0}]",2025-01-01,,in_force,POL-AL-V1,7.1,prepay.foreclosure
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,collateral.type,hypothecation of the financed vehicle,2025-01-01,,in_force,POL-AL-V1,6.1,collateral
+NAL-2025-01,NEXA-AL,NexaDrive Auto Loan,ltv,"[{""vehicle"": ""new"", ""ltv_pct"": 90, ""basis"": ""on-road price""}, {""vehicle"": ""used"", ""ltv_pct"": 70, ""basis"": ""NexaBank empanelled valuer's valuation""}]",2025-01-01,,in_force,POL-AL-V1,6.2,ltv

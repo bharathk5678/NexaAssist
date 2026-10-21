@@ -28,6 +28,39 @@ Create this index manually in Atlas (Atlas UI > Atlas Search > Create Search Ind
 
 Changing the embedding model or dimension means a new index version (`policy_chunks_v2`) and a full re-embed, never a mixed index.
 
+## Full-text index for hybrid retrieval
+
+Create a second **Atlas Search** index on the same chunk collection. This is a text
+index, separate from the Atlas Vector Search index above. Set its name to
+`policy_text_v1` (matching `TEXT_INDEX_NAME`):
+
+```json
+{
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "text": {
+        "type": "string",
+        "analyzer": "lucene.standard"
+      }
+    }
+  }
+}
+```
+
+Wait until both indexes are queryable, then set `RETRIEVAL_MODE=hybrid`.
+`MongoDBAtlasHybridSearchRetriever` combines dense and BM25 candidates using RRF.
+The vector branch uses `pre_filter`; the integration's text branch applies the
+same MongoDB filter immediately after `$search`, before its candidate limit and
+RRF. Text metadata filtering therefore does not require extra Atlas Search token
+mappings, though this post-search filtering can cost more at scale. Both branches
+enforce the same date, product, jurisdiction and confidentiality restrictions.
+Index creation is always manual; there is no fallback to dense search on a missing
+text index. Dense mode remains available for baseline comparisons.
+
+References: [LangChain MongoDB hybrid retriever](https://langchain-mongodb.readthedocs.io/en/latest/_modules/langchain_mongodb/retrievers/hybrid_search.html),
+[MongoDB text-search stage](https://langchain-mongodb.readthedocs.io/en/latest/_modules/langchain_mongodb/pipelines.html).
+
 ## Parent sections collection
 
 Whole sections live in a second, plain collection named by `MONGODB_PARENT_COLLECTION` (default `policy_sections`), keyed by `parent_id` (`<doc_id>_s<NN>`) in `_id`. It is not embedded and needs no search index. MongoDB creates it on the first ingest.

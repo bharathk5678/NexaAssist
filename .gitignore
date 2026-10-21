@@ -35,5 +35,6 @@ dist/
 # Application runtime output
 logs/
 *.log
+app/evaluation/reports/
 
 .cursor/

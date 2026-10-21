@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import argparse
 import asyncio
 import json
-import sys
 from pathlib import Path
 
 import structlog
@@ -12,7 +12,12 @@ from app.chains.ingestion import build_ingestion_chain
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
 from app.core.telemetry import init_telemetry
-from app.database.mongo import delete_stale_chunks, get_parent_store, get_vector_store
+from app.database.mongo import (
+    delete_stale_chunks,
+    get_parent_store,
+    get_vector_store,
+    retire_document,
+)
 from app.models.ingestion import IngestRequest, IngestResponse
 
 logger = structlog.get_logger()
@@ -69,13 +74,22 @@ async def ingest(requests: list[IngestRequest]) -> list[IngestResponse]:
 
 
 def main() -> None:
-    """Usage: python -m app.services.ingestion <path/to/document_register.json>"""
-    if len(sys.argv) != 2:
-        sys.exit(main.__doc__)
+    """Ingest a register, or explicitly retire one document withdrawn from it."""
+    parser = argparse.ArgumentParser(description=main.__doc__)
+    parser.add_argument("register", type=Path)
+    parser.add_argument("--retire-doc", help="Delete a withdrawn document from both MongoDB stores")
+    args = parser.parse_args()
     settings = get_settings()
-    configure_logging(settings.log_level)
     init_telemetry(settings.dd_trace_enabled)
-    asyncio.run(ingest(requests_from_register(Path(sys.argv[1]), settings)))
+    configure_logging(settings.log_level)
+    if args.retire_doc:
+        entries = json.loads(args.register.read_text())
+        if any(entry["doc_id"] == args.retire_doc and entry["authoritative"] for entry in entries):
+            parser.error("Cannot retire a document still marked authoritative in the register")
+        counts = retire_document(settings, args.retire_doc)
+        logger.info("document_retired", doc_id=args.retire_doc, **counts)
+    else:
+        asyncio.run(ingest(requests_from_register(args.register, settings)))
 
 
 if __name__ == "__main__":
