@@ -1159,10 +1159,27 @@ semantic model quality. Existing LangSmith tracing settings apply independently.
 ## 8. Testing and quality checks
 
 ```bash
-uv run pytest -q              # 15 tests, no network or credentials needed
+uv run pytest -q              # offline application tests
 uv run ruff check app tests   # lint
 uv run mypy app tests         # type check
 ```
+
+Install the Git commit hook once per clone after syncing dependencies:
+
+```bash
+uv sync --locked --extra ui --extra evaluation
+uv run --locked --no-sync pre-commit install --install-hooks
+uv run --locked --no-sync pre-commit run --all-files
+```
+
+The hook checks staged files for YAML/TOML validity, merge-conflict markers,
+private keys, Ruff lint errors and Python formatting. Ruff uses the version in
+`uv.lock` and the exclusions in `pyproject.toml`. Checks report errors without
+rewriting files; fix formatting with `uv run --no-sync ruff format app tests`,
+then stage the changes again. Keep `uv` on your PATH when committing. Hook setup
+requires network access initially; pytest and mypy remain separate checks.
+Private-key detection does not detect every API token: keep `.env` untracked.
+See the [pre-commit documentation](https://pre-commit.com/).
 
 The tests run the real parser and chain over your synthetic PDFs, with an in-memory vector store and fake embeddings in place of Atlas and OpenAI.
 
