@@ -22,9 +22,9 @@ def parent_key_prefix(doc_id: str) -> str:
 
 
 def chunk_checksum(text: str, metadata: dict[str, Any]) -> str:
-    """Fingerprint of everything that should force a re-embed: text, metadata, model.
+    """Fingerprint text, metadata, embedding model and embedding dimensions.
 
-    `metadata` carries `embedding_model`, so switching models changes every checksum.
+    Enrichment includes both embedding settings, so either change invalidates chunks.
     """
     payload = json.dumps({"text": text, "metadata": metadata}, sort_keys=True, ensure_ascii=False)
     return "sha256:" + hashlib.sha256(payload.encode()).hexdigest()
@@ -51,7 +51,9 @@ def build_ingestion_chain(
             state["elements"], settings.chunk_max_characters, settings.chunk_overlap_characters
         )
         if not chunks:
-            raise ValueError("Parsed document produced no chunks; refusing to replace stored content")
+            raise ValueError(
+                "Parsed document produced no chunks; refusing to replace stored content"
+            )
         return chunks
 
     def enrich(state: dict[str, Any]) -> dict[str, list[Document]]:
@@ -82,6 +84,7 @@ def build_ingestion_chain(
                 "clause_heading": item.clause_heading,
                 "section_type": "table" if item.has_table else "text",
                 "embedding_model": settings.embedding_model,
+                "embedding_dimensions": settings.embedding_dimensions,
             }
             metadata["checksum"] = chunk_checksum(text, metadata)
             children.append(Document(id=chunk_id, page_content=text, metadata=metadata))
@@ -108,24 +111,25 @@ def build_ingestion_chain(
         return [child for child in children if stored.get(child.id) != child.metadata["checksum"]]
 
     async def embed_and_upsert(state: dict[str, Any]) -> IngestResponse:
+        # shortcut: writes span collections; add transactions before concurrent ingestion.
         request: IngestRequest = state["request"]
         children: list[Document] = state["enriched"]["children"]
         parents: list[Document] = state["enriched"]["parents"]
         changed: list[Document] = state["changed"]
 
-        # Parents are not embedded, so rewriting them is cheap. The doc store's insert
-        # does not overwrite, so this document's sections are cleared first.
-        prefix = parent_key_prefix(request.doc_id)
-        stale = [key async for key in parent_store.ayield_keys(prefix=prefix)]
-        if stale:
-            await parent_store.amdelete(stale)
-        await parent_store.amset([(parent.id, parent) for parent in parents if parent.id])
-
         if changed:
-            # Deterministic ids make the write idempotent: a re-run replaces, never duplicates.
             await vector_store.aadd_documents(
                 changed, ids=[child.metadata["chunk_id"] for child in changed]
             )
+        current = {parent.id for parent in parents if parent.id}
+        await parent_store.amset([(parent.id, parent) for parent in parents if parent.id])
+        stale = [
+            key
+            async for key in parent_store.ayield_keys(prefix=parent_key_prefix(request.doc_id))
+            if key not in current and key.rsplit("_s", 1)[0] == request.doc_id
+        ]
+        if stale:
+            await parent_store.amdelete(stale)
         return IngestResponse(
             doc_id=request.doc_id,
             chunk_count=len(children),

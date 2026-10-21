@@ -1,0 +1,389 @@
+openapi: 3.0.3
+info:
+  title: NexaBank Case Management and Core Banking Mock API
+  version: 1.0.0
+  description: |
+    Mock contract for the NexaAssist training program. NexaBank is fictional.
+
+    Design rules the assistant and the mock both follow:
+
+    1. Reads are free of side effects. Writes are limited to cases, notes, escalations and service requests.
+    2. There is deliberately NO endpoint that approves, declines, sanctions, disburses, changes a rate, waives a fee or edits KYC.
+       Credit decisions are out of the assistant's scope, so the API gives it no way to make one.
+    3. Clients cannot set case status or priority beyond the enums below. Status is server-controlled.
+    4. Every POST requires an `Idempotency-Key` header. See "Idempotency" below.
+    5. Restricted compliance fields (internal risk category, monitoring alerts, STR status) are never returned by any endpoint.
+
+    ## Idempotency
+    - Header: `Idempotency-Key`, 16 to 64 characters, client-generated (UUID v4 recommended). Required on every POST.
+    - Scope: the key is scoped to the caller (bearer token), HTTP method and path. Retention: 24 hours.
+    - First request with a key: executes and stores the outcome (status, headers, body) if the outcome is 2xx.
+    - Same key, same body: returns the stored response with the same status and body, plus `Idempotent-Replayed: true`. No second write happens.
+    - Same key, different body: `422` problem `idempotency-key-reuse`. Nothing is executed.
+    - Same key while the first request is still running: `409` problem `request-in-progress` with `Retry-After`.
+    - Missing or malformed key: `400` problem `idempotency-key-required`.
+    - `5xx` and `429` outcomes are not stored, so the same key can be retried. A `504` returned after commit is safe to retry with the same key: the retry replays the stored result.
+    - Body comparison uses canonical JSON (key order and whitespace ignored).
+
+    ## Mock fault injection (mock server only)
+    Header `X-Mock-Fault` on a POST, applied once per idempotency key:
+    - `503-once`: fail with 503 before any write. A retry with the same key executes normally.
+    - `commit-then-timeout`: perform the write, then return 504. A retry with the same key must replay, not duplicate.
+servers:
+  - url: http://localhost:8080
+    description: Local mock
+security:
+  - bearerAuth: []
+tags:
+  - name: Customer reads
+  - name: Cases
+  - name: Service requests
+paths:
+  /v1/customers/{customerId}:
+    get:
+      tags: [Customer reads]
+      operationId: getCustomerProfile
+      summary: Customer profile (masked PII, no restricted fields)
+      parameters: [{$ref: '#/components/parameters/CustomerId'}]
+      responses:
+        '200': {description: Profile, content: {application/json: {schema: {$ref: '#/components/schemas/CustomerProfile'}}}}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+  /v1/customers/{customerId}/accounts:
+    get:
+      tags: [Customer reads]
+      operationId: listAccounts
+      summary: Deposit accounts and loan accounts, including loan terms and the policy version that governs each loan
+      parameters: [{$ref: '#/components/parameters/CustomerId'}]
+      responses:
+        '200': {description: Accounts, content: {application/json: {schema: {$ref: '#/components/schemas/AccountList'}}}}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+  /v1/accounts/{accountId}/transactions:
+    get:
+      tags: [Customer reads]
+      operationId: listTransactions
+      summary: Transactions for a deposit account, newest first, cursor paginated
+      parameters:
+        - {name: accountId, in: path, required: true, schema: {type: string, pattern: '^NXA-[0-9]{6}$'}}
+        - {name: from, in: query, schema: {type: string, format: date}}
+        - {name: to, in: query, schema: {type: string, format: date}}
+        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 200, default: 50}}
+        - {name: cursor, in: query, schema: {type: string}}
+      responses:
+        '200': {description: Page of transactions, content: {application/json: {schema: {$ref: '#/components/schemas/TransactionPage'}}}}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+  /v1/customers/{customerId}/kyc-status:
+    get:
+      tags: [Customer reads]
+      operationId: getKycStatus
+      summary: KYC status, last verification and next due date. Never returns the risk category
+      parameters: [{$ref: '#/components/parameters/CustomerId'}]
+      responses:
+        '200': {description: KYC status, content: {application/json: {schema: {$ref: '#/components/schemas/KycStatus'}}}}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+  /v1/customers/{customerId}/bureau-summary:
+    get:
+      tags: [Customer reads]
+      operationId: getBureauSummary
+      summary: Bureau-style summary (synthetic)
+      parameters: [{$ref: '#/components/parameters/CustomerId'}]
+      responses:
+        '200': {description: Summary, content: {application/json: {schema: {$ref: '#/components/schemas/BureauSummary'}}}}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+  /v1/customers/{customerId}/income:
+    get:
+      tags: [Customer reads]
+      operationId: getIncome
+      summary: Disclosed income and its verification status
+      parameters: [{$ref: '#/components/parameters/CustomerId'}]
+      responses:
+        '200': {description: Income, content: {application/json: {schema: {$ref: '#/components/schemas/Income'}}}}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+  /v1/customers/{customerId}/applications:
+    get:
+      tags: [Customer reads]
+      operationId: listApplications
+      summary: Open loan applications and their stage. Stage is informational and never a decision
+      parameters: [{$ref: '#/components/parameters/CustomerId'}]
+      responses:
+        '200': {description: Applications, content: {application/json: {schema: {$ref: '#/components/schemas/ApplicationList'}}}}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+  /v1/cases:
+    post:
+      tags: [Cases]
+      operationId: createCase
+      summary: Create a case. Idempotent
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/CaseCreate'}}}
+      responses:
+        '201': {description: Created, headers: {Idempotent-Replayed: {$ref: '#/components/headers/IdempotentReplayed'}, ETag: {schema: {type: string}}}, content: {application/json: {schema: {$ref: '#/components/schemas/Case'}}}}
+        '400': {$ref: '#/components/responses/Problem'}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+        '409': {$ref: '#/components/responses/Problem'}
+        '422': {$ref: '#/components/responses/Problem'}
+        '503': {$ref: '#/components/responses/Problem'}
+        '504': {$ref: '#/components/responses/Problem'}
+  /v1/cases/{caseId}:
+    get:
+      tags: [Cases]
+      operationId: getCase
+      summary: Get a case with its notes and escalation state
+      parameters: [{$ref: '#/components/parameters/CaseId'}]
+      responses:
+        '200': {description: Case, headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {$ref: '#/components/schemas/Case'}}}}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+  /v1/cases/{caseId}/notes:
+    post:
+      tags: [Cases]
+      operationId: addCaseNote
+      summary: Append a note to a case. Append only. Idempotent
+      parameters: [{$ref: '#/components/parameters/CaseId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/NoteCreate'}}}
+      responses:
+        '201': {description: Note added, headers: {Idempotent-Replayed: {$ref: '#/components/headers/IdempotentReplayed'}}, content: {application/json: {schema: {$ref: '#/components/schemas/Note'}}}}
+        '400': {$ref: '#/components/responses/Problem'}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+        '409': {$ref: '#/components/responses/Problem'}
+        '422': {$ref: '#/components/responses/Problem'}
+        '503': {$ref: '#/components/responses/Problem'}
+        '504': {$ref: '#/components/responses/Problem'}
+  /v1/cases/{caseId}/escalations:
+    post:
+      tags: [Cases]
+      operationId: escalateCase
+      summary: Hand a case to a human officer. Sets case status to ESCALATED. Idempotent
+      parameters: [{$ref: '#/components/parameters/CaseId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/EscalationCreate'}}}
+      responses:
+        '201': {description: Escalated, headers: {Idempotent-Replayed: {$ref: '#/components/headers/IdempotentReplayed'}}, content: {application/json: {schema: {$ref: '#/components/schemas/Escalation'}}}}
+        '400': {$ref: '#/components/responses/Problem'}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+        '409': {$ref: '#/components/responses/Problem'}
+        '422': {$ref: '#/components/responses/Problem'}
+        '503': {$ref: '#/components/responses/Problem'}
+        '504': {$ref: '#/components/responses/Problem'}
+  /v1/service-requests:
+    post:
+      tags: [Service requests]
+      operationId: createServiceRequest
+      summary: Raise a low-risk service request (statement copy, callback, re-KYC reminder, circular opt-in). Idempotent
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/ServiceRequestCreate'}}}
+      responses:
+        '201': {description: Created, headers: {Idempotent-Replayed: {$ref: '#/components/headers/IdempotentReplayed'}}, content: {application/json: {schema: {$ref: '#/components/schemas/ServiceRequest'}}}}
+        '400': {$ref: '#/components/responses/Problem'}
+        '401': {$ref: '#/components/responses/Problem'}
+        '404': {$ref: '#/components/responses/Problem'}
+        '409': {$ref: '#/components/responses/Problem'}
+        '422': {$ref: '#/components/responses/Problem'}
+        '503': {$ref: '#/components/responses/Problem'}
+        '504': {$ref: '#/components/responses/Problem'}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer}
+  headers:
+    IdempotentReplayed:
+      description: Present and "true" when the response is a replay of a stored result
+      schema: {type: string, enum: ['true']}
+  parameters:
+    CustomerId: {name: customerId, in: path, required: true, schema: {type: string, pattern: '^NXC-[0-9]{4}$'}, example: NXC-0002}
+    CaseId: {name: caseId, in: path, required: true, schema: {type: string, pattern: '^NXCASE-[0-9]{6}$'}, example: NXCASE-000001}
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Client-generated unique key, 16 to 64 characters
+      schema: {type: string, minLength: 16, maxLength: 64}
+      example: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+  responses:
+    Problem:
+      description: Error (RFC 7807 problem+json)
+      content: {application/problem+json: {schema: {$ref: '#/components/schemas/Problem'}}}
+  schemas:
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: {type: string, description: 'URI tail such as idempotency-key-required, idempotency-key-reuse, request-in-progress, validation-error, not-found, unauthorized, upstream-unavailable, upstream-timeout'}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        retryable: {type: boolean}
+    CustomerProfile:
+      type: object
+      required: [customer_id, profile]
+      properties:
+        customer_id: {type: string}
+        profile: {type: object, additionalProperties: true}
+    AccountList:
+      type: object
+      required: [customer_id, accounts, loans]
+      properties:
+        customer_id: {type: string}
+        accounts: {type: array, items: {type: object, additionalProperties: true}}
+        loans: {type: array, items: {type: object, additionalProperties: true}}
+    Transaction:
+      type: object
+      required: [txn_id, account_id, txn_date, amount, direction, narration, balance_after]
+      properties:
+        txn_id: {type: string}
+        account_id: {type: string}
+        txn_date: {type: string, format: date}
+        amount: {type: integer, description: INR}
+        direction: {type: string, enum: [credit, debit]}
+        channel: {type: string}
+        narration: {type: string}
+        category: {type: string}
+        balance_after: {type: integer}
+    TransactionPage:
+      type: object
+      required: [items]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Transaction'}}
+        next_cursor: {type: string, nullable: true}
+    KycStatus:
+      type: object
+      required: [customer_id, status]
+      properties:
+        customer_id: {type: string}
+        status: {type: string, enum: [verified, re_kyc_due, expired, incomplete]}
+        last_verified_on: {type: string, format: date, nullable: true}
+        next_due_on: {type: string, format: date, nullable: true}
+        pending_documents: {type: array, items: {type: string}}
+    BureauSummary:
+      type: object
+      required: [customer_id, bureau_status]
+      properties:
+        customer_id: {type: string}
+        bureau_status: {type: string, enum: [scored, no_history]}
+        score: {type: integer, nullable: true, minimum: 300, maximum: 900}
+        score_date: {type: string, format: date}
+        active_tradelines: {type: integer}
+        total_outstanding: {type: integer}
+        monthly_obligations_total: {type: integer}
+        dpd_30_last_12m: {type: integer}
+        dpd_90_last_24m: {type: integer}
+        enquiries_last_6m: {type: integer}
+        credit_utilisation_pct: {type: integer}
+        write_off_flag: {type: boolean}
+    Income:
+      type: object
+      required: [customer_id, disclosed_income, income_verification]
+      properties:
+        customer_id: {type: string}
+        disclosed_income: {type: object, additionalProperties: true}
+        income_verification:
+          type: object
+          required: [status]
+          properties:
+            status: {type: string, enum: [verified, itr_verified, self_declared, mismatch_under_review]}
+            method: {type: string}
+    ApplicationList:
+      type: object
+      required: [customer_id, applications]
+      properties:
+        customer_id: {type: string}
+        applications:
+          type: array
+          items:
+            type: object
+            required: [application_id, product_id, requested_amount, tenure_months, stage]
+            properties:
+              application_id: {type: string}
+              product_id: {type: string}
+              requested_amount: {type: integer}
+              tenure_months: {type: integer}
+              stage: {type: string, enum: [application_received, documents_pending, income_verification_pending, credit_assessment_in_progress, sanctioned, disbursed, closed]}
+              submitted_on: {type: string, format: date}
+              pending_documents: {type: array, items: {type: string}}
+    CaseCreate:
+      type: object
+      additionalProperties: false
+      required: [customer_id, category, priority, summary]
+      properties:
+        customer_id: {type: string, pattern: '^NXC-[0-9]{4}$'}
+        category: {type: string, enum: [LOAN_ENQUIRY, KYC_ISSUE, FEE_WAIVER_REQUEST, COMPLAINT, SUSPECTED_FRAUD, DOCUMENT_ANOMALY, OTHER]}
+        priority: {type: string, enum: [LOW, NORMAL, HIGH]}
+        summary: {type: string, minLength: 5, maxLength: 1000}
+        related_application_id: {type: string, nullable: true}
+        channel: {type: string, enum: [ASSISTANT], default: ASSISTANT}
+    Case:
+      type: object
+      required: [case_id, customer_id, category, priority, status, created_at]
+      properties:
+        case_id: {type: string}
+        customer_id: {type: string}
+        category: {type: string}
+        priority: {type: string}
+        status: {type: string, enum: [OPEN, ESCALATED, RESOLVED], description: Server-controlled}
+        summary: {type: string}
+        created_at: {type: string, format: date-time}
+        notes: {type: array, items: {$ref: '#/components/schemas/Note'}}
+        escalation: {type: object, nullable: true, additionalProperties: true}
+    NoteCreate:
+      type: object
+      additionalProperties: false
+      required: [text]
+      properties:
+        text: {type: string, minLength: 1, maxLength: 2000}
+    Note:
+      type: object
+      required: [note_id, case_id, text, created_at]
+      properties:
+        note_id: {type: string}
+        case_id: {type: string}
+        text: {type: string}
+        created_at: {type: string, format: date-time}
+    EscalationCreate:
+      type: object
+      additionalProperties: false
+      required: [reason, summary]
+      properties:
+        reason: {type: string, enum: [COMPLAINT, FEE_WAIVER_OR_SPECIAL_RATE, SUSPECTED_FRAUD, HARDSHIP, KYC_DISCREPANCY, UPLOAD_WITH_EMBEDDED_INSTRUCTIONS, OUT_OF_SCOPE_REQUEST]}
+        summary: {type: string, minLength: 5, maxLength: 1000}
+        preferred_contact: {type: string, enum: [CALLBACK, BRANCH_VISIT, EMAIL], default: CALLBACK}
+    Escalation:
+      type: object
+      required: [escalation_id, case_id, status, sla_hours]
+      properties:
+        escalation_id: {type: string}
+        case_id: {type: string}
+        status: {type: string, enum: [ESCALATED]}
+        sla_hours: {type: integer}
+    ServiceRequestCreate:
+      type: object
+      additionalProperties: false
+      required: [customer_id, request_type]
+      properties:
+        customer_id: {type: string, pattern: '^NXC-[0-9]{4}$'}
+        request_type: {type: string, enum: [STATEMENT_COPY, CALLBACK, RE_KYC_REMINDER, OPT_IN_CIR_2026_07_PART_PREPAY, INTEREST_CERTIFICATE]}
+        loan_account_id: {type: string, nullable: true, description: Required for OPT_IN_CIR_2026_07_PART_PREPAY and INTEREST_CERTIFICATE}
+        notes: {type: string, maxLength: 500, nullable: true}
+    ServiceRequest:
+      type: object
+      required: [service_request_id, customer_id, request_type, status, created_at]
+      properties:
+        service_request_id: {type: string}
+        customer_id: {type: string}
+        request_type: {type: string}
+        loan_account_id: {type: string, nullable: true}
+        status: {type: string, enum: [RECEIVED]}
+        created_at: {type: string, format: date-time}

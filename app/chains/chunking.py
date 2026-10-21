@@ -93,4 +93,3 @@ def chunk_by_clause(elements: list[Element], max_characters: int, overlap: int) 
             if text
         )
     return chunks
-

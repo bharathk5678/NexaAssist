@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from contextlib import nullcontext
+
 import structlog
+from ddtrace.llmobs import LLMObs
 from langchain_core.runnables import RunnableLambda
 
 from app.chains.answer import build_answer_chain
@@ -17,8 +20,21 @@ async def answer_policy(request: RetrieveRequest, settings: Settings) -> AnswerR
     async def retrieve(value: RetrieveRequest) -> RetrieveResponse:
         return await retrieve_policy(value, settings)
 
-    chain = build_answer_chain(RunnableLambda(retrieve), get_chat_model(settings))
-    response = await chain.ainvoke(request)
+    chain = build_answer_chain(RunnableLambda(retrieve), get_chat_model(settings), settings)
+    with LLMObs.workflow(name="policy_answer") if LLMObs.enabled else nullcontext() as span:
+        response = await chain.ainvoke(request)
+        if span is not None:
+            try:
+                LLMObs.annotate(
+                    span=span,
+                    input_data=request.model_dump(mode="json"),
+                    output_data=response.model_dump(mode="json"),
+                )
+                exported = LLMObs.export_span(span)
+                if exported is not None:
+                    response.datadog_span_id = exported["span_id"]
+            except Exception as exc:  # noqa: BLE001 - optional telemetry must preserve the answer
+                logger.warning("answer_datadog_publish_failed", error_type=type(exc).__name__)
     logger.info(
         "answer_completed",
         status=response.status,

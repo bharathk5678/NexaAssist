@@ -6,6 +6,7 @@ requires-python = ">=3.14"
 dependencies = [
     "ddtrace",
     "fastapi",
+    "httpx",
     "langchain-core",
     "langchain-mongodb",
     "langchain-openai",
@@ -13,15 +14,24 @@ dependencies = [
     "pdfplumber",
     "pydantic>=2",
     "pydantic-settings",
-    "pymongo",
+    # ddtrace 4.15 uses Server.run_operation, removed in PyMongo 4.18.
+    "pymongo>=4.9,<4.18",
     "structlog",
+    "tiktoken>=0.14.0",
     "unstructured[md]",
     "uvicorn",
 ]
 
+[project.optional-dependencies]
+ui = ["streamlit>=1.66"]
+evaluation = [
+    # RAGAS 0.4.3 imports the VertexAI wrapper removed in community 0.4.
+    "langchain-community==0.3.31",
+    "ragas>=0.4,<0.5",
+]
+
 [dependency-groups]
 dev = [
-    "httpx",
     "ipykernel",
     "mongomock>=4.3.0",
     "mypy",
@@ -29,7 +39,6 @@ dev = [
     "pytest",
     "python-dotenv",
     "ruff",
-    "tiktoken>=0.14.0",
 ]
 
 [tool.pytest.ini_options]

@@ -6,6 +6,7 @@ from datetime import date
 from itertools import pairwise
 from pathlib import Path
 from typing import Any
+from unittest.mock import AsyncMock, Mock
 
 import mongomock
 import pytest
@@ -25,6 +26,7 @@ from unstructured.documents.elements import (
 from app.chains.chunking import chunk_by_clause
 from app.chains.ingestion import build_ingestion_chain
 from app.core.config import Settings
+from app.database import mongo
 from app.database.mongo import delete_stale_chunks
 from app.models.ingestion import IngestRequest, IngestResponse
 from app.services.ingestion import requests_from_register
@@ -352,3 +354,69 @@ def test_stale_chunks_are_deleted_and_current_ones_kept() -> None:
     )
     assert delete_stale_chunks(collection, "POL-X", ["POL-X_1.1_c01"]) == 1
     assert sorted(row["_id"] for row in collection.find()) == ["POL-X_1.1_c01", "POL-Y_1.1_c01"]
+
+
+def test_dimension_change_reembeds_every_chunk(
+    settings: Settings, requests: dict[str, IngestRequest]
+) -> None:
+    store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
+    request = requests["CIR-2026-07"]
+    first = run_chain(store, settings, request)
+    changed = settings.model_copy(update={"embedding_dimensions": 1024})
+    second = run_chain(store, changed, request)
+    assert second.embedded_count == first.chunk_count
+    assert all(
+        doc.metadata["embedding_dimensions"] == 1024 for doc in store.get_by_ids(second.chunk_ids)
+    )
+
+
+def test_failed_embedding_keeps_existing_parent_evidence(
+    monkeypatch: pytest.MonkeyPatch, settings: Settings, requests: dict[str, IngestRequest]
+) -> None:
+    store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
+    parents = InMemoryStore()
+    request = requests["CIR-2026-07"]
+    run_chain(store, settings, request, parents)
+    before = dict(parents.store)
+    monkeypatch.setattr(store, "aadd_documents", AsyncMock(side_effect=TimeoutError("embedding")))
+    with pytest.raises(TimeoutError):
+        run_chain(store, settings, request.model_copy(update={"title": "Changed title"}), parents)
+    assert parents.store == before
+
+
+def test_parent_store_uses_upserts_and_literal_document_prefixes(
+    monkeypatch: pytest.MonkeyPatch, settings: Settings
+) -> None:
+    storage: Any = mongomock.MongoClient().db
+    monkeypatch.setattr(mongo, "_database", lambda _: storage)
+    collection = storage[settings.mongodb_parent_collection]
+    collection.insert_many(
+        [{"_id": key, "page_content": "Old evidence"} for key in ("POL.A_s01", "POLxA_s01")]
+    )
+    store = mongo.get_parent_store(settings)
+    assert list(store.yield_keys(prefix="POL.A_s")) == ["POL.A_s01"]
+    write = Mock()
+    monkeypatch.setattr(collection, "bulk_write", write)
+    store.mset([("POL.A_s01", Document(page_content="Updated evidence"))])
+    operation = write.call_args.args[0][0]
+    assert operation._upsert is True
+    assert operation._filter == {"_id": "POL.A_s01"}
+    assert operation._doc["page_content"] == "Updated evidence"
+
+
+def test_reingest_preserves_documents_sharing_a_parent_key_prefix(
+    settings: Settings, requests: dict[str, IngestRequest]
+) -> None:
+    vector = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
+    parents = InMemoryStore()
+    foreign = "CIR-2026-07_s02_s01"
+    stale = "CIR-2026-07_s99"
+    parents.mset(
+        [
+            (foreign, Document(page_content="Other policy")),
+            (stale, Document(page_content="Old section")),
+        ]
+    )
+    run_chain(vector, settings, requests["CIR-2026-07"], parents)
+    assert parents.mget([foreign])[0] is not None
+    assert parents.mget([stale]) == [None]

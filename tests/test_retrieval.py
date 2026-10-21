@@ -139,6 +139,7 @@ def test_api_returns_safe_failure_and_validates_body(monkeypatch: Any) -> None:
 
 def test_health_metrics_and_failure_counters(monkeypatch: Any) -> None:
     retrieval_service.retrieval_metrics.clear()
+    retrieval_service.retrieval_latencies.clear()
     response = RetrieveResponse(
         as_of=date(2026, 10, 1),
         results=[],
@@ -149,7 +150,7 @@ def test_health_metrics_and_failure_counters(monkeypatch: Any) -> None:
     monkeypatch.setattr(retrieval_service, "get_embeddings", lambda _settings: object())
     monkeypatch.setattr(retrieval_service, "get_vector_store", lambda *_args: object())
     monkeypatch.setattr(retrieval_service, "get_parent_store", lambda _settings: object())
-    monkeypatch.setattr(retrieval_service, "build_retrieval_chain", lambda *_args: chain)
+    monkeypatch.setattr(retrieval_service, "build_retrieval_chain", lambda *_args, **_kwargs: chain)
 
     request = RetrieveRequest(query="unknown", as_of=date(2026, 10, 1))
     asyncio.run(retrieval_service.retrieve_policy(request, settings()))
@@ -168,4 +169,10 @@ def test_health_metrics_and_failure_counters(monkeypatch: Any) -> None:
         "retrieval_errors_total": 1,
         "retrieval_empty_total": 1,
         "retrieval_latency_ms_total": 2.5,
+    }
+    assert client.get("/metrics/latency").json() == {
+        "sample_count": 1,
+        "p50_ms": 2.5,
+        "p95_ms": 2.5,
+        "p99_ms": 2.5,
     }

@@ -1,0 +1,1840 @@
+{
+  "currency": "INR",
+  "gst_pct_on_fees": 18,
+  "resolution_rule": "A loan is governed by the version whose effective window contains its sanction date. Version NHL-2026-07 is POL-HL-V3 as amended by CIR-2026-07 and applies to sanctions on or after 2026-07-01.",
+  "benchmark": {
+    "name": "NRLR",
+    "full_name": "NexaBank Repo-Linked Rate",
+    "history": [
+      {
+        "effective_from": "2023-04-01",
+        "rate_pct": 6.5
+      },
+      {
+        "effective_from": "2025-06-01",
+        "rate_pct": 6.0
+      },
+      {
+        "effective_from": "2026-02-01",
+        "rate_pct": 5.75
+      }
+    ]
+  },
+  "products": [
+    {
+      "product_id": "NEXA-HL",
+      "name": "NexaHome Loan",
+      "category": "home_loan",
+      "secured": true,
+      "purpose": "Purchase, construction, extension or improvement of a residential property, or balance transfer of an existing home loan",
+      "versions": [
+        {
+          "version_id": "NHL-2023-04",
+          "policy_doc": "POL-HL-V1",
+          "policy_version": "1.0",
+          "circular_doc": null,
+          "effective_from": "2023-04-01",
+          "effective_to": "2024-03-31",
+          "status": "superseded",
+          "terms": {
+            "eligibility": {
+              "age": {
+                "min": 21,
+                "max_at_application_salaried": 58,
+                "max_at_application_self_employed": 60,
+                "max_at_maturity_salaried": 60,
+                "max_at_maturity_self_employed": 65
+              },
+              "income": {
+                "min_net_monthly_salaried": 25000,
+                "min_annual_self_employed_itr": 400000
+              },
+              "bureau": {
+                "min_score_auto": 650,
+                "below_min_outcome": "decline_under_policy"
+              },
+              "foir": [
+                {
+                  "income_min": 0,
+                  "income_max": null,
+                  "foir_max_pct": 50
+                }
+              ]
+            },
+            "limits": {
+              "amount": {
+                "min": 500000,
+                "max": 50000000
+              },
+              "tenure_months": {
+                "min": 60,
+                "max": 300
+              }
+            },
+            "rate": {
+              "type": "floating",
+              "benchmark": "NRLR",
+              "reset": "annual",
+              "spread_table": [
+                {
+                  "min_score": 800,
+                  "max_score": 900,
+                  "value_pct": 2.25
+                },
+                {
+                  "min_score": 750,
+                  "max_score": 799,
+                  "value_pct": 2.55
+                },
+                {
+                  "min_score": 700,
+                  "max_score": 749,
+                  "value_pct": 3.0
+                },
+                {
+                  "min_score": 650,
+                  "max_score": 699,
+                  "value_pct": 3.5
+                }
+              ],
+              "fixed_option": {
+                "available": true,
+                "premium_over_floating_pct": 0.5,
+                "fixed_period_months": 36
+              }
+            },
+            "fees": {
+              "processing": {
+                "pct": 0.5,
+                "min": 10000,
+                "max": 25000,
+                "gst_extra": true
+              },
+              "legal_technical": {
+                "amount": 7500,
+                "gst_extra": true
+              },
+              "penal": {
+                "basis": "per_month_on_overdue_amount",
+                "value_pct": 2.0
+              }
+            },
+            "prepayment": {
+              "foreclosure_floating_pct": 0.0,
+              "foreclosure_fixed_period_pct": 2.0,
+              "part_prepayment_min": 50000,
+              "part_prepayment_fee_pct": 0.0,
+              "notice_days": 7
+            },
+            "collateral": {
+              "type": "first mortgage on the financed residential property"
+            },
+            "ltv": [
+              {
+                "loan_min": 0,
+                "loan_max": 3000000,
+                "ltv_pct": 90
+              },
+              {
+                "loan_min": 3000001,
+                "loan_max": 7500000,
+                "ltv_pct": 80
+              },
+              {
+                "loan_min": 7500001,
+                "loan_max": null,
+                "ltv_pct": 75
+              }
+            ]
+          },
+          "clause_refs": {
+            "eligibility.age.min": {
+              "source_doc": "POL-HL-V1",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_application_salaried": {
+              "source_doc": "POL-HL-V1",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_application_self_employed": {
+              "source_doc": "POL-HL-V1",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_maturity_salaried": {
+              "source_doc": "POL-HL-V1",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_maturity_self_employed": {
+              "source_doc": "POL-HL-V1",
+              "clause": "3.1"
+            },
+            "eligibility.income.min_net_monthly_salaried": {
+              "source_doc": "POL-HL-V1",
+              "clause": "3.2"
+            },
+            "eligibility.income.min_annual_self_employed_itr": {
+              "source_doc": "POL-HL-V1",
+              "clause": "3.2"
+            },
+            "eligibility.bureau.min_score_auto": {
+              "source_doc": "POL-HL-V1",
+              "clause": "3.3"
+            },
+            "eligibility.bureau.below_min_outcome": {
+              "source_doc": "POL-HL-V1",
+              "clause": "3.3"
+            },
+            "eligibility.foir": {
+              "source_doc": "POL-HL-V1",
+              "clause": "3.4"
+            },
+            "limits.amount.min": {
+              "source_doc": "POL-HL-V1",
+              "clause": "4.1"
+            },
+            "limits.amount.max": {
+              "source_doc": "POL-HL-V1",
+              "clause": "4.1"
+            },
+            "limits.tenure_months.min": {
+              "source_doc": "POL-HL-V1",
+              "clause": "4.2"
+            },
+            "limits.tenure_months.max": {
+              "source_doc": "POL-HL-V1",
+              "clause": "4.2"
+            },
+            "rate.type": {
+              "source_doc": "POL-HL-V1",
+              "clause": "5.1"
+            },
+            "rate.benchmark": {
+              "source_doc": "POL-HL-V1",
+              "clause": "5.1"
+            },
+            "rate.reset": {
+              "source_doc": "POL-HL-V1",
+              "clause": "5.3"
+            },
+            "rate.spread_table": {
+              "source_doc": "POL-HL-V1",
+              "clause": "5.2"
+            },
+            "rate.fixed_option.available": {
+              "source_doc": "POL-HL-V1",
+              "clause": "5.4"
+            },
+            "rate.fixed_option.premium_over_floating_pct": {
+              "source_doc": "POL-HL-V1",
+              "clause": "5.4"
+            },
+            "rate.fixed_option.fixed_period_months": {
+              "source_doc": "POL-HL-V1",
+              "clause": "5.4"
+            },
+            "fees.processing.pct": {
+              "source_doc": "POL-HL-V1",
+              "clause": "6.2"
+            },
+            "fees.processing.min": {
+              "source_doc": "POL-HL-V1",
+              "clause": "6.2"
+            },
+            "fees.processing.max": {
+              "source_doc": "POL-HL-V1",
+              "clause": "6.2"
+            },
+            "fees.processing.gst_extra": {
+              "source_doc": "POL-HL-V1",
+              "clause": "6.2"
+            },
+            "fees.legal_technical.amount": {
+              "source_doc": "POL-HL-V1",
+              "clause": "6.3"
+            },
+            "fees.legal_technical.gst_extra": {
+              "source_doc": "POL-HL-V1",
+              "clause": "6.3"
+            },
+            "fees.penal.basis": {
+              "source_doc": "POL-HL-V1",
+              "clause": "6.4"
+            },
+            "fees.penal.value_pct": {
+              "source_doc": "POL-HL-V1",
+              "clause": "6.4"
+            },
+            "prepayment.foreclosure_floating_pct": {
+              "source_doc": "POL-HL-V1",
+              "clause": "8.1"
+            },
+            "prepayment.foreclosure_fixed_period_pct": {
+              "source_doc": "POL-HL-V1",
+              "clause": "8.2"
+            },
+            "prepayment.part_prepayment_min": {
+              "source_doc": "POL-HL-V1",
+              "clause": "8.3"
+            },
+            "prepayment.part_prepayment_fee_pct": {
+              "source_doc": "POL-HL-V1",
+              "clause": "8.3"
+            },
+            "prepayment.notice_days": {
+              "source_doc": "POL-HL-V1",
+              "clause": "8.4"
+            },
+            "collateral.type": {
+              "source_doc": "POL-HL-V1",
+              "clause": "7.1"
+            },
+            "ltv": {
+              "source_doc": "POL-HL-V1",
+              "clause": "7.2"
+            }
+          }
+        },
+        {
+          "version_id": "NHL-2024-04",
+          "policy_doc": "POL-HL-V2",
+          "policy_version": "2.0",
+          "circular_doc": null,
+          "effective_from": "2024-04-01",
+          "effective_to": "2025-09-30",
+          "status": "superseded",
+          "terms": {
+            "eligibility": {
+              "age": {
+                "min": 21,
+                "max_at_application_salaried": 60,
+                "max_at_application_self_employed": 62,
+                "max_at_maturity_salaried": 65,
+                "max_at_maturity_self_employed": 70
+              },
+              "income": {
+                "min_net_monthly_salaried": 30000,
+                "min_annual_self_employed_itr": 450000
+              },
+              "bureau": {
+                "min_score_auto": 650,
+                "below_min_outcome": "decline_under_policy"
+              },
+              "foir": [
+                {
+                  "income_min": 0,
+                  "income_max": 99999,
+                  "foir_max_pct": 50
+                },
+                {
+                  "income_min": 100000,
+                  "income_max": null,
+                  "foir_max_pct": 55
+                }
+              ]
+            },
+            "limits": {
+              "amount": {
+                "min": 500000,
+                "max": 50000000
+              },
+              "tenure_months": {
+                "min": 60,
+                "max": 360
+              }
+            },
+            "rate": {
+              "type": "floating",
+              "benchmark": "NRLR",
+              "reset": "quarterly",
+              "spread_table": [
+                {
+                  "min_score": 800,
+                  "max_score": 900,
+                  "value_pct": 2.0
+                },
+                {
+                  "min_score": 750,
+                  "max_score": 799,
+                  "value_pct": 2.3
+                },
+                {
+                  "min_score": 725,
+                  "max_score": 749,
+                  "value_pct": 2.75
+                },
+                {
+                  "min_score": 700,
+                  "max_score": 724,
+                  "value_pct": 3.1
+                },
+                {
+                  "min_score": 650,
+                  "max_score": 699,
+                  "value_pct": 3.6
+                }
+              ],
+              "fixed_option": {
+                "available": true,
+                "premium_over_floating_pct": 0.4,
+                "fixed_period_months": 36
+              }
+            },
+            "fees": {
+              "processing": {
+                "pct": 0.4,
+                "min": 7500,
+                "max": 20000,
+                "gst_extra": true
+              },
+              "legal_technical": {
+                "amount": 6500,
+                "gst_extra": true
+              },
+              "penal": {
+                "basis": "per_annum_over_contractual_rate_on_overdue_amount",
+                "value_pct": 2.0
+              }
+            },
+            "prepayment": {
+              "foreclosure_floating_pct": 0.0,
+              "foreclosure_fixed_period_pct": 1.5,
+              "part_prepayment_min": 25000,
+              "part_prepayment_fee_pct": 0.0,
+              "notice_days": 3
+            },
+            "collateral": {
+              "type": "first mortgage on the financed residential property"
+            },
+            "ltv": [
+              {
+                "loan_min": 0,
+                "loan_max": 3000000,
+                "ltv_pct": 90
+              },
+              {
+                "loan_min": 3000001,
+                "loan_max": 7500000,
+                "ltv_pct": 80
+              },
+              {
+                "loan_min": 7500001,
+                "loan_max": null,
+                "ltv_pct": 75
+              }
+            ]
+          },
+          "clause_refs": {
+            "eligibility.age.min": {
+              "source_doc": "POL-HL-V2",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_application_salaried": {
+              "source_doc": "POL-HL-V2",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_application_self_employed": {
+              "source_doc": "POL-HL-V2",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_maturity_salaried": {
+              "source_doc": "POL-HL-V2",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_maturity_self_employed": {
+              "source_doc": "POL-HL-V2",
+              "clause": "3.1"
+            },
+            "eligibility.income.min_net_monthly_salaried": {
+              "source_doc": "POL-HL-V2",
+              "clause": "3.2"
+            },
+            "eligibility.income.min_annual_self_employed_itr": {
+              "source_doc": "POL-HL-V2",
+              "clause": "3.2"
+            },
+            "eligibility.bureau.min_score_auto": {
+              "source_doc": "POL-HL-V2",
+              "clause": "3.3"
+            },
+            "eligibility.bureau.below_min_outcome": {
+              "source_doc": "POL-HL-V2",
+              "clause": "3.3"
+            },
+            "eligibility.foir": {
+              "source_doc": "POL-HL-V2",
+              "clause": "3.4"
+            },
+            "limits.amount.min": {
+              "source_doc": "POL-HL-V2",
+              "clause": "4.1"
+            },
+            "limits.amount.max": {
+              "source_doc": "POL-HL-V2",
+              "clause": "4.1"
+            },
+            "limits.tenure_months.min": {
+              "source_doc": "POL-HL-V2",
+              "clause": "4.2"
+            },
+            "limits.tenure_months.max": {
+              "source_doc": "POL-HL-V2",
+              "clause": "4.2"
+            },
+            "rate.type": {
+              "source_doc": "POL-HL-V2",
+              "clause": "5.1"
+            },
+            "rate.benchmark": {
+              "source_doc": "POL-HL-V2",
+              "clause": "5.1"
+            },
+            "rate.reset": {
+              "source_doc": "POL-HL-V2",
+              "clause": "5.3"
+            },
+            "rate.spread_table": {
+              "source_doc": "POL-HL-V2",
+              "clause": "5.2"
+            },
+            "rate.fixed_option.available": {
+              "source_doc": "POL-HL-V2",
+              "clause": "5.4"
+            },
+            "rate.fixed_option.premium_over_floating_pct": {
+              "source_doc": "POL-HL-V2",
+              "clause": "5.4"
+            },
+            "rate.fixed_option.fixed_period_months": {
+              "source_doc": "POL-HL-V2",
+              "clause": "5.4"
+            },
+            "fees.processing.pct": {
+              "source_doc": "POL-HL-V2",
+              "clause": "6.2"
+            },
+            "fees.processing.min": {
+              "source_doc": "POL-HL-V2",
+              "clause": "6.2"
+            },
+            "fees.processing.max": {
+              "source_doc": "POL-HL-V2",
+              "clause": "6.2"
+            },
+            "fees.processing.gst_extra": {
+              "source_doc": "POL-HL-V2",
+              "clause": "6.2"
+            },
+            "fees.legal_technical.amount": {
+              "source_doc": "POL-HL-V2",
+              "clause": "6.3"
+            },
+            "fees.legal_technical.gst_extra": {
+              "source_doc": "POL-HL-V2",
+              "clause": "6.3"
+            },
+            "fees.penal.basis": {
+              "source_doc": "POL-HL-V2",
+              "clause": "6.4"
+            },
+            "fees.penal.value_pct": {
+              "source_doc": "POL-HL-V2",
+              "clause": "6.4"
+            },
+            "prepayment.foreclosure_floating_pct": {
+              "source_doc": "POL-HL-V2",
+              "clause": "8.1"
+            },
+            "prepayment.foreclosure_fixed_period_pct": {
+              "source_doc": "POL-HL-V2",
+              "clause": "8.2"
+            },
+            "prepayment.part_prepayment_min": {
+              "source_doc": "POL-HL-V2",
+              "clause": "8.3"
+            },
+            "prepayment.part_prepayment_fee_pct": {
+              "source_doc": "POL-HL-V2",
+              "clause": "8.3"
+            },
+            "prepayment.notice_days": {
+              "source_doc": "POL-HL-V2",
+              "clause": "8.4"
+            },
+            "collateral.type": {
+              "source_doc": "POL-HL-V2",
+              "clause": "7.1"
+            },
+            "ltv": {
+              "source_doc": "POL-HL-V2",
+              "clause": "7.2"
+            }
+          }
+        },
+        {
+          "version_id": "NHL-2025-10",
+          "policy_doc": "POL-HL-V3",
+          "policy_version": "3.0",
+          "circular_doc": null,
+          "effective_from": "2025-10-01",
+          "effective_to": "2026-06-30",
+          "status": "superseded_in_part",
+          "terms": {
+            "eligibility": {
+              "age": {
+                "min": 21,
+                "max_at_application_salaried": 62,
+                "max_at_application_self_employed": 65,
+                "max_at_maturity_salaried": 70,
+                "max_at_maturity_self_employed": 75
+              },
+              "income": {
+                "min_net_monthly_salaried": 30000,
+                "min_annual_self_employed_itr": 500000
+              },
+              "bureau": {
+                "min_score_auto": 675,
+                "below_min_outcome": "manual_underwriting_referral"
+              },
+              "foir": [
+                {
+                  "income_min": 0,
+                  "income_max": 99999,
+                  "foir_max_pct": 50
+                },
+                {
+                  "income_min": 100000,
+                  "income_max": 249999,
+                  "foir_max_pct": 55
+                },
+                {
+                  "income_min": 250000,
+                  "income_max": null,
+                  "foir_max_pct": 60
+                }
+              ]
+            },
+            "limits": {
+              "amount": {
+                "min": 500000,
+                "max": 75000000
+              },
+              "tenure_months": {
+                "min": 60,
+                "max": 360
+              }
+            },
+            "rate": {
+              "type": "floating",
+              "benchmark": "NRLR",
+              "reset": "quarterly",
+              "spread_table": [
+                {
+                  "min_score": 800,
+                  "max_score": 900,
+                  "value_pct": 1.9
+                },
+                {
+                  "min_score": 750,
+                  "max_score": 799,
+                  "value_pct": 2.2
+                },
+                {
+                  "min_score": 700,
+                  "max_score": 749,
+                  "value_pct": 2.7
+                },
+                {
+                  "min_score": 675,
+                  "max_score": 699,
+                  "value_pct": 3.25
+                }
+              ],
+              "fixed_option": {
+                "available": false,
+                "premium_over_floating_pct": null,
+                "fixed_period_months": null
+              }
+            },
+            "fees": {
+              "processing": {
+                "pct": 0.35,
+                "min": 5000,
+                "max": 15000,
+                "gst_extra": true
+              },
+              "legal_technical": {
+                "amount": 6000,
+                "gst_extra": true
+              },
+              "penal": {
+                "basis": "per_annum_over_contractual_rate_on_overdue_amount",
+                "value_pct": 2.0
+              }
+            },
+            "prepayment": {
+              "foreclosure_floating_pct": 0.0,
+              "foreclosure_fixed_period_pct": null,
+              "part_prepayment_min": 25000,
+              "part_prepayment_fee_pct": 0.0,
+              "notice_days": 3
+            },
+            "collateral": {
+              "type": "first mortgage on the financed residential property"
+            },
+            "ltv": [
+              {
+                "loan_min": 0,
+                "loan_max": 3000000,
+                "ltv_pct": 90
+              },
+              {
+                "loan_min": 3000001,
+                "loan_max": 7500000,
+                "ltv_pct": 80
+              },
+              {
+                "loan_min": 7500001,
+                "loan_max": null,
+                "ltv_pct": 75
+              }
+            ]
+          },
+          "clause_refs": {
+            "eligibility.age.min": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_application_salaried": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_application_self_employed": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_maturity_salaried": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_maturity_self_employed": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.1"
+            },
+            "eligibility.income.min_net_monthly_salaried": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.2"
+            },
+            "eligibility.income.min_annual_self_employed_itr": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.2"
+            },
+            "eligibility.bureau.min_score_auto": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.3"
+            },
+            "eligibility.bureau.below_min_outcome": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.3"
+            },
+            "eligibility.foir": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.4"
+            },
+            "limits.amount.min": {
+              "source_doc": "POL-HL-V3",
+              "clause": "4.1"
+            },
+            "limits.amount.max": {
+              "source_doc": "POL-HL-V3",
+              "clause": "4.1"
+            },
+            "limits.tenure_months.min": {
+              "source_doc": "POL-HL-V3",
+              "clause": "4.2"
+            },
+            "limits.tenure_months.max": {
+              "source_doc": "POL-HL-V3",
+              "clause": "4.2"
+            },
+            "rate.type": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.1"
+            },
+            "rate.benchmark": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.1"
+            },
+            "rate.reset": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.3"
+            },
+            "rate.spread_table": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.2"
+            },
+            "rate.fixed_option.available": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.4"
+            },
+            "rate.fixed_option.premium_over_floating_pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.4"
+            },
+            "rate.fixed_option.fixed_period_months": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.4"
+            },
+            "fees.processing.pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.2"
+            },
+            "fees.processing.min": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.2"
+            },
+            "fees.processing.max": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.2"
+            },
+            "fees.processing.gst_extra": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.2"
+            },
+            "fees.legal_technical.amount": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.3"
+            },
+            "fees.legal_technical.gst_extra": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.3"
+            },
+            "fees.penal.basis": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.4"
+            },
+            "fees.penal.value_pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.4"
+            },
+            "prepayment.foreclosure_floating_pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "8.1"
+            },
+            "prepayment.foreclosure_fixed_period_pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "8.2"
+            },
+            "prepayment.part_prepayment_min": {
+              "source_doc": "POL-HL-V3",
+              "clause": "8.3"
+            },
+            "prepayment.part_prepayment_fee_pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "8.3"
+            },
+            "prepayment.notice_days": {
+              "source_doc": "POL-HL-V3",
+              "clause": "8.4"
+            },
+            "collateral.type": {
+              "source_doc": "POL-HL-V3",
+              "clause": "7.1"
+            },
+            "ltv": {
+              "source_doc": "POL-HL-V3",
+              "clause": "7.2"
+            }
+          }
+        },
+        {
+          "version_id": "NHL-2026-07",
+          "policy_doc": "POL-HL-V3",
+          "policy_version": "3.0 as amended by CIR-2026-07",
+          "circular_doc": "CIR-2026-07",
+          "effective_from": "2026-07-01",
+          "effective_to": null,
+          "status": "in_force",
+          "terms": {
+            "eligibility": {
+              "age": {
+                "min": 21,
+                "max_at_application_salaried": 62,
+                "max_at_application_self_employed": 65,
+                "max_at_maturity_salaried": 70,
+                "max_at_maturity_self_employed": 75
+              },
+              "income": {
+                "min_net_monthly_salaried": 30000,
+                "min_annual_self_employed_itr": 500000
+              },
+              "bureau": {
+                "min_score_auto": 675,
+                "below_min_outcome": "manual_underwriting_referral"
+              },
+              "foir": [
+                {
+                  "income_min": 0,
+                  "income_max": 99999,
+                  "foir_max_pct": 50
+                },
+                {
+                  "income_min": 100000,
+                  "income_max": 249999,
+                  "foir_max_pct": 55
+                },
+                {
+                  "income_min": 250000,
+                  "income_max": null,
+                  "foir_max_pct": 60
+                }
+              ]
+            },
+            "limits": {
+              "amount": {
+                "min": 500000,
+                "max": 75000000
+              },
+              "tenure_months": {
+                "min": 60,
+                "max": 360
+              }
+            },
+            "rate": {
+              "type": "floating",
+              "benchmark": "NRLR",
+              "reset": "quarterly",
+              "spread_table": [
+                {
+                  "min_score": 800,
+                  "max_score": 900,
+                  "value_pct": 1.9
+                },
+                {
+                  "min_score": 750,
+                  "max_score": 799,
+                  "value_pct": 2.2
+                },
+                {
+                  "min_score": 700,
+                  "max_score": 749,
+                  "value_pct": 2.7
+                },
+                {
+                  "min_score": 675,
+                  "max_score": 699,
+                  "value_pct": 3.25
+                }
+              ],
+              "fixed_option": {
+                "available": false,
+                "premium_over_floating_pct": null,
+                "fixed_period_months": null
+              }
+            },
+            "fees": {
+              "processing": {
+                "pct": 0.3,
+                "min": 5000,
+                "max": 10000,
+                "gst_extra": true
+              },
+              "legal_technical": {
+                "amount": 6000,
+                "gst_extra": true
+              },
+              "penal": {
+                "basis": "per_annum_over_contractual_rate_on_overdue_amount",
+                "value_pct": 2.0
+              }
+            },
+            "prepayment": {
+              "foreclosure_floating_pct": 0.0,
+              "foreclosure_fixed_period_pct": null,
+              "part_prepayment_min": 10000,
+              "part_prepayment_fee_pct": 0.0,
+              "notice_days": 3
+            },
+            "collateral": {
+              "type": "first mortgage on the financed residential property"
+            },
+            "ltv": [
+              {
+                "loan_min": 0,
+                "loan_max": 3000000,
+                "ltv_pct": 90
+              },
+              {
+                "loan_min": 3000001,
+                "loan_max": 7500000,
+                "ltv_pct": 80
+              },
+              {
+                "loan_min": 7500001,
+                "loan_max": null,
+                "ltv_pct": 75
+              }
+            ]
+          },
+          "clause_refs": {
+            "eligibility.age.min": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_application_salaried": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_application_self_employed": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_maturity_salaried": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.1"
+            },
+            "eligibility.age.max_at_maturity_self_employed": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.1"
+            },
+            "eligibility.income.min_net_monthly_salaried": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.2"
+            },
+            "eligibility.income.min_annual_self_employed_itr": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.2"
+            },
+            "eligibility.bureau.min_score_auto": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.3"
+            },
+            "eligibility.bureau.below_min_outcome": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.3"
+            },
+            "eligibility.foir": {
+              "source_doc": "POL-HL-V3",
+              "clause": "3.4"
+            },
+            "limits.amount.min": {
+              "source_doc": "POL-HL-V3",
+              "clause": "4.1"
+            },
+            "limits.amount.max": {
+              "source_doc": "POL-HL-V3",
+              "clause": "4.1"
+            },
+            "limits.tenure_months.min": {
+              "source_doc": "POL-HL-V3",
+              "clause": "4.2"
+            },
+            "limits.tenure_months.max": {
+              "source_doc": "POL-HL-V3",
+              "clause": "4.2"
+            },
+            "rate.type": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.1"
+            },
+            "rate.benchmark": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.1"
+            },
+            "rate.reset": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.3"
+            },
+            "rate.spread_table": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.2"
+            },
+            "rate.fixed_option.available": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.4"
+            },
+            "rate.fixed_option.premium_over_floating_pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.4"
+            },
+            "rate.fixed_option.fixed_period_months": {
+              "source_doc": "POL-HL-V3",
+              "clause": "5.4"
+            },
+            "fees.processing.pct": {
+              "source_doc": "CIR-2026-07",
+              "clause": "3.1"
+            },
+            "fees.processing.min": {
+              "source_doc": "CIR-2026-07",
+              "clause": "3.1"
+            },
+            "fees.processing.max": {
+              "source_doc": "CIR-2026-07",
+              "clause": "3.1"
+            },
+            "fees.processing.gst_extra": {
+              "source_doc": "CIR-2026-07",
+              "clause": "3.1"
+            },
+            "fees.legal_technical.amount": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.3"
+            },
+            "fees.legal_technical.gst_extra": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.3"
+            },
+            "fees.penal.basis": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.4"
+            },
+            "fees.penal.value_pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "6.4"
+            },
+            "prepayment.foreclosure_floating_pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "8.1"
+            },
+            "prepayment.foreclosure_fixed_period_pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "8.2"
+            },
+            "prepayment.part_prepayment_min": {
+              "source_doc": "CIR-2026-07",
+              "clause": "4.1"
+            },
+            "prepayment.part_prepayment_fee_pct": {
+              "source_doc": "POL-HL-V3",
+              "clause": "8.3"
+            },
+            "prepayment.notice_days": {
+              "source_doc": "POL-HL-V3",
+              "clause": "8.4"
+            },
+            "collateral.type": {
+              "source_doc": "POL-HL-V3",
+              "clause": "7.1"
+            },
+            "ltv": {
+              "source_doc": "POL-HL-V3",
+              "clause": "7.2"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "NEXA-PL",
+      "name": "NexaFlex Personal Loan",
+      "category": "personal_loan",
+      "secured": false,
+      "purpose": "Any lawful personal need except speculative, capital market or illegal end use",
+      "versions": [
+        {
+          "version_id": "NPL-2024-01",
+          "policy_doc": "POL-PL-V1",
+          "policy_version": "1.0",
+          "circular_doc": null,
+          "effective_from": "2024-01-01",
+          "effective_to": null,
+          "status": "in_force",
+          "terms": {
+            "eligibility": {
+              "age": {
+                "min": 23,
+                "max_at_application": 58,
+                "max_at_maturity": 60
+              },
+              "income": {
+                "min_net_monthly_salaried": 25000,
+                "min_annual_self_employed_itr": 300000
+              },
+              "bureau": {
+                "min_score_auto": 700,
+                "below_min_outcome": "not_eligible_under_standard_criteria"
+              },
+              "foir": [
+                {
+                  "income_min": 0,
+                  "income_max": null,
+                  "foir_max_pct": 50
+                }
+              ]
+            },
+            "limits": {
+              "amount": {
+                "min": 50000,
+                "max": 2500000
+              },
+              "tenure_months": {
+                "min": 12,
+                "max": 60
+              }
+            },
+            "rate": {
+              "type": "fixed",
+              "benchmark": null,
+              "reset": "none",
+              "rate_table": [
+                {
+                  "min_score": 800,
+                  "max_score": 900,
+                  "value_pct": 11.5
+                },
+                {
+                  "min_score": 750,
+                  "max_score": 799,
+                  "value_pct": 13.25
+                },
+                {
+                  "min_score": 725,
+                  "max_score": 749,
+                  "value_pct": 15.0
+                },
+                {
+                  "min_score": 700,
+                  "max_score": 724,
+                  "value_pct": 17.5
+                }
+              ]
+            },
+            "fees": {
+              "processing": {
+                "pct": 2.0,
+                "min": 2000,
+                "max": null,
+                "gst_extra": true
+              },
+              "penal": {
+                "basis": "per_month_on_overdue_emi",
+                "value_pct": 2.0,
+                "min_amount": 500
+              }
+            },
+            "prepayment": {
+              "lock_in_emis": 6,
+              "foreclosure_pct_of_outstanding": 4.0,
+              "part_prepayment_fee_pct_of_amount": 4.0,
+              "part_prepayment_min_emis": 1
+            },
+            "collateral": {
+              "type": "none (unsecured)"
+            }
+          },
+          "clause_refs": {
+            "eligibility.age.min": {
+              "source_doc": "POL-PL-V1",
+              "clause": "2.1"
+            },
+            "eligibility.age.max_at_application": {
+              "source_doc": "POL-PL-V1",
+              "clause": "2.1"
+            },
+            "eligibility.age.max_at_maturity": {
+              "source_doc": "POL-PL-V1",
+              "clause": "2.1"
+            },
+            "eligibility.income.min_net_monthly_salaried": {
+              "source_doc": "POL-PL-V1",
+              "clause": "2.2"
+            },
+            "eligibility.income.min_annual_self_employed_itr": {
+              "source_doc": "POL-PL-V1",
+              "clause": "2.2"
+            },
+            "eligibility.bureau.min_score_auto": {
+              "source_doc": "POL-PL-V1",
+              "clause": "2.3"
+            },
+            "eligibility.bureau.below_min_outcome": {
+              "source_doc": "POL-PL-V1",
+              "clause": "2.3"
+            },
+            "eligibility.foir": {
+              "source_doc": "POL-PL-V1",
+              "clause": "2.4"
+            },
+            "limits.amount.min": {
+              "source_doc": "POL-PL-V1",
+              "clause": "3.1"
+            },
+            "limits.amount.max": {
+              "source_doc": "POL-PL-V1",
+              "clause": "3.1"
+            },
+            "limits.tenure_months.min": {
+              "source_doc": "POL-PL-V1",
+              "clause": "3.2"
+            },
+            "limits.tenure_months.max": {
+              "source_doc": "POL-PL-V1",
+              "clause": "3.2"
+            },
+            "rate.type": {
+              "source_doc": "POL-PL-V1",
+              "clause": "4.1"
+            },
+            "rate.benchmark": {
+              "source_doc": "POL-PL-V1",
+              "clause": "4.1"
+            },
+            "rate.reset": {
+              "source_doc": "POL-PL-V1",
+              "clause": "4.1"
+            },
+            "rate.rate_table": {
+              "source_doc": "POL-PL-V1",
+              "clause": "4.1"
+            },
+            "fees.processing.pct": {
+              "source_doc": "POL-PL-V1",
+              "clause": "5.1"
+            },
+            "fees.processing.min": {
+              "source_doc": "POL-PL-V1",
+              "clause": "5.1"
+            },
+            "fees.processing.max": {
+              "source_doc": "POL-PL-V1",
+              "clause": "5.1"
+            },
+            "fees.processing.gst_extra": {
+              "source_doc": "POL-PL-V1",
+              "clause": "5.1"
+            },
+            "fees.penal.basis": {
+              "source_doc": "POL-PL-V1",
+              "clause": "5.2"
+            },
+            "fees.penal.value_pct": {
+              "source_doc": "POL-PL-V1",
+              "clause": "5.2"
+            },
+            "fees.penal.min_amount": {
+              "source_doc": "POL-PL-V1",
+              "clause": "5.2"
+            },
+            "prepayment.lock_in_emis": {
+              "source_doc": "POL-PL-V1",
+              "clause": "7.1"
+            },
+            "prepayment.foreclosure_pct_of_outstanding": {
+              "source_doc": "POL-PL-V1",
+              "clause": "7.2"
+            },
+            "prepayment.part_prepayment_fee_pct_of_amount": {
+              "source_doc": "POL-PL-V1",
+              "clause": "7.3"
+            },
+            "prepayment.part_prepayment_min_emis": {
+              "source_doc": "POL-PL-V1",
+              "clause": "7.3"
+            },
+            "collateral.type": {
+              "source_doc": "POL-PL-V1",
+              "clause": "6.1"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "NEXA-LAP",
+      "name": "NexaProperty Plus (Loan Against Property)",
+      "category": "loan_against_property",
+      "secured": true,
+      "purpose": "Business needs, education, medical expenses or weddings, against an owned property. Not for purchasing property",
+      "versions": [
+        {
+          "version_id": "NLAP-2024-06",
+          "policy_doc": "POL-LAP-V1",
+          "policy_version": "1.0",
+          "circular_doc": null,
+          "effective_from": "2024-06-01",
+          "effective_to": null,
+          "status": "in_force",
+          "terms": {
+            "eligibility": {
+              "age": {
+                "min": 25,
+                "max_at_application": 60,
+                "max_at_maturity_salaried": 65,
+                "max_at_maturity_self_employed": 70
+              },
+              "income": {
+                "min_net_monthly_salaried": 40000,
+                "min_annual_self_employed_itr": 600000
+              },
+              "bureau": {
+                "min_score_auto": 675,
+                "below_min_outcome": "not_eligible_under_standard_criteria"
+              },
+              "foir": [
+                {
+                  "income_min": 0,
+                  "income_max": null,
+                  "foir_max_pct": 50
+                }
+              ]
+            },
+            "limits": {
+              "amount": {
+                "min": 1000000,
+                "max": 100000000
+              },
+              "tenure_months": {
+                "min": 36,
+                "max": 180
+              }
+            },
+            "rate": {
+              "type": "floating",
+              "benchmark": "NRLR",
+              "reset": "quarterly",
+              "spread_table": [
+                {
+                  "min_score": 800,
+                  "max_score": 900,
+                  "value_pct": 3.5
+                },
+                {
+                  "min_score": 750,
+                  "max_score": 799,
+                  "value_pct": 3.9
+                },
+                {
+                  "min_score": 700,
+                  "max_score": 749,
+                  "value_pct": 4.5
+                },
+                {
+                  "min_score": 675,
+                  "max_score": 699,
+                  "value_pct": 5.0
+                }
+              ]
+            },
+            "fees": {
+              "processing": {
+                "pct": 1.0,
+                "min": 15000,
+                "max": 100000,
+                "gst_extra": true
+              },
+              "legal_technical": {
+                "amount": 10000,
+                "gst_extra": true
+              },
+              "penal": {
+                "basis": "per_annum_over_contractual_rate_on_overdue_amount",
+                "value_pct": 2.0
+              }
+            },
+            "prepayment": {
+              "foreclosure_floating_pct": 0.0,
+              "part_prepayment_min": 100000,
+              "part_prepayment_fee_pct": 0.0,
+              "notice_days": 5
+            },
+            "collateral": {
+              "type": "first mortgage on an owned, unencumbered property"
+            },
+            "ltv": [
+              {
+                "property_type": "residential_self_occupied",
+                "ltv_pct": 60
+              },
+              {
+                "property_type": "commercial",
+                "ltv_pct": 55
+              },
+              {
+                "property_type": "industrial",
+                "ltv_pct": 50
+              }
+            ]
+          },
+          "clause_refs": {
+            "eligibility.age.min": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "2.1"
+            },
+            "eligibility.age.max_at_application": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "2.1"
+            },
+            "eligibility.age.max_at_maturity_salaried": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "2.1"
+            },
+            "eligibility.age.max_at_maturity_self_employed": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "2.1"
+            },
+            "eligibility.income.min_net_monthly_salaried": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "2.2"
+            },
+            "eligibility.income.min_annual_self_employed_itr": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "2.2"
+            },
+            "eligibility.bureau.min_score_auto": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "2.3"
+            },
+            "eligibility.bureau.below_min_outcome": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "2.3"
+            },
+            "eligibility.foir": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "2.4"
+            },
+            "limits.amount.min": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "3.1"
+            },
+            "limits.amount.max": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "3.1"
+            },
+            "limits.tenure_months.min": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "3.2"
+            },
+            "limits.tenure_months.max": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "3.2"
+            },
+            "rate.type": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "4.1"
+            },
+            "rate.benchmark": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "4.1"
+            },
+            "rate.reset": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "4.1"
+            },
+            "rate.spread_table": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "4.1"
+            },
+            "fees.processing.pct": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "5.1"
+            },
+            "fees.processing.min": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "5.1"
+            },
+            "fees.processing.max": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "5.1"
+            },
+            "fees.processing.gst_extra": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "5.1"
+            },
+            "fees.legal_technical.amount": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "5.2"
+            },
+            "fees.legal_technical.gst_extra": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "5.2"
+            },
+            "fees.penal.basis": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "5.3"
+            },
+            "fees.penal.value_pct": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "5.3"
+            },
+            "prepayment.foreclosure_floating_pct": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "7.1"
+            },
+            "prepayment.part_prepayment_min": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "7.2"
+            },
+            "prepayment.part_prepayment_fee_pct": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "7.2"
+            },
+            "prepayment.notice_days": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "7.2"
+            },
+            "collateral.type": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "6.1"
+            },
+            "ltv": {
+              "source_doc": "POL-LAP-V1",
+              "clause": "6.2"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "product_id": "NEXA-AL",
+      "name": "NexaDrive Auto Loan",
+      "category": "auto_loan",
+      "secured": true,
+      "purpose": "Purchase of a new or used private car",
+      "versions": [
+        {
+          "version_id": "NAL-2025-01",
+          "policy_doc": "POL-AL-V1",
+          "policy_version": "1.0",
+          "circular_doc": null,
+          "effective_from": "2025-01-01",
+          "effective_to": null,
+          "status": "in_force",
+          "terms": {
+            "eligibility": {
+              "age": {
+                "min": 21,
+                "max_at_application": 60,
+                "max_at_maturity": 65
+              },
+              "income": {
+                "min_net_monthly_salaried": 30000,
+                "min_annual_self_employed_itr": 360000
+              },
+              "bureau": {
+                "min_score_auto": 675,
+                "below_min_outcome": "not_eligible_under_standard_criteria"
+              },
+              "foir": [
+                {
+                  "income_min": 0,
+                  "income_max": null,
+                  "foir_max_pct": 50
+                }
+              ]
+            },
+            "limits": {
+              "amount": {
+                "min": 100000,
+                "max": 15000000
+              },
+              "tenure_months": {
+                "min": 12,
+                "max_new_vehicle": 84,
+                "max_used_vehicle": 60
+              },
+              "vehicle_age_at_maturity_max_years": 12
+            },
+            "rate": {
+              "type": "fixed",
+              "benchmark": null,
+              "reset": "none",
+              "rate_table": [
+                {
+                  "min_score": 800,
+                  "max_score": 900,
+                  "value_pct": 8.9
+                },
+                {
+                  "min_score": 750,
+                  "max_score": 799,
+                  "value_pct": 9.5
+                },
+                {
+                  "min_score": 700,
+                  "max_score": 749,
+                  "value_pct": 10.75
+                },
+                {
+                  "min_score": 675,
+                  "max_score": 699,
+                  "value_pct": 12.5
+                }
+              ],
+              "used_vehicle_premium_pct": 1.0
+            },
+            "fees": {
+              "processing": {
+                "pct": 1.0,
+                "min": 3500,
+                "max": 10000,
+                "gst_extra": true
+              },
+              "penal": {
+                "basis": "per_month_on_overdue_emi",
+                "value_pct": 2.0,
+                "min_amount": 500
+              }
+            },
+            "prepayment": {
+              "foreclosure_schedule": [
+                {
+                  "from_month": 1,
+                  "to_month": 12,
+                  "pct_of_outstanding": 3.0
+                },
+                {
+                  "from_month": 13,
+                  "to_month": 24,
+                  "pct_of_outstanding": 2.0
+                },
+                {
+                  "from_month": 25,
+                  "to_month": null,
+                  "pct_of_outstanding": 0.0
+                }
+              ]
+            },
+            "collateral": {
+              "type": "hypothecation of the financed vehicle"
+            },
+            "ltv": [
+              {
+                "vehicle": "new",
+                "ltv_pct": 90,
+                "basis": "on-road price"
+              },
+              {
+                "vehicle": "used",
+                "ltv_pct": 70,
+                "basis": "NexaBank empanelled valuer's valuation"
+              }
+            ]
+          },
+          "clause_refs": {
+            "eligibility.age.min": {
+              "source_doc": "POL-AL-V1",
+              "clause": "2.1"
+            },
+            "eligibility.age.max_at_application": {
+              "source_doc": "POL-AL-V1",
+              "clause": "2.1"
+            },
+            "eligibility.age.max_at_maturity": {
+              "source_doc": "POL-AL-V1",
+              "clause": "2.1"
+            },
+            "eligibility.income.min_net_monthly_salaried": {
+              "source_doc": "POL-AL-V1",
+              "clause": "2.2"
+            },
+            "eligibility.income.min_annual_self_employed_itr": {
+              "source_doc": "POL-AL-V1",
+              "clause": "2.2"
+            },
+            "eligibility.bureau.min_score_auto": {
+              "source_doc": "POL-AL-V1",
+              "clause": "2.3"
+            },
+            "eligibility.bureau.below_min_outcome": {
+              "source_doc": "POL-AL-V1",
+              "clause": "2.3"
+            },
+            "eligibility.foir": {
+              "source_doc": "POL-AL-V1",
+              "clause": "2.4"
+            },
+            "limits.amount.min": {
+              "source_doc": "POL-AL-V1",
+              "clause": "3.1"
+            },
+            "limits.amount.max": {
+              "source_doc": "POL-AL-V1",
+              "clause": "3.1"
+            },
+            "limits.tenure_months.min": {
+              "source_doc": "POL-AL-V1",
+              "clause": "3.2"
+            },
+            "limits.tenure_months.max_new_vehicle": {
+              "source_doc": "POL-AL-V1",
+              "clause": "3.2"
+            },
+            "limits.tenure_months.max_used_vehicle": {
+              "source_doc": "POL-AL-V1",
+              "clause": "3.2"
+            },
+            "limits.vehicle_age_at_maturity_max_years": {
+              "source_doc": "POL-AL-V1",
+              "clause": "3.2"
+            },
+            "rate.type": {
+              "source_doc": "POL-AL-V1",
+              "clause": "4.1"
+            },
+            "rate.benchmark": {
+              "source_doc": "POL-AL-V1",
+              "clause": "4.1"
+            },
+            "rate.reset": {
+              "source_doc": "POL-AL-V1",
+              "clause": "4.1"
+            },
+            "rate.rate_table": {
+              "source_doc": "POL-AL-V1",
+              "clause": "4.1"
+            },
+            "rate.used_vehicle_premium_pct": {
+              "source_doc": "POL-AL-V1",
+              "clause": "4.1"
+            },
+            "fees.processing.pct": {
+              "source_doc": "POL-AL-V1",
+              "clause": "5.1"
+            },
+            "fees.processing.min": {
+              "source_doc": "POL-AL-V1",
+              "clause": "5.1"
+            },
+            "fees.processing.max": {
+              "source_doc": "POL-AL-V1",
+              "clause": "5.1"
+            },
+            "fees.processing.gst_extra": {
+              "source_doc": "POL-AL-V1",
+              "clause": "5.1"
+            },
+            "fees.penal.basis": {
+              "source_doc": "POL-AL-V1",
+              "clause": "5.2"
+            },
+            "fees.penal.value_pct": {
+              "source_doc": "POL-AL-V1",
+              "clause": "5.2"
+            },
+            "fees.penal.min_amount": {
+              "source_doc": "POL-AL-V1",
+              "clause": "5.2"
+            },
+            "prepayment.foreclosure_schedule": {
+              "source_doc": "POL-AL-V1",
+              "clause": "7.1"
+            },
+            "collateral.type": {
+              "source_doc": "POL-AL-V1",
+              "clause": "6.1"
+            },
+            "ltv": {
+              "source_doc": "POL-AL-V1",
+              "clause": "6.2"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Catalog is synthetic. Rates, fees and limits are illustrative.",
+    "Spread tables are applied to the Bureau Score at sanction.",
+    "For floating-rate products the all-in rate = NRLR on sanction date + spread."
+  ]
+}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from time import perf_counter
+from typing import Any
 
 import structlog
 from langchain_core.documents import Document
@@ -24,6 +25,9 @@ def build_retrieval_chain(
     vector_store: VectorStore,
     parent_store: BaseStore[str, Document],
     settings: Settings,
+    *,
+    candidate_search: Runnable[dict[str, Any], list[tuple[Document, float]]] | None = None,
+    reranker: Runnable[dict[str, Any], list[tuple[Document, float]]] | None = None,
 ) -> Runnable[RetrieveRequest, RetrieveResponse]:
     """Search indexed policy chunks, then expand each hit to its parent section."""
 
@@ -39,16 +43,29 @@ def build_retrieval_chain(
             filters.append({"product_id": request.product_id})
 
         started = perf_counter()
-        rows = await vector_store.asimilarity_search_with_score(
-            request.query, k=request.top_k, pre_filter={"$and": filters}
-        )
+        k = max(request.top_k, settings.retrieval_candidates) if reranker else request.top_k
+        if candidate_search is not None:
+            rows = await candidate_search.ainvoke(
+                {"query": request.query, "k": k, "pre_filter": {"$and": filters}}
+            )
+        else:
+            rows = await vector_store.asimilarity_search_with_score(
+                request.query, k=k, pre_filter={"$and": filters}
+            )
         searched = perf_counter()
-        parent_ids = [document.metadata["parent_id"] for document, _ in rows]
+        candidate_count = len(rows)
+        if reranker is not None and rows:
+            rows = await reranker.ainvoke({"query": request.query, "as_of": as_of, "rows": rows})
+        reranked = perf_counter()
+        rows = rows[: request.top_k]
+        parent_ids = list(dict.fromkeys(document.metadata["parent_id"] for document, _ in rows))
         parents = await parent_store.amget(parent_ids) if parent_ids else []
+        parent_lookup = dict(zip(parent_ids, parents, strict=True))
         expanded = perf_counter()
 
         hits = []
-        for rank, ((document, score), parent) in enumerate(zip(rows, parents, strict=True), 1):
+        for rank, (document, score) in enumerate(rows, 1):
+            parent = parent_lookup[document.metadata["parent_id"]]
             if parent is None:
                 logger.warning("parent_section_missing", parent_id=document.metadata["parent_id"])
             hits.append(
@@ -72,12 +89,18 @@ def build_retrieval_chain(
                 )
             )
 
+        logger.info(
+            "retrieval_stages",
+            candidate_count=candidate_count,
+            mode="hybrid" if candidate_search is not None else "dense",
+            rerank_ms=round((reranked - searched) * 1000, 2),
+        )
         return RetrieveResponse(
             as_of=request.as_of,
             results=hits,
             timings=RetrieveTimings(
                 search_ms=round((searched - started) * 1000, 2),
-                parent_ms=round((expanded - searched) * 1000, 2),
+                parent_ms=round((expanded - reranked) * 1000, 2),
                 total_ms=round((perf_counter() - started) * 1000, 2),
             ),
         )
