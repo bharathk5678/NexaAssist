@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
-from uuid import UUID, uuid4
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 import structlog
 from ddtrace.llmobs import LLMObs
@@ -14,9 +14,17 @@ from app.models.feedback import FeedbackRecord, FeedbackRequest, FeedbackReview
 
 async def submit_feedback(request: FeedbackRequest, settings: Settings) -> FeedbackRecord:
     record = FeedbackRecord(
-        **request.model_dump(), feedback_id=uuid4(), created_at=datetime.now(UTC)
+        **request.model_dump(),
+        feedback_id=uuid5(
+            NAMESPACE_URL, f"{settings.institution}:{request.submitter_id}:{request.submission_id}"
+        ),
+        created_at=datetime.now(UTC),
     )
-    await asyncio.to_thread(database.save_feedback, record, settings)
+    previous = await asyncio.to_thread(database.save_feedback, record, settings)
+    if previous is not None:
+        if previous.model_dump(include=set(FeedbackRequest.model_fields)) != request.model_dump():
+            raise ValueError("Submission ID already used for different feedback")
+        return previous
     if LLMObs.enabled and request.response.datadog_span_id is not None:
         try:
             LLMObs.submit_feedback(

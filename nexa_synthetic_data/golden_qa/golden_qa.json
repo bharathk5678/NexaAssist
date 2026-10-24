@@ -121,7 +121,7 @@
     "upload_ref": null,
     "question": "Is there a foreclosure charge on a NexaFlex personal loan?",
     "expected_behavior": "answer",
-    "gold_answer": "Yes. Foreclosure is not allowed before 6 EMIs have been paid. After that, foreclosure attracts 4.00% of the outstanding principal plus 18% GST.",
+    "gold_answer": "Yes. Foreclosure is not allowed before 6 EMIs have been paid. After that, foreclosure attracts 4.00% of the outstanding principal plus GST. The foreclosure clause does not specify a GST percentage.",
     "key_facts": [
       "not allowed before 6 EMIs",
       "4.00% of outstanding principal",

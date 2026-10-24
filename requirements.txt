@@ -7,7 +7,7 @@ langchain-core
 langchain-mongodb>=0.12.1
 langchain-openai
 langchain-text-splitters>=1.1.3
-langsmith
+langgraph>=1.2.12,<2
 openai
 pdfplumber
 pydantic>=2

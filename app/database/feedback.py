@@ -2,18 +2,36 @@ from __future__ import annotations
 
 from uuid import UUID
 
+from pymongo.errors import DuplicateKeyError
+
 from app.core.config import Settings
 from app.database.mongo import _database
 from app.models.feedback import FeedbackRecord, FeedbackReview
 
 
-def save_feedback(record: FeedbackRecord, settings: Settings) -> None:
-    _database(settings)[settings.mongodb_feedback_collection].insert_one(
-        {
-            "_id": str(record.feedback_id),
-            "institution": settings.institution,
-            **record.model_dump(mode="json"),
-        }
+def save_feedback(record: FeedbackRecord, settings: Settings) -> FeedbackRecord | None:
+    collection = _database(settings)[settings.mongodb_feedback_collection]
+    query = {"_id": str(record.feedback_id), "institution": settings.institution}
+    try:
+        previous = collection.find_one_and_update(
+            query,
+            {
+                "$setOnInsert": {
+                    "_id": str(record.feedback_id),
+                    "institution": settings.institution,
+                    **record.model_dump(mode="json"),
+                }
+            },
+            upsert=True,
+        )
+    except DuplicateKeyError:
+        previous = collection.find_one(query)
+        if previous is None:
+            raise
+    if previous is None:
+        return None
+    return FeedbackRecord.model_validate(
+        {key: value for key, value in previous.items() if key not in {"_id", "institution"}}
     )
 
 

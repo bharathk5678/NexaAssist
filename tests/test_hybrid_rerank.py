@@ -57,6 +57,9 @@ def test_service_applies_configured_search_and_reranking(
     monkeypatch.setattr(retrieval_service, "get_embeddings", lambda _: object())
     monkeypatch.setattr(retrieval_service, "get_vector_store", lambda *_: vector)
     monkeypatch.setattr(retrieval_service, "get_parent_store", lambda _: InMemoryStore())
+    monkeypatch.setattr(
+        retrieval_service, "build_amendment_search", lambda _: RunnableLambda(lambda _: [])
+    )
     monkeypatch.setattr(retrieval_service, "build_hybrid_search", hybrid_factory, raising=False)
     monkeypatch.setattr(retrieval_service, "build_rerank_chain", rerank_factory, raising=False)
     response = asyncio.run(

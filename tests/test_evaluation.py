@@ -10,6 +10,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from pydantic import ValidationError
 
+from app.core import observability
 from app.core.config import Settings
 from app.evaluation import run as evaluation
 from app.evaluation.run import JudgeScore, load_cases, quality_gate
@@ -124,9 +125,11 @@ def test_evaluation_reuses_generation_evidence_and_collects_trace(
         enabled=datadog_enabled,
         workflow=Mock(return_value=nullcontext(span)),
         annotate=Mock(),
+        annotation_context=Mock(side_effect=lambda **_: nullcontext()),
         export_span=Mock(return_value={"trace_id": "1", "span_id": "2"}),
     )
     monkeypatch.setattr(evaluation, "LLMObs", datadog)
+    monkeypatch.setattr(observability, "LLMObs", datadog)
     response = RetrieveResponse.model_validate(
         {
             "as_of": "2026-10-01",
@@ -195,6 +198,10 @@ def test_evaluation_reuses_generation_evidence_and_collects_trace(
         "answer_policy",
     }
     if datadog_enabled:
+        prompt = datadog.annotation_context.call_args.kwargs["prompt"]
+        assert prompt["id"] == "nexaassist-policy-judge"
+        assert prompt["version"] == "policy-judge-v2"
+        assert "Reference source text" in prompt["variables"]["record"]
         assert records[0]["datadog_span"] == {"trace_id": "1", "span_id": "2"}
         assert datadog.annotate.call_args.kwargs["input_data"] == records[0]["request"]
         assert datadog.annotate.call_args.kwargs["output_data"]["answer"] == "7.5 crore [1]"

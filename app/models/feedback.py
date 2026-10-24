@@ -17,6 +17,7 @@ class FeedbackRequest(BaseModel):
     response: AnswerResponse
     helpful: bool
     submitter_id: UUID = Field(default_factory=uuid4)
+    submission_id: UUID = Field(default_factory=uuid4)
     correction: str = Field(default="", max_length=4000)
 
     @model_validator(mode="after")
