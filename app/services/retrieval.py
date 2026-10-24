@@ -10,7 +10,7 @@ from app.chains.retrieval import build_retrieval_chain
 from app.core.config import Settings
 from app.core.observability import retrieval_latencies
 from app.database.mongo import get_parent_store, get_vector_store
-from app.database.retrieval import build_hybrid_search
+from app.database.retrieval import build_amendment_search, build_hybrid_search
 from app.models.retrieval import RetrieveRequest, RetrieveResponse
 
 logger = structlog.get_logger()
@@ -29,6 +29,7 @@ async def retrieve_policy(request: RetrieveRequest, settings: Settings) -> Retri
             if settings.retrieval_mode == "hybrid"
             else None,
             reranker=build_rerank_chain(settings) if settings.rerank_enabled else None,
+            amendment_search=build_amendment_search(settings),
         )
         response = await chain.ainvoke(request)
     except Exception:

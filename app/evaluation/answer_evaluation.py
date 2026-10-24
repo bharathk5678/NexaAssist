@@ -27,7 +27,7 @@ class GoldenAnswer(BaseModel):
     input: RetrieveRequest
     expected_output: str = Field(min_length=1)
     context: list[ExpectedEvidence]
-    expected_status: Literal["answered", "insufficient_evidence"]
+    expected_status: Literal["answered", "insufficient_evidence", "needs_clarification"]
 
 
 class EvidenceContext(BaseModel):
@@ -61,7 +61,7 @@ def capture_sources(retrieved: RetrieveResponse) -> list[EvidenceContext]:
     """Mirror the answer chain's document/version/parent deduplication, in order."""
     # shortcut: keep this key aligned with build_answer_chain until it exposes context.
     unique: dict[tuple[str, str, str], RetrieveHit] = {}
-    for hit in retrieved.results:
+    for hit in retrieved.evidence:
         key = (hit.citation.doc_id, hit.citation.policy_version, hit.parent_text)
         unique.setdefault(key, hit)
     return [EvidenceContext(evidence_id=i, hit=hit) for i, hit in enumerate(unique.values(), 1)]
@@ -75,6 +75,8 @@ def mechanical_checks(record: EvaluationRecord) -> dict[str, bool | float | None
     ids = {citation.evidence_id for citation in response.citations}
     if response.status == "insufficient_evidence":
         valid = not response.citations and not markers and response.answer == INSUFFICIENT_EVIDENCE
+    elif response.status == "needs_clarification":
+        valid = not response.citations and not markers and response.answer.rstrip().endswith("?")
     else:
         valid = (
             bool(ids)

@@ -1,0 +1,518 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="A code-backed Datadog field guide for NexaAssist: FastAPI, Streamlit, LangChain, MongoDB Atlas and OpenAI."><title>NexaAssist · Datadog Field Guide</title><style>
+/* Layout: single reading column (max 1080px) with a sticky section nav; signal colors (metrics/traces/logs/AI) carry meaning across every diagram, card and chip. */
+:root{
+  --bg:#f3f4f8; --surface:#ffffff; --sunk:#e9ebf2; --ink:#1a1c29; --muted:#5a5f75; --line:#d9dce7;
+  --accent:#5b3cc4; --accent-ink:#ffffff; --accent-soft:#ece7fb;
+  --metric:#2259c4; --trace:#b46a00; --log:#0f7d72; --ai:#a8306f;
+  --metric-soft:#e3ecfb; --trace-soft:#f8ecd9; --log-soft:#dcf1ee; --ai-soft:#f7e2ee;
+  --code-bg:#1d1f2c; --code-ink:#e6e7f0; --code-dim:#9095ad; --code-key:#c7b8ff; --code-str:#9fe3cf;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --s-1:.8125rem; --s0:1rem; --s1:1.125rem; --s2:1.375rem; --s3:1.875rem; --s4:2.75rem;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#11121a; --surface:#1a1c27; --sunk:#232634; --ink:#e9eaf3; --muted:#a0a4bb; --line:#2e3142;
+  --accent:#a08bff; --accent-ink:#14111f; --accent-soft:#2a2445;
+  --metric:#78a6ff; --trace:#f2ab45; --log:#46c8b8; --ai:#f07ab6;
+  --metric-soft:#1d2a45; --trace-soft:#3a2b14; --log-soft:#133431; --ai-soft:#3a1d2d;
+  --code-bg:#0c0d13; --code-ink:#e6e7f0; --code-dim:#7e839c; --code-key:#c7b8ff; --code-str:#9fe3cf;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#11121a; --surface:#1a1c27; --sunk:#232634; --ink:#e9eaf3; --muted:#a0a4bb; --line:#2e3142;
+  --accent:#a08bff; --accent-ink:#14111f; --accent-soft:#2a2445;
+  --metric:#78a6ff; --trace:#f2ab45; --log:#46c8b8; --ai:#f07ab6;
+  --metric-soft:#1d2a45; --trace-soft:#3a2b14; --log-soft:#133431; --ai-soft:#3a1d2d;
+  --code-bg:#0c0d13; --code-ink:#e6e7f0; --code-dim:#7e839c; --code-key:#c7b8ff; --code-str:#9fe3cf;
+  color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:var(--s0);line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h2{font-size:var(--s3);font-weight:800;letter-spacing:-.01em}
+h3{font-size:var(--s1);font-weight:700}
+p{margin:0}
+code,kbd{font-family:var(--mono);font-size:.88em}
+:not(pre)>code{background:var(--sunk);padding:.08em .35em;border-radius:4px}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--mono);font-size:var(--s-1);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{max-width:65ch;color:var(--muted);font-size:var(--s1)}
+
+/* header */
+header{padding-block:40px 24px}
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px;align-items:end}
+.hero h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;letter-spacing:-.025em}
+.hero h1 span{color:var(--accent)}
+.hero p{margin-top:14px}
+.signals{display:grid;gap:8px}
+.sig{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;align-items:center;padding:10px 12px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.sig b{font-family:var(--mono);font-size:var(--s-1);letter-spacing:.06em;text-transform:uppercase}
+.sig span{font-size:.92rem;color:var(--muted)}
+.sig.m b{color:var(--metric)} .sig.t b{color:var(--trace)} .sig.l b{color:var(--log)} .sig.a b{color:var(--ai)}
+.update{margin-top:22px;padding:12px 14px;border-radius:8px;background:var(--accent-soft);font-size:.94rem;max-width:80ch}
+.update strong{color:var(--accent)}
+
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-block:1px solid var(--line)}
+nav.toc .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:8px;scrollbar-width:none}
+nav.toc a{flex:none;text-decoration:none;color:var(--ink);font-size:.9rem;font-weight:500;padding:6px 12px;border-radius:999px}
+nav.toc a:hover{background:var(--sunk)}
+
+section{padding-block:56px 8px;scroll-margin-top:56px}
+.sec-head{display:grid;gap:8px;margin-bottom:24px}
+
+/* learning guide */
+.levels{display:grid;gap:14px}
+.level{display:grid;grid-template-columns:72px minmax(0,1fr);gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.level .num{font-family:var(--display);font-weight:800;font-size:2.4rem;line-height:1;color:var(--accent)}
+.level .num small{display:block;font-family:var(--mono);font-size:.68rem;font-weight:400;letter-spacing:.08em;color:var(--muted);margin-top:6px;text-transform:uppercase}
+.level h3{margin-bottom:6px}
+.level .what{max-width:70ch}
+.triad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.triad div{background:var(--sunk);border-radius:8px;padding:10px 12px;font-size:.93rem;min-width:0}
+.triad b{display:block;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.level ul{margin:8px 0 0;padding-left:1.1em}
+.level li{margin:2px 0}
+
+/* diagrams */
+.figure{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.scroll-x{overflow-x:auto}
+.figure svg{display:block;width:100%;min-width:760px;height:auto}
+.figure figcaption,.caption{margin-top:10px;color:var(--muted);font-size:.9rem;max-width:80ch}
+svg text{font-family:var(--body)}
+svg .mono{font-family:var(--mono)}
+.arrowhead{fill:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:.88rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+/* flash notes */
+.fc-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:.88rem;padding:6px 12px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.ghost{margin-left:auto}
+.fc-progress{font-family:var(--mono);font-size:.82rem;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.card{perspective:1000px;min-height:200px}
+.card-inner{position:relative;width:100%;height:100%;min-height:200px;transition:transform .45s ease;transform-style:preserve-3d}
+.card.flipped .card-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);overflow:auto}
+.front{background:var(--surface);cursor:pointer}
+.back{background:var(--sunk);transform:rotateY(180deg)}
+.face .tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.face .q{font-family:var(--display);font-weight:700;font-size:1.08rem;line-height:1.3}
+.face .a{font-size:.93rem;line-height:1.5}
+.face .row{margin-top:auto;display:flex;gap:8px;justify-content:space-between;align-items:center}
+.face button{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:4px 10px;cursor:pointer}
+.face button.known{background:var(--log-soft);border-color:var(--log);color:var(--log)}
+.hint{font-size:.8rem;color:var(--muted)}
+.card.is-known .front{border-color:var(--log)}
+@media (prefers-reduced-motion: reduce){.card-inner{transition:none}}
+
+/* memorize */
+.mnemonics{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.mn{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:grid;gap:8px;align-content:start}
+.mn .hook{font-family:var(--display);font-weight:800;font-size:1.5rem;letter-spacing:-.01em;line-height:1.15}
+.mn .hook em{font-style:normal;color:var(--accent)}
+.mn .keys{display:flex;flex-wrap:wrap;gap:6px}
+.mn .keys span{font-family:var(--mono);font-size:.78rem;padding:3px 8px;border-radius:5px;background:var(--sunk)}
+.mn p{font-size:.93rem;color:var(--muted)}
+.ladder{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:6px}
+.rung{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;min-width:0}
+.rung b{font-family:var(--display);font-size:1.6rem;color:var(--accent);line-height:1}
+.rung h3{font-size:1rem;margin:4px 0}
+.rung p{font-size:.86rem;color:var(--muted)}
+.plan{width:100%;border-collapse:collapse;font-size:.93rem;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.plan th,.plan td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.plan th{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.plan td:first-child{font-family:var(--mono);white-space:nowrap;font-variant-numeric:tabular-nums}
+.sub{margin-top:36px;display:grid;gap:12px}
+
+/* project */
+.steps{display:grid;gap:14px;counter-reset:step}
+.step{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px}
+.step .n{width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--display);font-weight:800}
+.step .body{min-width:0;display:grid;gap:8px}
+.step .body p{max-width:72ch}
+.codebox{position:relative;background:var(--code-bg);border-radius:8px;min-width:0}
+.codebox pre{margin:0;padding:14px 16px;overflow-x:auto;color:var(--code-ink);font-family:var(--mono);font-size:.82rem;line-height:1.55}
+.codebox .lbl{display:flex;justify-content:space-between;align-items:center;padding:6px 10px 0 16px;font-family:var(--mono);font-size:.7rem;color:var(--code-dim);letter-spacing:.06em;text-transform:uppercase}
+.codebox button{font:inherit;font-size:.7rem;background:transparent;color:var(--code-dim);border:1px solid var(--code-dim);border-radius:5px;padding:2px 8px;cursor:pointer}
+.c{color:var(--code-dim)} .k{color:var(--code-key)} .s{color:var(--code-str)}
+.monitors{width:100%;border-collapse:collapse;font-size:.9rem}
+.monitors th,.monitors td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.monitors th{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.monitors td code{white-space:nowrap}
+.pill{display:inline-block;font-family:var(--mono);font-size:.7rem;padding:2px 8px;border-radius:999px;font-weight:600}
+.pill.m{background:var(--metric-soft);color:var(--metric)} .pill.t{background:var(--trace-soft);color:var(--trace)} .pill.l{background:var(--log-soft);color:var(--log)} .pill.a{background:var(--ai-soft);color:var(--ai)}
+.check{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.check ul{margin:8px 0 0;padding-left:1.1em}
+.check li{margin:4px 0}
+.queries{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+
+footer{padding-block:56px 48px;color:var(--muted);font-size:.88rem}
+footer ul{padding-left:1.1em}
+
+@media (max-width:820px){
+  .hero{grid-template-columns:1fr}
+  .triad,.queries{grid-template-columns:1fr}
+  .ladder{grid-template-columns:1fr 1fr}
+}
+@media (max-width:520px){
+  .level{grid-template-columns:1fr;gap:6px}
+  .ladder{grid-template-columns:1fr}
+  .step{grid-template-columns:1fr}
+  .chip.ghost{margin-left:0}
+  h2{font-size:var(--s2)}
+}
+
+body{margin:0}
+.skip{position:absolute;left:16px;top:-80px;background:var(--surface);padding:10px;z-index:20}.skip:focus{top:8px}
+.status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px;margin-top:22px}
+.status-grid article{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:8px}
+.status-grid h3{font-size:1.05rem}.status-grid p{font-size:.92rem;color:var(--muted)}
+.path{display:flex;align-items:stretch;gap:8px;overflow-x:auto;padding-bottom:6px}.path>div{flex:1;min-width:160px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}.path b{display:block;color:var(--trace)}.path span{font-size:.88rem;color:var(--muted)}
+.stack{display:grid;gap:16px}.note{background:var(--accent-soft);border-left:3px solid var(--accent);padding:14px 16px;border-radius:0 8px 8px 0}.muted{color:var(--muted)}
+.plan td:first-child{white-space:normal}.plan td code,.plan th{overflow-wrap:anywhere}.plan code{white-space:normal}a,code{overflow-wrap:anywhere}
+.mnemonics{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}.face .q{font-size:1.03rem}.card,.card-inner{min-height:260px}.card-inner{height:260px}.face .row{margin-top:auto}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@media print{nav,.fc-bar,.skip,[data-copy]{display:none}.wrap{max-width:none}section{break-inside:avoid;padding-top:24px}.card,.card-inner{height:auto;min-height:0;transform:none!important}.face{position:static;transform:none;overflow:visible}.front{display:none}.back{display:block}.figure svg{min-width:0}.scroll-x{overflow:visible}.cards{grid-template-columns:1fr 1fr}.codebox pre{white-space:pre-wrap}body{font-size:11px}}
+</style></head><body><a class="skip" href="#guide">Skip to the guide</a>
+<header><div class="wrap"><div class="hero"><div><p class="eyebrow">NexaAssist · repository field guide · 22 October 2026</p><h1>Datadog,<br><span>inside NexaAssist.</span></h1><p class="lede">Follow a policy question from Streamlit to FastAPI, LangChain, Atlas and OpenAI. Learn what the telemetry means, where the code creates it, and how to find it in Datadog.</p></div><div class="signals" aria-label="Signal types"><div class="sig t"><b>APM</b><span>Where did the request spend its time?</span></div><div class="sig a"><b>LLM</b><span>Which prompt, context and model produced this answer?</span></div><div class="sig m"><b>Quality</b><span>Did the answer satisfy the evidence and reference?</span></div><div class="sig l"><b>Logs</b><span>Which application event explains the outcome?</span></div></div></div><p class="update"><strong>Read this as a map of the existing code.</strong> Traces, prompt tracking, local evaluations and feedback are implemented. JSON logs exist locally; the supplied Docker Agent does not collect them. Dashboards, monitors and SLOs still need separate configuration. Datadog may label the LLM views “Agent Observability”; the Python SDK remains <code>ddtrace.llmobs</code>.</p></div></header><nav class="toc" aria-label="Sections"><div class="wrap"><a href="#guide">Learn the signals</a><a href="#flow">Follow a question</a><a href="#mindmap">Repo map</a><a href="#flash">Flash notes</a><a href="#memorize">Practice</a><a href="#project">Run &amp; inspect</a><a href="#sources">Sources</a></div></nav><main class="wrap">
+<section id="guide"><div class="sec-head"><p class="eyebrow">01 · Learn the signals</p><h2>One application. Different questions.</h2><p class="lede">A healthy HTTP response, a correct policy answer and a delivered trace are three separate checks.</p></div>
+<div class="levels">
+<article class="level"><div class="num">1<small>Collect</small></div><div><h3>The SDK records; the Agent forwards.</h3><p class="what"><code>ddtrace-run</code> starts before application imports so supported FastAPI, HTTPX, PyMongo, LangChain and OpenAI calls can be instrumented. <code>init_telemetry()</code> also calls <code>ddtrace.patch_all()</code> during application startup.</p><div class="triad"><div><b>Purpose</b>Explain latency across API, retrieval and model calls.</div><div><b>In this repo</b>Mac processes send traces to <code>127.0.0.1:18126</code>; Docker maps that to the Agent’s <code>8126/TCP</code>. Runtime metrics use <code>18125 → 8125/UDP</code>.</div><div><b>Operating habit</b>Load <code>.env</code> into the process before <code>ddtrace-run</code>. Pydantic reading the file does not export SDK settings.</div></div><p class="caption"><a href="app/core/telemetry.py">app/core/telemetry.py</a> · <a href="app/compose.datadog.yaml">app/compose.datadog.yaml</a></p></div></article>
+<article class="level"><div class="num">2<small>Identify</small></div><div><h3>Keep service, application and span distinct.</h3><p class="what">The UI is APM service <code>nexaassist-ui</code>; the API is <code>nexaassist-api</code>. API workflows explicitly set <code>agent_service=settings.dd_service</code> so an upstream UI LLM application name does not regroup their model runs.</p><div class="triad"><div><b>Purpose</b>Find API model calls under the same LLM application whether the question came from the UI or directly.</div><div><b>In this repo</b>Datadog propagates tracing headers across HTTP. The API workflow identity is explicit while the distributed APM trace stays connected.</div><div><b>Operating habit</b>Start with <code>service:nexaassist-api env:dev</code>. Do not put an LLM-only span-type filter on an HTTP request search.</div></div><p class="caption"><a href="app/services/answer.py">app/services/answer.py</a> · <a href="app/services/evaluation.py">app/services/evaluation.py</a></p></div></article>
+<article class="level"><div class="num">3<small>Explain</small></div><div><h3>An LLM span carries the generation evidence.</h3><p class="what"><code>ChatOpenAI</code> uses the Responses API. Automatic instrumentation records supported model calls; <code>prompt_annotation_context()</code> adds a stable prompt ID, version, static chat template and the actual invocation variables.</p><div class="triad"><div><b>Purpose</b>Reproduce the question, date, product and supplied policy passages used for a generation.</div><div><b>In this repo</b>Templates come from the existing LangChain prompts. Each citation-repair attempt has its own variables under the same prompt version.</div><div><b>Operating habit</b>Inspect the OpenAI provider LLM span for prompt details. Increment the adjacent version constant whenever its template changes.</div></div><p class="caption"><a href="app/chains/llm.py">app/chains/llm.py</a> · <a href="app/core/observability.py">app/core/observability.py</a> · <a href="app/chains/prompts/answer.py">app/chains/prompts/answer.py</a></p></div></article>
+<article class="level"><div class="num">4<small>Evaluate</small></div><div><h3>Tracing records behavior; Ragas and judges score it.</h3><p class="what">The evaluated-answer service retrieves and generates once, then scores that answer and its exact assembled context. The batch runner also compares against local golden cases with a structured LLM judge.</p><div class="triad"><div><b>Purpose</b>Separate fast answers from grounded, relevant answers.</div><div><b>In this repo</b>Scored values are submitted against an exported workflow span with <code>eval_scope="span"</code>. Missing reference data yields an explicit unavailable status, not a fabricated zero.</div><div><b>Operating habit</b>Select the evaluated workflow’s <strong>Evaluations</strong> tab. Its child model spans do not automatically inherit the same evaluation scores.</div></div><p class="caption"><a href="app/evaluation/live.py">app/evaluation/live.py</a> · <a href="app/evaluation/run.py">app/evaluation/run.py</a></p></div></article>
+<article class="level"><div class="num">5<small>Diagnose</small></div><div><h3>Use events and limits honestly.</h3><p class="what"><code>structlog</code> writes JSON events such as <code>retrieval_completed</code>, <code>answer_completed</code> and <code>model_token_usage</code>. The tracing SDK injects correlation fields when configured. Collection and indexing of those logs are a separate path.</p><div class="triad"><div><b>Purpose</b>Correlate failures and token usage with a request ID in local logs.</div><div><b>In this repo</b>The current Compose file enables APM and DogStatsD, not a Logs Agent source. Its Docker socket exposes container information, not full macOS host monitoring.</div><div><b>Operating habit</b>Treat JSON endpoints, custom metric export, log shipping and alert creation as separate integrations.</div></div><p class="caption"><a href="app/core/logging.py">app/core/logging.py</a> · <a href="app/api/operations.py">app/api/operations.py</a></p></div></article>
+</div><div class="sub"><h3>Implementation status</h3><div class="scroll-x"><table class="plan"><thead><tr><th scope="col">Signal or capability</th><th scope="col">What exists now</th><th scope="col">Boundary</th></tr></thead><tbody><tr><td>APM + LLM traces</td><td>Automatic library spans and explicit answer/evaluation workflows.</td><td>Cloud visibility was confirmed by the user for the 21 October diagnostic; this guide does not run another live check.</td></tr><tr><td>Prompt versions</td><td>Answer <code>nexaassist-policy-answer / 1.0.0</code>; batch judge <code>nexaassist-policy-judge / policy-judge-v2</code>.</td><td>Local templates tracked in Datadog; no hosted prompt registry or remote deployment.</td></tr><tr><td>Quality + feedback</td><td>Live Ragas, batch Ragas and judge scores; optional <code>thumbs</code> feedback.</td><td>Scoring requires a successful run and the necessary reference/context. <code>queued</code> is not a delivery receipt.</td></tr><tr><td>Metrics</td><td>Python runtime metrics are configured through DogStatsD. Retrieval counters and recent percentiles are JSON HTTP endpoints.</td><td>The application does not publish those endpoint values as custom DogStatsD metrics or configure a scraper.</td></tr><tr><td>Logs</td><td>JSON output with trace correlation; local log files when the launch command redirects output.</td><td>Docker Agent log collection is disabled in the supplied Compose file. No cloud log visibility is claimed.</td></tr><tr><td>Monitors, SLOs, RUM, agents</td><td>Available as possible later work.</td><td>No configured monitor/SLO/RUM, LangGraph agent or application MCP server is supplied here.</td></tr></tbody></table></div></div></section>
+<section id="flow"><div class="sec-head"><p class="eyebrow">02 · Follow a question</p><h2>The policy path and the telemetry path.</h2><p class="lede">The application calls Atlas and OpenAI directly. Datadog’s Agent receives telemetry; it does not proxy policy retrieval or model traffic.</p></div>
+<div class="path" aria-label="Application request path"><div><b>1 · Streamlit</b><span>HTTPX request<br>Answer or Evidence mode</span></div><div><b>2 · FastAPI</b><span>Validate the contract<br>call the service</span></div><div><b>3 · LangChain</b><span>Retrieve, assemble context<br>generate, validate citations</span></div><div><b>4 · Atlas + OpenAI</b><span>Vector and parent evidence<br>embeddings and chat</span></div><div><b>5 · Response</b><span>Answer + quoted sources<br>optional quality + feedback</span></div></div>
+<figure class="figure" style="margin:0">
+    <div class="scroll-x">
+    <svg viewBox="0 0 985 470" role="img" aria-label="Data flow: app with ddtrace sends traces, metrics, logs and LLM spans to the Datadog Agent on ports 8126 and 8125 and via log tailing; the Agent forwards to Datadog intake for your DD_SITE; products feed dashboards, monitors, Prompt versions and notifications. An agentless path sends LLM spans directly.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+
+      <!-- columns -->
+      <rect x="20" y="50" width="240" height="360" rx="10" style="fill:var(--sunk);stroke:var(--line)"/>
+      <text x="140" y="78" text-anchor="middle" style="fill:var(--ink);font-size:15px;font-weight:700">NexaAssist on Mac</text>
+      <text x="140" y="94" text-anchor="middle" style="fill:var(--muted);font-size:11px">Streamlit + FastAPI + LangChain</text>
+
+      <rect x="320" y="50" width="230" height="360" rx="10" style="fill:var(--sunk);stroke:var(--line)"/>
+      <text x="435" y="78" text-anchor="middle" style="fill:var(--ink);font-size:15px;font-weight:700">Datadog Agent</text>
+      <text x="435" y="94" text-anchor="middle" style="fill:var(--muted);font-size:11px">Docker Desktop · loopback ports</text>
+
+      <rect x="610" y="50" width="160" height="360" rx="10" style="fill:var(--sunk);stroke:var(--line)"/>
+      <text x="690" y="78" text-anchor="middle" style="fill:var(--ink);font-size:15px;font-weight:700">Datadog intake</text>
+      <text x="690" y="94" text-anchor="middle" style="fill:var(--muted);font-size:11px" class="mono">DD_SITE region</text>
+
+      <rect x="800" y="50" width="165" height="360" rx="10" style="fill:var(--sunk);stroke:var(--line)"/>
+      <text x="882" y="78" text-anchor="middle" style="fill:var(--ink);font-size:15px;font-weight:700">You inspect</text>
+      <text x="882" y="94" text-anchor="middle" style="fill:var(--muted);font-size:11px">Views used by this repository</text>
+
+      <!-- app chips -->
+      <g>
+        <rect x="34" y="108" width="212" height="46" rx="7" style="fill:var(--surface);stroke:var(--trace);stroke-width:1.5"/>
+        <text x="46" y="127" style="fill:var(--ink);font-size:12.5px;font-weight:600">ddtrace auto-instrumentation</text>
+        <text x="46" y="144" style="fill:var(--muted);font-size:11px">FastAPI, HTTPX, MongoDB, OpenAI</text>
+
+        <rect x="34" y="164" width="212" height="46" rx="7" style="fill:var(--surface);stroke:var(--metric);stroke-width:1.5"/>
+        <text x="46" y="183" style="fill:var(--ink);font-size:12.5px;font-weight:600">Python runtime metrics</text>
+        <text x="46" y="200" style="fill:var(--muted);font-size:11px">GC, memory and process telemetry</text>
+
+        <rect x="34" y="220" width="212" height="46" rx="7" style="fill:var(--surface);stroke:var(--log);stroke-width:1.5"/>
+        <text x="46" y="239" style="fill:var(--ink);font-size:12.5px;font-weight:600">JSON logs · local output</text>
+        <text x="46" y="256" style="fill:var(--muted);font-size:11px">trace IDs injected when enabled</text>
+
+        <rect x="34" y="276" width="212" height="46" rx="7" style="fill:var(--surface);stroke:var(--ai);stroke-width:1.5"/>
+        <text x="46" y="295" style="fill:var(--ink);font-size:12.5px;font-weight:600">LLMObs SDK</text>
+        <text x="46" y="312" style="fill:var(--muted);font-size:11px">workflow + model spans, scores</text>
+
+        <text x="140" y="356" text-anchor="middle" style="fill:var(--muted);font-size:11px" class="mono">DD_SERVICE</text>
+        <text x="140" y="372" text-anchor="middle" style="fill:var(--muted);font-size:11px" class="mono">DD_ENV · DD_VERSION</text>
+        <text x="140" y="392" text-anchor="middle" style="fill:var(--muted);font-size:11px">shared service / env / version tags</text>
+      </g>
+
+      <!-- agent chips -->
+      <g>
+        <rect x="334" y="108" width="202" height="46" rx="7" style="fill:var(--surface);stroke:var(--line)"/>
+        <text x="346" y="127" style="fill:var(--trace);font-size:12.5px;font-weight:600" class="mono">:18126 → :8126 TCP</text>
+        <text x="346" y="144" style="fill:var(--muted);font-size:11px">trace receiver, sampling</text>
+
+        <rect x="334" y="164" width="202" height="46" rx="7" style="fill:var(--surface);stroke:var(--line)"/>
+        <text x="346" y="183" style="fill:var(--metric);font-size:12.5px;font-weight:600" class="mono">:18125 → :8125 UDP</text>
+        <text x="346" y="200" style="fill:var(--muted);font-size:11px">runtime telemetry via UDP</text>
+
+        <rect x="334" y="220" width="202" height="46" rx="7" style="fill:var(--surface);stroke:var(--line)"/>
+        <text x="346" y="239" style="fill:var(--log);font-size:12.5px;font-weight:600">Log tailer · not configured</text>
+        <text x="346" y="256" style="fill:var(--muted);font-size:11px">no mounted app-log source</text>
+
+        <rect x="334" y="276" width="202" height="46" rx="7" style="fill:var(--surface);stroke:var(--line)"/>
+        <text x="346" y="295" style="fill:var(--ai);font-size:12.5px;font-weight:600">LLM span relay</text>
+        <text x="346" y="312" style="fill:var(--muted);font-size:11px">Agent-based LLM telemetry</text>
+
+        <rect x="334" y="332" width="202" height="46" rx="7" style="fill:var(--surface);stroke:var(--line)"/>
+        <text x="346" y="351" style="fill:var(--ink);font-size:12.5px;font-weight:600">Checks + host metrics</text>
+        <text x="346" y="368" style="fill:var(--muted);font-size:11px">Docker / VM metrics; not macOS</text>
+      </g>
+
+      <!-- app → agent arrows -->
+      <g style="stroke:var(--muted);stroke-width:1.4;fill:none">
+        <line x1="246" y1="131" x2="332" y2="131" marker-end="url(#ah)"/>
+        <line x1="246" y1="187" x2="332" y2="187" marker-end="url(#ah)"/>
+        <line stroke-dasharray="5 4" opacity=".45" x1="246" y1="243" x2="332" y2="243" marker-end="url(#ah)"/>
+        <line x1="246" y1="299" x2="332" y2="299" marker-end="url(#ah)"/>
+      </g>
+
+      <!-- intake chips -->
+      <g>
+        <rect x="624" y="108" width="132" height="46" rx="7" style="fill:var(--trace-soft);stroke:var(--trace)"/>
+        <text x="690" y="136" text-anchor="middle" style="fill:var(--ink);font-size:12.5px;font-weight:600">APM / Traces</text>
+        <rect x="624" y="164" width="132" height="46" rx="7" style="fill:var(--metric-soft);stroke:var(--metric)"/>
+        <text x="690" y="192" text-anchor="middle" style="fill:var(--ink);font-size:12.5px;font-weight:600">Metrics</text>
+        <rect x="624" y="220" width="132" height="46" rx="7" style="fill:var(--log-soft);stroke:var(--log)"/>
+        <text x="690" y="248" opacity=".5" text-anchor="middle" style="fill:var(--ink);font-size:12.5px;font-weight:600">Logs</text>
+        <rect x="624" y="276" width="132" height="46" rx="7" style="fill:var(--ai-soft);stroke:var(--ai)"/>
+        <text x="690" y="304" text-anchor="middle" style="fill:var(--ink);font-size:12.5px;font-weight:600">Agent Obs</text>
+        <rect x="624" y="332" width="132" height="46" rx="7" style="fill:var(--surface);stroke:var(--line)"/>
+        <text x="690" y="360" text-anchor="middle" style="fill:var(--ink);font-size:12.5px;font-weight:600">Infrastructure</text>
+      </g>
+
+      <!-- agent → intake -->
+      <g style="stroke:var(--muted);stroke-width:1.4;fill:none">
+        <line x1="536" y1="131" x2="622" y2="131" marker-end="url(#ah)"/>
+        <line x1="536" y1="187" x2="622" y2="187" marker-end="url(#ah)"/>
+        <line stroke-dasharray="5 4" opacity=".45" x1="536" y1="243" x2="622" y2="243" marker-end="url(#ah)"/>
+        <line x1="536" y1="299" x2="622" y2="299" marker-end="url(#ah)"/>
+        <line x1="536" y1="355" x2="622" y2="355" marker-end="url(#ah)"/>
+      </g>
+      <text x="579" y="398" text-anchor="middle" style="fill:var(--muted);font-size:10.5px">HTTPS, batched</text>
+
+      <!-- act chips -->
+      <g>
+        <rect x="814" y="108" width="137" height="40" rx="7" style="fill:var(--surface);stroke:var(--line)"/>
+        <text x="882" y="133" text-anchor="middle" style="fill:var(--ink);font-size:12.5px;font-weight:600">APM request path</text>
+        <rect x="814" y="156" width="137" height="40" rx="7" style="fill:var(--accent-soft);stroke:var(--accent)"/>
+        <text x="882" y="181" text-anchor="middle" style="fill:var(--ink);font-size:12.5px;font-weight:600">LLM trace details</text>
+        <rect x="814" y="204" width="137" height="40" rx="7" style="fill:var(--surface);stroke:var(--line)"/>
+        <text x="882" y="229" text-anchor="middle" style="fill:var(--ink);font-size:12.5px;font-weight:600">Prompt versions</text>
+        <rect x="814" y="252" width="137" height="40" rx="7" style="fill:var(--surface);stroke:var(--line)"/>
+        <text x="882" y="277" text-anchor="middle" style="fill:var(--ink);font-size:12.5px;font-weight:600">Quality evaluations</text>
+        <rect x="814" y="300" width="137" height="40" rx="7" style="fill:var(--surface);stroke:var(--line)"/>
+        <text x="882" y="325" text-anchor="middle" style="fill:var(--ink);font-size:12.5px;font-weight:600">Thumbs feedback</text>
+        <text x="882" y="368" text-anchor="middle" style="fill:var(--accent);font-size:11.5px;font-weight:600">Monitors / SLOs: future</text>
+        <text x="882" y="386" text-anchor="middle" style="fill:var(--muted);font-size:10.5px">not configured in the repository</text>
+      </g>
+      <line x1="770" y1="230" x2="812" y2="230" style="stroke:var(--muted);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+
+      <!-- banner -->
+      <rect x="20" y="426" width="945" height="34" rx="8" style="fill:var(--accent-soft);stroke:none"/>
+      <text x="492" y="448" text-anchor="middle" style="fill:var(--accent);font-size:13px;font-weight:600">Solid paths are configured. Dashed log paths still need collection setup.</text>
+    </svg>
+    </div>
+    <figcaption>Traces use <code>http://127.0.0.1:18126</code>; runtime metrics use <code>udp://127.0.0.1:18125</code>. Log shipping is not configured. OpenAI and Atlas still require their own application credentials and network access. No agentless telemetry is enabled.</figcaption>
+  </figure>
+  <div class="legend" aria-label="Signal colors">
+    <span><i style="background:var(--trace)"></i>Traces</span>
+    <span><i style="background:var(--metric)"></i>Metrics</span>
+    <span><i style="background:var(--log)"></i>Logs</span>
+    <span><i style="background:var(--ai)"></i>Agent Observability</span>
+    <span><i style="background:var(--accent)"></i>Inspection</span>
+  </div>
+
+<div class="sub"><h3>Which workflow should I open?</h3><div class="scroll-x"><table class="plan"><thead><tr><th scope="col">Trigger</th><th scope="col">Workflow name</th><th scope="col">What to inspect</th></tr></thead><tbody><tr><td><code>POST /answer</code></td><td><code>policy_answer</code></td><td>Input, cited response and model child spans. No quality scoring is triggered by this endpoint.</td></tr><tr><td><code>POST /answer/evaluated</code></td><td><code>policy_answer_live_evaluation</code></td><td>The exact generated answer, Ragas metric statuses and scored evaluations.</td></tr><tr><td><code>python -m app.evaluation.run</code></td><td><code>policy_answer_evaluation</code></td><td>Golden-case request, reference, generation, structured judge and Ragas scores.</td></tr></tbody></table></div><div class="codebox"><div class="lbl">Conceptual trace · automatic span names can vary<button type="button" data-copy>Copy</button></div><pre>httpx.request                         service: nexaassist-ui
+└─ fastapi.request POST /answer/evaluated  service: nexaassist-api
+   └─ policy_answer_live_evaluation       workflow
+      ├─ retrieval / embeddings / MongoDB calls
+      ├─ OpenAI provider generation       llm + answer prompt metadata
+      └─ Ragas scoring calls              evaluator-owned prompts
+
+Evaluations attach to the workflow span, not every child LLM span.</pre></div></div></section>
+<section id="mindmap"><div class="sec-head"><p class="eyebrow">03 · Repo map</p><h2>Learn the integration by its seams.</h2><p class="lede">Eight branches connect the visible Datadog signals to the implementation. The map is generated locally; it makes no API calls.</p></div>
+<figure class="figure" style="margin:0"><div class="scroll-x"><svg id="mm" role="img" aria-label="NexaAssist Datadog map: bootstrap, requests, quality, prompts, identity, inspection, gaps, and privacy"></svg></div><figcaption>Start with bootstrap, follow a request, then choose the workflow, prompt or evaluation you need. The linked code index below is the source of truth.</figcaption></figure>
+<div class="sub"><div class="scroll-x"><table class="plan"><thead><tr><th scope="col">Code</th><th scope="col">Responsibility</th></tr></thead><tbody><tr><td><a href="app/main.py">app/main.py</a><br><a href="app/core/telemetry.py">app/core/telemetry.py</a></td><td>FastAPI startup; conditional <code>patch_all()</code>. The runner bootstraps early.</td></tr><tr><td><a href="app/services/answer.py">app/services/answer.py</a><br><a href="app/services/evaluation.py">app/services/evaluation.py</a></td><td>Explicit API workflow identity, request/output annotation and exported workflow span IDs.</td></tr><tr><td><a href="app/core/observability.py">app/core/observability.py</a><br><a href="app/chains/answer.py">app/chains/answer.py</a></td><td>Prompt annotation around every generation attempt; token-usage callback and latency summary.</td></tr><tr><td><a href="app/chains/prompts/answer.py">app/chains/prompts/answer.py</a><br><a href="app/chains/prompts/judge.py">app/chains/prompts/judge.py</a></td><td>Prompt text, stable IDs and explicit version constants.</td></tr><tr><td><a href="app/evaluation/live.py">app/evaluation/live.py</a><br><a href="app/evaluation/run.py">app/evaluation/run.py</a></td><td>Score the existing answer; run golden cases and submit workflow-scoped evaluations.</td></tr><tr><td><a href="app/services/feedback.py">app/services/feedback.py</a><br><a href="app/ui/app.py">app/ui/app.py</a></td><td>Persist feedback to MongoDB, then optionally submit <code>thumbs</code> to the answer workflow.</td></tr><tr><td><a href="app/core/logging.py">app/core/logging.py</a><br><a href="app/api/operations.py">app/api/operations.py</a></td><td>JSON logs and process-local operational HTTP endpoints.</td></tr><tr><td><a href="app/compose.datadog.yaml">app/compose.datadog.yaml</a><br><a href=".env.example">.env.example</a><br><a href="tests/test_telemetry.py">tests/test_telemetry.py</a></td><td>Docker Agent topology, non-secret configuration template and SDK regression tests.</td></tr></tbody></table></div></div></section>
+<section id="flash"><div class="sec-head"><p class="eyebrow">04 · Flash notes</p><h2>Answer aloud. Flip. Check the code.</h2><p class="lede">Repository-specific prompts replace the source guide’s generic cloud stack. “Known” progress stays in this browser’s local storage.</p></div>
+<div class="fc-bar"><div id="filters" role="group" aria-label="Flashcard categories" style="display:contents"></div><button type="button" class="chip" id="shuffle">Shuffle</button><button type="button" class="chip ghost" id="hideKnown" aria-pressed="false">Hide known</button><span class="fc-progress" id="progress" role="status" aria-live="polite"></span></div><div class="cards" id="cards"></div><noscript><p class="note">Flashcards and the mind map need JavaScript. The learning guide, code index and runbook remain readable without it.</p></noscript></section>
+<section id="memorize"><div class="sec-head"><p class="eyebrow">05 · Practice</p><h2>Three habits that prevent empty screens.</h2></div>
+<div class="mnemonics"><article class="mn"><div class="hook">“<em>Load</em>, then trace.”</div><div class="keys"><span>--env-file .env</span><span>ddtrace-run</span><span>application import</span></div><p>The SDK reads process environment during bootstrap. Settings parsing inside FastAPI is later.</p></article><article class="mn"><div class="hook">“<em>Host 18</em>, container 8.”</div><div class="keys"><span>18126 → 8126 / TCP</span><span>18125 → 8125 / UDP</span></div><p>Mac applications use the published loopback ports. A container on the Compose network uses the Agent’s container address and ports.</p></article><article class="mn"><div class="hook">“<em>Workflow</em> for scores.”</div><div class="keys"><span>provider span → prompt / tokens</span><span>workflow → evaluations</span></div><p>The score joins use a span ID and <code>eval_scope="span"</code>. Opening a sibling or child span can show an empty Evaluations tab.</p></article></div>
+<div class="sub"><h3>Revisit the trace-visibility incident</h3><p>A traced Streamlit client propagated <code>nexaassist-ui</code> as the LLM application name. Both API answer workflows now pass <code>agent_service=settings.dd_service</code>. This makes API generation discoverable under <code>nexaassist-api</code> without discarding the caller’s APM trace.</p><div class="codebox"><div class="lbl">Existing answer workflow · app/services/answer.py<button type="button" data-copy>Copy</button></div><pre>with (
+    LLMObs.workflow(name=&quot;policy_answer&quot;, agent_service=settings.dd_service)
+    if LLMObs.enabled
+    else nullcontext()
+) as span:
+    response = await chain.ainvoke(request)</pre></div><p><a href="tests/test_telemetry.py">The SDK regression</a> checks upstream UI identity, both API workflow identities and APM trace continuity.</p></div>
+<div class="sub"><h3>Saved evidence · 21 October 2026, 19:55 IST</h3><p>The synthetic NexaHome example returned HTTP 200 and ₹7.5 crore, citing POL-HL-V3 clause 4.1. The saved run took 6.4 seconds and logged 3,710 tokens. These are one diagnostic’s observations, not an SLO or a quality benchmark.</p><div class="scroll-x"><table class="plan"><thead><tr><th scope="col">Evidence</th><th scope="col">Saved value</th></tr></thead><tbody><tr><td>APM trace ID</td><td><code>14417201337028729959</code></td></tr><tr><td>LLM workflow span ID</td><td><code>13258989794602002539</code></td></tr><tr><td>Agent receipt</td><td>26 API spans and 2 UI-client spans in the captured receiver window; no refused payloads or dropped spans reported.</td></tr><tr><td>Web check</td><td>After the report was saved, the user confirmed both APM and LLM traces were visible. The collection-time report still records the earlier unverified status.</td></tr><tr><td>Scope</td><td>The diagnostic used <code>/answer</code>; it did not compute new Ragas evaluation scores.</td></tr></tbody></table></div><p><a href="app/evaluation/results/trace_visibility_check.json">Open the saved diagnostic</a> · <a href="https://app.datadoghq.com/apm/trace/14417201337028729959?timeHint=1792592696465&amp;env=dev&amp;graphType=flamegraph">Historical APM trace</a> · <a href="https://app.datadoghq.com/llm/traces?query=%40span_id%3A13258989794602002539&amp;start=1792592636465&amp;end=1792592882864&amp;paused=true">Historical LLM workflow</a>. Historical links depend on account access and retention; they are outside today’s rolling Live Search window.</p></div>
+<div class="sub"><h3>A short learning loop</h3><div class="scroll-x"><table class="plan"><thead><tr><th scope="col">Exercise</th><th scope="col">Action</th><th scope="col">What it establishes</th></tr></thead><tbody><tr><td>1 · Transport</td><td>Start the existing Agent and request <code>/health</code>.</td><td>HTTP liveness; inspect a fresh APM server span. No model or answer quality is checked.</td></tr><tr><td>2 · Evidence</td><td>Ask the documented NexaHome question in Answer mode.</td><td>Inspect the selected date/product, retrieved sources, provider latency and prompt version.</td></tr><tr><td>3 · Quality</td><td>Enable Ragas scoring for that same question.</td><td>Open the returned workflow link; distinguish scored values from unavailable/error statuses.</td></tr><tr><td>4 · Change</td><td>Edit a prompt and bump its version in the same change.</td><td>Generate a new answer and compare linked runs. One answer does not prove a version is better.</td></tr><tr><td>5 · Diagnose</td><td>Clear time, application and span-kind filters before repeating a visibility check.</td><td>Separate instrumentation, Agent forwarding and authenticated cloud visibility.</td></tr></tbody></table></div></div></section>
+<section id="project"><div class="sec-head"><p class="eyebrow">06 · Run & inspect</p><h2>Use the implementation already in the repo.</h2><p class="lede">Run commands from the repository root. Examples contain synthetic policy data. Live questions and evaluations call the configured providers and can incur usage charges.</p></div>
+<div class="steps">
+<article class="step"><div class="n">1</div><div class="body"><h3>Prepare the existing environment.</h3><p>Preserve an existing <code>.env</code>. For a new checkout, copy <a href=".env.example">.env.example</a> and configure Atlas, OpenAI and the Datadog API key locally. Do not paste keys into this guide. The selected Datadog site is <code>datadoghq.com</code>.</p><div class="codebox"><div class="lbl">Install the locked project extras<button type="button" data-copy>Copy</button></div><pre>uv sync --locked --extra ui --extra evaluation</pre></div><div class="codebox"><div class="lbl">Datadog settings · .env.example excerpt<button type="button" data-copy>Copy</button></div><pre>DD_TRACE_ENABLED=true
+DD_SERVICE=nexaassist-api
+DD_ENV=dev
+DD_VERSION=0.1.0
+DD_SITE=datadoghq.com
+DD_TRACE_AGENT_URL=http://127.0.0.1:18126
+DD_DOGSTATSD_URL=udp://127.0.0.1:18125
+DD_LOGS_INJECTION=true
+DD_RUNTIME_METRICS_ENABLED=true
+DD_LLMOBS_ENABLED=true
+DD_LLMOBS_AGENTLESS_ENABLED=false
+DD_API_KEY=</pre></div></div></article>
+<article class="step"><div class="n">2</div><div class="body"><h3>Start the repository’s Docker Agent.</h3><p>Use <a href="app/compose.datadog.yaml">app/compose.datadog.yaml</a> rather than replacing it with the source guide’s generic Compose stack. The API and UI run on the Mac in this setup.</p><div class="codebox"><div class="lbl">Existing Compose service<button type="button" data-copy>Copy</button></div><pre>docker compose --env-file .env -f app/compose.datadog.yaml up -d
+docker compose --env-file .env -f app/compose.datadog.yaml exec datadog-agent agent status
+curl http://127.0.0.1:18126/info</pre></div><p>Check the trace receiver and forwarding errors. The receiver’s <code>/info</code> response proves local connectivity, not a visible cloud trace. The Docker Agent monitors its container/VM environment; it is not a native macOS host Agent.</p></div></article>
+<article class="step"><div class="n">3</div><div class="body"><h3>Start the API and UI in separate terminals.</h3><div class="codebox"><div class="lbl">Terminal A · FastAPI<button type="button" data-copy>Copy</button></div><pre>uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.main:app --host 127.0.0.1 --port 8000</pre></div><div class="codebox"><div class="lbl">Terminal B · Streamlit<button type="button" data-copy>Copy</button></div><pre>uv run --no-sync --env-file .env env DD_SERVICE=nexaassist-ui ddtrace-run python -m streamlit run app/streamlit_app.py --server.address 127.0.0.1 --server.port 8501</pre></div><p>Use <a href="http://127.0.0.1:8501">the local chat UI</a> or <a href="http://127.0.0.1:8000/docs">FastAPI’s docs</a>. Restart the API after changing workflow or prompt code. Do not start a second process on an occupied port or add another manual <code>LLMObs.enable()</code> bootstrap.</p></div></article>
+<article class="step"><div class="n">4</div><div class="body"><h3>Generate one dated policy answer.</h3><div class="codebox"><div class="lbl">Real /answer request · sends synthetic policy evidence to configured services<button type="button" data-copy>Copy</button></div><pre>curl --fail-with-body http://127.0.0.1:8000/answer \
+  -H &#x27;Content-Type: application/json&#x27; \
+  -d &#x27;{&quot;query&quot;:&quot;What is the maximum loan amount for a NexaHome Loan?&quot;,&quot;as_of&quot;:&quot;2026-10-01&quot;,&quot;product_id&quot;:&quot;NEXA-HL&quot;,&quot;top_k&quot;:20}&#x27;</pre></div><p>For the same input in Streamlit, select Answer mode, product <code>NEXA-HL</code>, date <code>2026-10-01</code> and 20 sources. Choose Ragas scoring only when you want an evaluated answer. Empty retrieval makes no generation call, so it produces no answer prompt run.</p></div></article>
+<article class="step"><div class="n">5</div><div class="body"><h3>Inspect the request in the right view.</h3><div class="scroll-x"><table class="plan"><thead><tr><th scope="col">View</th><th scope="col">Start here</th><th scope="col">Then inspect</th></tr></thead><tbody><tr><td>APM → Trace Explorer</td><td><a href="https://app.datadoghq.com/apm/traces?query=service%3Anexaassist-api%20env%3Adev">Open API traces</a>. Choose <strong>Live Search / All ingested data</strong>, last 15 minutes.</td><td>Search <code>service:nexaassist-api env:dev</code>; choose <code>fastapi.request</code> and the actual route. Remove LLM-only and MongoDB-operation filters.</td></tr><tr><td>LLM / Agent Observability</td><td><a href="https://app.datadoghq.com/llm/applications?query=%40ml_app%3Anexaassist-api">Open the API application</a>; clear saved prompt/version filters.</td><td>Include workflows for the answer root; open the OpenAI provider LLM span for prompt, model and token details. Old UI-origin runs may still be under <code>nexaassist-ui</code>.</td></tr><tr><td>Logs</td><td>Read terminal output or the configured local log file.</td><td>Search the same <code>dd.trace_id</code>. An empty Datadog Logs view is expected until collection is configured.</td></tr><tr><td>HTTP metrics</td><td><code>GET /metrics</code> and <code>GET /metrics/latency</code>.</td><td>These are per-process JSON counters and recent successful-retrieval percentiles, not Datadog custom metric streams.</td></tr></tbody></table></div><p>For older APM runs, use a matching absolute window and retained/indexed data. Live Search covers only the rolling last 15 minutes. A <code>/health</code> call cannot create an LLM generation or evaluation.</p></div></article>
+<article class="step"><div class="n">6</div><div class="body"><h3>Track prompt changes without duplicating templates.</h3><div class="scroll-x"><table class="plan"><thead><tr><th scope="col">Prompt</th><th scope="col">ID and current version</th><th scope="col">Edit here</th></tr></thead><tbody><tr><td>Policy answer</td><td><code>nexaassist-policy-answer</code><br><code>1.0.0</code></td><td><a href="app/chains/prompts/answer.py">app/chains/prompts/answer.py</a></td></tr><tr><td>Batch semantic judge</td><td><code>nexaassist-policy-judge</code><br><code>policy-judge-v2</code></td><td><a href="app/chains/prompts/judge.py">app/chains/prompts/judge.py</a></td></tr></tbody></table></div><div class="codebox"><div class="lbl">Existing call site · app/chains/answer.py<button type="button" data-copy>Copy</button></div><pre>with prompt_annotation_context(
+    ANSWER_PROMPT,
+    variables,
+    prompt_id=ANSWER_PROMPT_ID,
+    version=ANSWER_PROMPT_VERSION,
+):
+    raw = await generation.ainvoke(variables)</pre></div><p>The shared helper derives the chat template from <code>ChatPromptTemplate</code> and uses <code>LLMObs.annotation_context(prompt=...)</code>. Its variables include the question, as-of date, product, serialized evidence and repair feedback. Bump the version beside the prompt text, restart, then generate a new run. Datadog prompt tracking does not publish or deploy a hosted prompt registry.</p></div></article>
+<article class="step"><div class="n">7</div><div class="body"><h3>Inspect quality scores and user feedback.</h3><div class="scroll-x"><table class="plan"><thead><tr><th scope="col">Path</th><th scope="col">Datadog labels</th><th scope="col">Important distinction</th></tr></thead><tbody><tr><td>Live evaluated answer</td><td><code>ragas_faithfulness</code>, <code>ragas_answer_relevancy</code>, <code>ragas_context_precision</code>, <code>ragas_context_recall</code></td><td>Context precision/recall require a reference. The service can use an exact matching local golden case or a provided reference; missing evidence/status can make metrics unavailable.</td></tr><tr><td>Batch golden cases</td><td>The same Ragas labels, <code>judge_correctness</code>, <code>judge_groundedness</code> and <code>status_matches</code>.</td><td>The runner handles supported questions and abstention cases. Check each metric’s applicability and the full report.</td></tr><tr><td>User feedback</td><td><code>thumbs</code> boolean feedback on the exported answer workflow span.</td><td>Feedback is saved to MongoDB first. A telemetry failure does not undo that persisted feedback; a review decision is not a replacement for an automatic score.</td></tr></tbody></table></div><div class="codebox"><div class="lbl">Live evaluation · app/services/evaluation.py excerpt<button type="button" data-copy>Copy</button></div><pre>LLMObs.submit_evaluation(
+    span=reference_span,
+    label=f&quot;ragas_{name}&quot;,
+    metric_type=&quot;score&quot;,
+    value=metric.value,
+    tags={&quot;evaluation_provider&quot;: &quot;ragas&quot;},
+    eval_scope=&quot;span&quot;,
+)</pre></div><div class="codebox"><div class="lbl">One batch case · real provider calls, output saved locally<button type="button" data-copy>Copy</button></div><pre>uv run --no-sync --env-file .env ddtrace-run python -m app.evaluation.run --limit 1 --output app/evaluation/results/field_guide_example.json</pre></div><p>Use the chat’s <strong>View evaluation in Datadog</strong> link and select <code>policy_answer_live_evaluation</code> → <strong>Evaluations</strong>. Ragas owns its evaluator prompts; those calls are not labeled as the answer prompt. <code>queued</code> means submitted locally, not confirmed visible in the web application.</p></div></article>
+<article class="step"><div class="n">8</div><div class="body"><h3>Verify the boundaries before adding more.</h3><div class="codebox"><div class="lbl">Local checks · no paid provider run<button type="button" data-copy>Copy</button></div><pre>curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/metrics
+curl http://127.0.0.1:8000/metrics/latency
+uv run --no-sync pytest -q tests/test_telemetry.py</pre></div><p>The SDK tests capture API spans and correlated JSON logs, verify prompt metadata with mocked OpenAI HTTP responses, and reproduce upstream UI identity. Passing them does not establish a new cloud delivery or a Ragas quality score.</p><div class="scroll-x"><table class="plan"><thead><tr><th scope="col">If you see…</th><th scope="col">Check this first</th></tr></thead><tbody><tr><td>No API traces</td><td>SDK loaded before imports; actual receiver URL <code>:18126</code>; fresh HTTP request; correct organization, service and time window.</td></tr><tr><td>No LLM traces</td><td>A real model call occurred; <code>DD_LLMOBS_ENABLED=true</code>; select the API application and include the workflow.</td></tr><tr><td>Prompt but no scores</td><td>An ordinary answer does not run Ragas. On an evaluated answer, open the workflow rather than only its provider span.</td></tr><tr><td>API shows in APM, UI-origin models disappear</td><td>Both API workflows set the explicit API identity. Restart the API after the fix; historical traces keep their original application.</td></tr><tr><td>No logs in Datadog</td><td>The current Docker setup has no Logs Agent source. Correlation injection alone does not ship log files.</td></tr><tr><td>No retrieval metric in Metrics Explorer</td><td>The JSON metrics endpoints are not exported or scraped. Runtime metrics and automatic APM metrics are different signals.</td></tr></tbody></table></div><p>Log shipping would require an enabled Logs Agent and an explicit readable file/container source. Custom operational metric export, dashboards, monitors, SLOs and native Mac host monitoring are additional setup—not features installed by this guide. See <a href="DATADOG_README.md">the operating runbook</a> for local/cloud alternatives.</p></div></article>
+</div></section></main>
+<footer id="sources"><div class="wrap"><p class="eyebrow">Sources &amp; boundaries</p><h2>Code first. Product docs second.</h2><p class="caption">Adapted from the supplied “Datadog Field Guide.html” for the repository inspected on 22 October 2026. This standalone page keeps the original learning layout, generated mind map, flashcards and copy controls. It loads no external scripts, fonts or analytics. Opening an external source or Datadog link requires network access.</p><ul><li><a href="README.md">Project README</a> · <a href="APP_COMPONENT_GUIDE.md">Component guide</a> · <a href="DATADOG_README.md">Detailed Datadog runbook</a></li><li><a href="https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/python/">Datadog Python instrumentation</a> · <a href="https://docs.datadoghq.com/tracing/trace_collection/library_config/python/">Python configuration</a></li><li><a href="https://docs.datadoghq.com/llm_observability/instrument/sdk/">LLM / Agent Observability SDK</a> · <a href="https://docs.datadoghq.com/llm_observability/instrument/prompt_tracking/">Prompt tracking</a></li><li><a href="https://docs.datadoghq.com/tracing/trace_explorer/">Live versus indexed trace search</a> · <a href="https://docs.datadoghq.com/tracing/metrics/runtime_metrics/">Runtime metrics</a></li><li><a href="https://docs.datadoghq.com/logs/guide/container-agent-to-tail-logs-from-host/">Docker log collection</a> describes additional setup, not an enabled feature in the current Compose service.</li></ul><p>Use synthetic examples. Prompt variables, reference answers, cited policy passages and feedback can enter exported telemetry. Keep credentials out of prompts and committed files. Pricing, access controls and retention depend on your account; this guide makes no billing or production-readiness claim.</p></div></footer>
+<script>
+(function(){
+  /* ---------- mind map ---------- */
+  var NS = "http://www.w3.org/2000/svg";
+  var branches = [{"side": "R", "label": "Bootstrap", "color": "--accent", "leaves": [".env before ddtrace-run", "core/telemetry.py", "Docker Agent on 18126", "Runtime metrics on 18125"]}, {"side": "R", "label": "Request", "color": "--trace", "leaves": ["Streamlit → FastAPI", "LangChain → Atlas + OpenAI", "policy_answer workflow", "API model spans"]}, {"side": "R", "label": "Quality", "color": "--ai", "leaves": ["Local golden cases", "Live Ragas / batch judge", "eval_scope = span", "thumbs → workflow span"]}, {"side": "R", "label": "Prompts", "color": "--ai", "leaves": ["Answer: 1.0.0", "Judge: policy-judge-v2", "Existing templates reused", "Variables per generation"]}, {"side": "L", "label": "Identity", "color": "--log", "leaves": ["UI: nexaassist-ui", "API: nexaassist-api", "Explicit workflow identity", "APM context preserved"]}, {"side": "L", "label": "Inspect", "color": "--metric", "leaves": ["APM: HTTP / dependency time", "LLM: prompt / model / tokens", "Workflow: evaluation scores", "Logs: same dd.trace_id"]}, {"side": "L", "label": "Not wired", "color": "--accent", "leaves": ["Docker log collection", "Custom metric export", "Monitors / SLOs / RUM", "LangGraph agents / MCP"]}, {"side": "L", "label": "Boundaries", "color": "--trace", "leaves": ["/metrics is local JSON", "Queued ≠ cloud receipt", "Synthetic policy data", "Clear search time / filters"]}];
+  var LH = 25, GAP = 22, W = 1000, CX = 500;
+  function sideHeight(s){ return branches.filter(function(b){return b.side===s}).reduce(function(h,b,i){return h + b.leaves.length*LH + (i?GAP:0)},0); }
+  var hR = sideHeight("R"), hL = sideHeight("L"), H = Math.max(hR,hL) + 60;
+  var CY = H/2;
+  var svg = document.getElementById("mm");
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  function el(tag, attrs, style){ var e=document.createElementNS(NS,tag); for(var k in attrs) e.setAttribute(k,attrs[k]); if(style) e.setAttribute("style",style); svg.appendChild(e); return e; }
+  ["R","L"].forEach(function(side){
+    var list = branches.filter(function(b){return b.side===side});
+    var y = CY - sideHeight(side)/2;
+    var dir = side==="R"?1:-1;
+    var bx = CX + dir*165, bw = 124, lx = CX + dir*262;
+    list.forEach(function(b){
+      var bh = b.leaves.length*LH, by = y + bh/2, c = "var("+b.color+")";
+      var bEdge = bx - dir*bw/2;
+      el("path",{d:"M"+(CX+dir*58)+" "+CY+" C"+(CX+dir*100)+" "+CY+" "+(bEdge-dir*40)+" "+by+" "+bEdge+" "+by},"fill:none;stroke:"+c+";stroke-width:2.2;opacity:.75");
+      b.leaves.forEach(function(leaf,i){
+        var ly = y + i*LH + LH/2, start = bx + dir*bw/2;
+        el("path",{d:"M"+start+" "+by+" C"+(start+dir*30)+" "+by+" "+(lx-dir*40)+" "+ly+" "+(lx-dir*8)+" "+ly},"fill:none;stroke:"+c+";stroke-width:1.2;opacity:.55");
+        el("circle",{cx:lx-dir*5,cy:ly,r:3},"fill:"+c);
+        var t = el("text",{x:lx+dir*4,y:ly+4.5,"text-anchor":side==="R"?"start":"end"},"fill:var(--ink);font-size:13px");
+        t.textContent = leaf;
+      });
+      el("rect",{x:bx-bw/2,y:by-15,width:bw,height:30,rx:15},"fill:var(--surface);stroke:"+c+";stroke-width:1.8");
+      var bt = el("text",{x:bx,y:by+5,"text-anchor":"middle"},"fill:"+c+";font-size:13.5px;font-weight:700");
+      bt.textContent = b.label;
+      y += bh + GAP;
+    });
+  });
+  el("rect",{x:CX-58,y:CY-24,width:116,height:48,rx:12},"fill:var(--accent);stroke:none");
+  var ct = el("text",{x:CX,y:CY+6,"text-anchor":"middle"},"fill:var(--accent-ink);font-size:18px;font-weight:800;font-family:var(--display)");
+  ct.textContent = "NexaAssist";
+
+  /* ---------- flash notes ---------- */
+  var CATS = {Basics:"--metric", Instrument:"--trace", Query:"--log", Practice:"--accent", AI:"--ai", };
+  var cards = [["Basics", "What does an APM span tell you that a quality score does not?", "Which operation ran, how long it took, and whether it failed. A successful HTTP status or low latency does not establish a correct policy answer."], ["Basics", "Which ports do the Mac apps actually use?", "Traces: `127.0.0.1:18126` → Docker Agent `8126/TCP`. Python runtime metrics: `18125` → Agent `8125/UDP`."], ["Basics", "Does the Datadog Agent proxy OpenAI or Atlas traffic?", "No. The application calls those services directly. The Agent receives telemetry and forwards it to the Datadog account."], ["Basics", "Does this guide use an application key?", "No application key is required for the existing Agent-backed telemetry. The local Agent uses DD_API_KEY; DD_SITE selects its destination. Model and database credentials are separate."], ["Instrument", "Why load .env before ddtrace-run?", "The SDK reads process environment during bootstrap. Pydantic reading `.env` inside the app does not export those values to ddtrace."], ["Instrument", "What code fills the auto-instrumentation gap around answer orchestration?", "`LLMObs.workflow()` in the answer services and batch evaluator. Do not add duplicate manual model spans around a provider already traced automatically."], ["Instrument", "Why can UI-origin LLM traces appear in a different application?", "The traced UI propagates its own LLM application name. Both API workflows set `agent_service=settings.dd_service` so API runs use nexaassist-api while the APM trace stays connected."], ["Instrument", "Does log correlation mean log collection is running?", "No. JSON output and injected dd.trace_id fields exist. The supplied Docker Compose service has no Logs Agent source enabled, so those files are not automatically shipped."], ["Query", "What is the first APM query for this repo?", "`service:nexaassist-api env:dev`. Choose Live Search / All ingested data and the last 15 minutes. Clear LLM-only and MongoDB-operation filters."], ["Query", "Why might a historical trace be absent from Live Search?", "Live Search only covers the rolling last 15 minutes. Older runs need a matching absolute window and retained/indexed data."], ["Query", "Are /metrics and /metrics/latency custom Datadog metrics?", "No. They expose in-memory, per-process JSON values. The recent percentiles cover the last 1000 successful retrievals. A custom exporter or scraper is not configured."], ["Query", "Which trace can /health create?", "An HTTP request trace, when instrumentation is active. It cannot create a model generation, prompt run or answer-quality evaluation."], ["AI", "Name the three workflow roots.", "Ordinary answer: `policy_answer`. Live Ragas: `policy_answer_live_evaluation`. Batch golden cases: `policy_answer_evaluation`."], ["AI", "Where do the existing Ragas scores appear?", "The evaluated workflow’s Evaluations tab. The submissions use `eval_scope=\"span\"`; selecting a child model span can show no evaluations."], ["AI", "Which metrics need a reference answer in the live path?", "Context precision and context recall. Faithfulness and answer relevancy can run without a reference when their evidence/answer prerequisites are satisfied. Missing prerequisites have explicit statuses."], ["AI", "What extra checks does the batch runner add?", "A structured semantic judge scores correctness and groundedness. Code checks `status_matches`; eligible golden cases also receive Ragas scores."], ["AI", "Which prompt IDs and versions are defined?", "`nexaassist-policy-answer`: `1.0.0`. `nexaassist-policy-judge`: `policy-judge-v2`. The latter belongs to the batch judge, not every Ragas model call."], ["AI", "Does prompt version tracking create a hosted prompt registry?", "No. The existing LangChain prompt is the source of truth. `prompt_annotation_context()` derives its static template and attaches invocation variables to the provider LLM span."], ["AI", "How is citation-repair generation tracked?", "The answer chain permits one repair attempt. Each generation gets its own actual variables, including citation_feedback, under the same prompt version."], ["AI", "What does queued mean for evaluation delivery?", "The SDK accepted the local submission. Confirm the right workflow and scores in the authenticated Datadog web app; queued is not a cloud delivery receipt."], ["Practice", "How does feedback avoid losing a staff correction during a telemetry failure?", "It is saved to MongoDB first. Datadog thumbs feedback is optional and tied to the exported answer span; publishing failures do not undo the saved record."], ["Practice", "What does tests/test_telemetry.py verify?", "API tracing and JSON correlation, provider prompt metadata with mocked HTTP, concurrent prompt isolation, and UI-to-API workflow identity with preserved APM context. It does not establish live cloud delivery."], ["Practice", "What should you not claim from the one saved NexaHome example?", "It does not establish a full-dataset quality pass, sustained-load performance, current cloud health, configured log shipping or production readiness."], ["Practice", "Which capabilities remain additional work?", "Logs Agent collection, custom operational metric export, dashboards, monitors, SLOs and RUM. LangGraph agents and the application MCP server are future layers."]];
+  var known = {};
+  try { known = JSON.parse(localStorage.getItem("nexaassist-datadog-known-v1")||"{}") || {}; } catch(e){ known = {}; }
+  if(typeof known !== "object" || Array.isArray(known)) known = {};
+  function saveKnown(){ try{ localStorage.setItem("nexaassist-datadog-known-v1", JSON.stringify(known)); }catch(e){} }
+  var active = "All", hideKnown = false, order = cards.map(function(_,i){return i});
+
+  var filtersEl = document.getElementById("filters");
+  ["All"].concat(Object.keys(CATS)).forEach(function(c){
+    var b = document.createElement("button");
+    b.type="button"; b.className="chip"; b.textContent=c; b.setAttribute("aria-pressed", c===active);
+    b.addEventListener("click", function(){ active=c; Array.prototype.forEach.call(filtersEl.children,function(x){x.setAttribute("aria-pressed", x.textContent===c)}); render(); });
+    filtersEl.appendChild(b);
+  });
+  document.getElementById("shuffle").addEventListener("click", function(){
+    for(var i=order.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=order[i]; order[i]=order[j]; order[j]=t; }
+    render();
+  });
+  var hk = document.getElementById("hideKnown");
+  hk.addEventListener("click", function(){ hideKnown=!hideKnown; hk.setAttribute("aria-pressed", hideKnown); render(); });
+
+  function fmt(s){ return s.replace(/[&<>]/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]}).replace(/`([^`]+)`/g,"<code>$1</code>"); }
+
+  function render(){
+    var wrap = document.getElementById("cards"); wrap.innerHTML="";
+    var shown = 0;
+    order.forEach(function(i){
+      var c = cards[i];
+      if(active!=="All" && c[0]!==active) return;
+      if(hideKnown && known[i]) return;
+      shown++;
+      var col = "var("+CATS[c[0]]+")";
+      var card = document.createElement("div");
+      card.className = "card" + (known[i]?" is-known":"");
+      card.innerHTML =
+        '<div class="card-inner">'+
+          '<div class="face front" role="button" tabindex="0" aria-label="Flip card">'+
+            '<span class="tag" style="color:'+col+'">'+c[0]+'</span>'+
+            '<div class="q">'+fmt(c[1])+'</div>'+
+            '<div class="row"><span class="hint">Tap to reveal</span></div>'+
+          '</div>'+
+          '<div class="face back">'+
+            '<span class="tag" style="color:'+col+'">'+c[0]+' · answer</span>'+
+            '<div class="a">'+fmt(c[2])+'</div>'+
+            '<div class="row"><button type="button" class="flipback">Back</button>'+
+            '<button type="button" class="mark'+(known[i]?' known':'')+'">'+(known[i]?'Known ✓':'Mark known')+'</button></div>'+
+          '</div>'+
+        '</div>';
+      var front = card.querySelector(".front");
+      var back = card.querySelector(".back");
+      back.inert = true;
+      front.setAttribute("aria-expanded", "false");
+      front.setAttribute("aria-label", "Reveal answer: " + c[1]);
+      function flip(){
+        var open = card.classList.toggle("flipped");
+        front.inert = open; back.inert = !open;
+        front.setAttribute("aria-expanded", String(open));
+        (open ? back.querySelector(".flipback") : front).focus();
+      }
+      front.addEventListener("click", flip);
+      front.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); flip(); } });
+      card.querySelector(".flipback").addEventListener("click", flip);
+      card.querySelector(".mark").addEventListener("click", function(){
+        if(known[i]) delete known[i]; else known[i]=true;
+        saveKnown(); render();
+      });
+      wrap.appendChild(card);
+    });
+    var k = Object.keys(known).length;
+    document.getElementById("progress").textContent = k+" / "+cards.length+" known · "+shown+" shown";
+  }
+  render();
+
+  /* ---------- copy buttons ---------- */
+  document.querySelectorAll("[data-copy]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var pre = btn.closest(".codebox").querySelector("pre");
+      var text = pre.innerText;
+      function done(msg){ btn.textContent = msg; setTimeout(function(){ btn.textContent="Copy"; },1400); }
+      function fallback(){ var r=document.createRange(); r.selectNodeContents(pre); var s=getSelection(); s.removeAllRanges(); s.addRange(r); done("Selected"); }
+      try { navigator.clipboard.writeText(text).then(function(){ done("Copied"); }, fallback); } catch(e){ fallback(); }
+    });
+  });
+})();
+</script></body></html>

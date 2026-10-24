@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from contextlib import nullcontext
 from datetime import date
 from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
@@ -14,6 +15,7 @@ from langchain_core.runnables import RunnableLambda
 from app.api import answer as answer_api
 from app.chains.answer import build_answer_chain
 from app.chains.context import assemble_context, render_context, token_encoder
+from app.core import observability
 from app.core.config import Settings, get_settings
 from app.main import create_app
 from app.models.retrieval import (
@@ -95,9 +97,107 @@ def test_answer_abstains_on_invalid_citations(
     assert response.citations == []
 
 
-def test_empty_retrieval_does_not_generate(settings: Settings) -> None:
-    # The generator would fail draft validation if called.
-    assert run_answer(settings, [], {}).status == "insufficient_evidence"
+def test_empty_retrieval_can_clarify_scope(settings: Settings) -> None:
+    response = run_answer(
+        settings,
+        [],
+        {"status": "needs_clarification", "answer": "Which product?", "evidence": []},
+    )
+    assert response.status == "needs_clarification"
+    assert response.citations == []
+
+
+@pytest.mark.parametrize("repair_succeeds", [True, False])
+def test_invalid_citations_get_only_one_repair_attempt(
+    settings: Settings, repair_succeeds: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    annotation = Mock(side_effect=lambda **_: nullcontext())
+    monkeypatch.setattr(observability, "LLMObs", Mock(enabled=True, annotation_context=annotation))
+    invalid = {
+        "status": "answered",
+        "answer": "The maximum is 7.5 crore [1].",
+        "evidence": [{"evidence_id": 1, "quote": "invented quote"}],
+    }
+    valid = {
+        **invalid,
+        "evidence": [{"evidence_id": 1, "quote": "Maximum amount is 7.5 crore."}],
+    }
+    generate = Mock(side_effect=[invalid, valid if repair_succeeds else invalid])
+    llm = Mock(spec=BaseChatModel)
+    llm.with_structured_output.return_value = RunnableLambda(generate)
+    retrieved = RetrieveResponse(
+        as_of=date(2026, 10, 1),
+        results=[hit()],
+        timings=RetrieveTimings(search_ms=0, parent_ms=0, total_ms=0),
+    )
+    retrieve = Mock(return_value=retrieved)
+    result = asyncio.run(
+        build_answer_chain(RunnableLambda(retrieve), llm, settings).ainvoke(
+            RetrieveRequest(query="maximum", as_of=retrieved.as_of)
+        )
+    )
+    retrieve.assert_called_once()
+    assert generate.call_count == 2
+    assert result.status == ("answered" if repair_succeeds else "insufficient_evidence")
+    assert bool(result.citations) == repair_succeeds
+    prompts = [call.kwargs["prompt"] for call in annotation.call_args_list]
+    assert len(prompts) == 2
+    assert all(prompt["id"] == "nexaassist-policy-answer" for prompt in prompts)
+    assert all(prompt["version"] == "1.0.0" for prompt in prompts)
+    assert prompts[0]["variables"]["citation_feedback"] == ""
+    assert "previous draft failed" in prompts[1]["variables"]["citation_feedback"]
+    assert all(prompt["variables"]["query"] == "maximum" for prompt in prompts)
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "Which product and rate would you like to check?",
+        "Should I use 31 March 2024 or the date filter?",
+        "Is the fee 0.35%?",
+        "NexaFlex foreclosure is four percent plus GST. Which product did you mean?",
+    ],
+)
+def test_clarification_uses_a_fixed_scope_question_without_model_policy_claims(
+    settings: Settings, question: str
+) -> None:
+    response = run_answer(
+        settings,
+        [hit()],
+        {
+            "status": "needs_clarification",
+            "answer": question,
+            "evidence": [],
+        },
+    )
+    assert response.status == "needs_clarification"
+    assert response.answer == (
+        "Which product and policy date should I use, "
+        "and what specific rate or policy term do you want to check?"
+    )
+    assert response.citations == []
+
+
+def test_unfittable_amendment_abstains_before_generation(settings: Settings) -> None:
+    amendment = hit(2, "applicability " * 5000)
+    retrieved = RetrieveResponse(
+        as_of=date(2026, 10, 1),
+        results=[hit()],
+        amendments=[amendment],
+        timings=RetrieveTimings(search_ms=0, parent_ms=0, total_ms=0),
+    )
+    generate = Mock(return_value={})
+    llm = Mock(spec=BaseChatModel)
+    llm.with_structured_output.return_value = RunnableLambda(generate)
+    result = asyncio.run(
+        build_answer_chain(
+            RunnableLambda(lambda _: retrieved),
+            llm,
+            settings.model_copy(update={"context_max_tokens": 256}),
+        ).ainvoke(RetrieveRequest(query="fee", as_of=retrieved.as_of))
+    )
+    assert result.status == "insufficient_evidence"
+    generate.assert_not_called()
 
 
 def test_context_budget_deduplicates_and_preserves_whole_passages() -> None:

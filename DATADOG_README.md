@@ -4,6 +4,10 @@ This guide explains what Datadog measures, how to configure it on a local Mac or
 in the cloud, and how to investigate this project's FastAPI, Streamlit and RAG
 requests. Commands run from the repository root unless stated otherwise.
 
+For a visual learning companion, open [Datadog Field Guide](DATADOG_FIELD_GUIDE.html)
+locally. It adapts the supplied field guide to the existing NexaAssist code, with
+diagrams, flashcards, source links and explicit boundaries for features not configured.
+
 “Cloud” means deploying the application on a VM or container platform. For
 Claude/Anthropic models and Claude Code, see [Claude and other model providers](#8-claude-and-other-model-providers).
 
@@ -27,7 +31,7 @@ For an AI application, use these signals together:
 
 Datadog also offers managed and custom evaluations, but enabling tracing does
 not configure them or calculate this project's RAGAS scores. Keep operational
-monitoring alongside the existing LangSmith and dataset-based evaluation workflow.
+monitoring alongside the dataset-based RAGAS and structured-judge evaluation workflow.
 See [Datadog's AI observability concepts](https://docs.datadoghq.com/llm_observability/quickstart/terms/).
 Some current documentation calls LLM Observability **Agent Observability**; the
 Python configuration still uses `DD_LLMOBS_*`.
@@ -59,7 +63,7 @@ instrumentation alone does not guarantee a span for every Streamlit interaction.
 | [app/core/observability.py](app/core/observability.py) | Logs returned model token usage; summarizes recent retrieval latency. |
 | [app/chains/llm.py](app/chains/llm.py) | Configures `ChatOpenAI` with the token-usage callback. |
 | [app/evaluation/run.py](app/evaluation/run.py) | Creates one workflow per evaluated answer and joins existing judge/RAGAS scores to that trace when LLM Observability is enabled. |
-| [app/services/evaluation.py](app/services/evaluation.py) | Retrieves and generates once for a live UI question, then returns RAGAS results and queues those same values against its Datadog workflow. |
+| [app/services/evaluation.py](app/services/evaluation.py) | Retrieves once, produces the final answer with at most one citation-repair draft, then returns RAGAS results and queues those values against its Datadog workflow. |
 | [app/evaluation/live.py](app/evaluation/live.py) | Scores the exact generated answer and assembled context; gives explicit unavailable/error statuses when a metric cannot be measured. |
 | [app/api/operations.py](app/api/operations.py) | Exposes liveness, retrieval counters and latency summaries. |
 | [app/Dockerfile](app/Dockerfile) | Starts the API under `ddtrace-run`. |
@@ -523,7 +527,7 @@ After generating traffic, use Datadog's matching time range:
 
 Automatic integration coverage depends on the actual libraries and SDK versions.
 Custom LCEL functions are not guaranteed to become individually named Datadog
-LLM spans. Existing LangSmith run names help investigate the chain separately.
+LLM spans. Named LCEL stages also identify operations in locally collected evaluation traces.
 See [supported automatic LLM instrumentation](https://docs.datadoghq.com/llm_observability/instrument/auto_instrumentation/)
 and [runtime metrics](https://docs.datadoghq.com/tracing/metrics/runtime_metrics/).
 
@@ -555,6 +559,43 @@ span/trace IDs, so they belong to the selected workflow span:
 | `status_matches` | Whether the actual answer/abstention status matches the golden case. |
 | `ragas_faithfulness`, `ragas_answer_relevancy` | Existing RAGAS scores for answerable cases. |
 | `ragas_context_precision`, `ragas_context_recall` | Existing RAGAS evidence scores for answerable cases. |
+
+#### Track prompt versions
+
+The answer chain and batch judge attach structured prompt metadata with
+`LLMObs.annotation_context(prompt=...)` around each model invocation:
+
+| Prompt ID | Version | Source of truth |
+| --- | --- | --- |
+| `nexaassist-policy-answer` | `1.0.0` | `ANSWER_PROMPT` and `ANSWER_PROMPT_VERSION` in [app/chains/prompts/answer.py](app/chains/prompts/answer.py) |
+| `nexaassist-policy-judge` | `policy-judge-v2` | `JUDGE_PROMPT` and `JUDGE_VERSION` in [app/chains/prompts/judge.py](app/chains/prompts/judge.py) |
+
+The existing LangChain templates supply the tracked chat template; their text is
+not copied into a second registry. Dynamic values are recorded separately as
+`variables`, including the question, date, product, retrieved context and citation
+repair feedback. Each repair attempt has its own variables under the same version.
+RAGAS owns its evaluator prompts and is not labeled as either application prompt.
+Tracking does nothing when `DD_LLMOBS_ENABLED=false`.
+
+Restart the traced API after updating the code, then ask an Answer-mode question
+with available evidence, such as “What is the maximum loan amount for a NexaHome
+Loan?” with product `NEXA-HL` and date `2026-10-01`. In Datadog, open the
+application's **Prompts** view and find `nexaassist-policy-answer`. Open a linked
+trace and select the **OpenAI provider LLM span** to inspect its prompt ID,
+version, template and variables. The existing batch evaluation command above also
+produces `nexaassist-policy-judge`. Empty retrieval makes no generation call and
+therefore creates no answer prompt run.
+
+Keep each ID stable. When editing its template, increment the adjacent version
+constant in the same change, restart the process, and generate another answer.
+Compare the two versions and their linked traces in Datadog. Existing evaluations
+remain attached to the parent workflow; select that workflow to inspect scores.
+
+These are locally defined prompts tracked in Datadog, rather than remotely
+managed prompt deployments. No application key or additional dependency is needed
+for this tracking integration. The existing trace export includes populated
+variables, so use synthetic policy examples and keep credentials out of prompts.
+See [Datadog's prompt tracking reference](https://docs.datadoghq.com/llm_observability/instrument/sdk/).
 
 #### View the saved RAGAS measurements
 
@@ -611,6 +652,20 @@ review but cannot attach it to Datadog. A Datadog submission error does not undo
 the MongoDB save; it logs `feedback_datadog_publish_failed`. Submission queues
 locally and does not confirm cloud receipt or automatically retry a failed call.
 
+The UI includes a stable `submission_id` with feedback. An identical retry
+returns the existing MongoDB record without submitting the Datadog rating again.
+Reusing that ID for different contents returns HTTP 409. API clients must retain
+their UUID across retries to get the same protection. This prevents duplicate
+attempts; it does not guarantee delivery after a Datadog outage.
+
+Feedback listing and review require `Authorization: Bearer <reviewer token>`.
+Configure `FEEDBACK_REVIEWER_TOKEN` in `.env` with at least 32 random characters,
+restart FastAPI, and enter it in Streamlit's **Review feedback** workspace.
+No configured token means review is disabled (503); missing or wrong credentials
+return 401. Keep the token out of screenshots, logs and commits. This local
+reviewer credential is separate from the Datadog API key and is not a user
+account or role system.
+
 SDK reference: https://docs.datadoghq.com/llm_observability/instrument/sdk/
 
 #### RAGAS scores in Datadog for Streamlit questions
@@ -619,11 +674,13 @@ In the sidebar, leave **Answer quality → Evaluate with RAGAS** enabled, then
 submit a new question in **Answer** mode. The UI calls `POST /answer/evaluated`;
 the original `/answer` and `/retrieve` contracts remain available.
 
-The service retrieves once, generates once, and scores that answer against the
+The service retrieves once and scores its final answer against the
 same budgeted, deduplicated evidence passed into generation. Metrics are shown
 in Datadog only; Streamlit displays the answer, citations and a Datadog link,
 without score cards or metric-status messages. The UI stores the result with that chat turn, so
 rerendering or reopening the chat does not repeat scoring.
+Citation validation can trigger one repair draft against the same evidence;
+two invalid drafts abstain. This adds a model call and latency only on that path.
 
 - Faithfulness and answer relevancy use the answer and its evidence/question.
 - Context precision and context recall also need a reference answer. Enter it
@@ -836,9 +893,8 @@ uv run --env-file .env env DD_SERVICE=nexaassist-ingestion ddtrace-run python -m
 This writes to the configured MongoDB stores and calls the embedding provider;
 use it when ingesting documents, not merely to test telemetry connectivity.
 
-LangSmith is independent: configure its existing API key/project settings and
-enable `LANGCHAIN_TRACING_V2` when you want LCEL trajectory traces. The
-[main README](README.md) documents the evaluation runners and datasets. LangGraph
+The [main README](README.md) documents the local evaluation runners and datasets.
+Datadog is the application's telemetry destination. LangGraph
 agents and MCP services are future layers here; this setup does not create them
 or promise tool trajectories for workflows that do not exist.
 
@@ -870,6 +926,38 @@ uv run --locked pytest tests/test_telemetry.py
 
 It consumes spans locally and does not call Atlas, a model or a Datadog collector.
 Passing it proves instrumentation behavior, not successful cloud ingestion.
+
+### Traces from Streamlit — application grouping
+
+The traced UI runs as `nexaassist-ui`. Its HTTP client also propagates that name
+as the upstream LLM application, even though the model calls happen in the API.
+Without an explicit API workflow identity, a question sent through Streamlit can
+therefore appear under LLM application `nexaassist-ui`, while a direct API call
+appears under `nexaassist-api`.
+
+Both answer services now set `agent_service=settings.dd_service` on their Datadog
+workflow. Restart the API after this change. New ordinary and evaluated answers
+belong to `nexaassist-api`; the HTTP trace still connects UI and API services.
+Older traces retain their original grouping, so include `nexaassist-ui` when
+searching historical LLM runs. No global sampling or retention rule is changed.
+The SDK regression test verifies the propagated UI identity, both API workflows'
+explicit identity, and preservation of the caller's APM trace ID.
+
+For a fresh request:
+
+- **APM → Trace Explorer:** choose **Live Search / All ingested data**, **Last
+  15 minutes**, and `service:nexaassist-api env:dev`. Clear LLM-only span-type,
+  MongoDB-operation and saved absolute-time filters.
+- **LLM/Agent Observability → Traces:** select application `nexaassist-api`, clear
+  prompt/version filters, and include workflows when looking for `policy_answer`
+  or `policy_answer_live_evaluation`. Select the provider LLM span for prompt,
+  token and model details; select the evaluated workflow for its quality scores.
+
+See [Datadog Trace Explorer](https://docs.datadoghq.com/tracing/trace_explorer/)
+for live versus indexed searches. The latest diagnostic response and direct trace
+links are saved in [trace_visibility_check.json](app/evaluation/results/trace_visibility_check.json).
+Local Agent receipt and forwarding counters do not establish authenticated web
+visibility; check the linked trace in your current organization.
 
 ### Docker verification results — 20 October 2026
 

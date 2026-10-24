@@ -13,16 +13,16 @@ import structlog
 from ddtrace.llmobs import LLMObs
 from langchain_core.runnables import RunnableLambda
 from langchain_core.tracers.run_collector import RunCollectorCallbackHandler
-from langsmith import traceable
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.chains.answer import build_answer_chain
 from app.chains.context import assemble_context
 from app.chains.embeddings import get_embeddings
 from app.chains.llm import get_chat_model
-from app.chains.prompts.judge import JUDGE_PROMPT, JUDGE_VERSION
+from app.chains.prompts.judge import JUDGE_PROMPT, JUDGE_PROMPT_ID, JUDGE_VERSION
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
+from app.core.observability import prompt_annotation_context
 from app.database.retrieval import resolve_reference_contexts
 from app.models.evaluation import METRIC_NAMES, QualityScore
 from app.models.retrieval import RetrieveRequest, RetrieveResponse
@@ -38,7 +38,9 @@ class GoldenCase(BaseModel):
     input: RetrieveRequest
     expected_output: str
     context: list[dict[str, Any]]
-    expected_status: Literal["answered", "insufficient_evidence"] = "answered"
+    expected_status: Literal["answered", "insufficient_evidence", "needs_clarification"] = (
+        "answered"
+    )
 
 
 class JudgeScore(BaseModel):
@@ -77,7 +79,6 @@ def trace_summary(runs: list[Any]) -> list[dict[str, Any]]:
     return spans
 
 
-@traceable
 async def collect_records(cases: list[GoldenCase], settings: Settings) -> list[dict[str, Any]]:
     """Generate once per case; evaluate the exact evidence passed to that generation."""
     model = get_chat_model(settings)
@@ -106,7 +107,7 @@ async def collect_records(cases: list[GoldenCase], settings: Settings) -> list[d
                 .ainvoke(case.input, config={"callbacks": [collector]})
             )
             sources = assemble_context(
-                retrieved.results, settings.context_max_tokens, settings.token_encoding
+                retrieved.evidence, settings.context_max_tokens, settings.token_encoding
             )
 
             def replay(
@@ -125,9 +126,14 @@ async def collect_records(cases: list[GoldenCase], settings: Settings) -> list[d
                 "expected_status": case.expected_status,
                 "actual_status": answer.status,
             }
-            score = JudgeScore.model_validate(
-                await judge.ainvoke({"record": json.dumps(record, ensure_ascii=False)})
-            )
+            judge_variables = {"record": json.dumps(record, ensure_ascii=False)}
+            with prompt_annotation_context(
+                JUDGE_PROMPT,
+                judge_variables,
+                prompt_id=JUDGE_PROMPT_ID,
+                version=JUDGE_VERSION,
+            ):
+                score = JudgeScore.model_validate(await judge.ainvoke(judge_variables))
             record.update(
                 request=case.input.model_dump(mode="json"),
                 retrieval_timings=retrieved.timings.model_dump(),
@@ -157,7 +163,6 @@ async def collect_records(cases: list[GoldenCase], settings: Settings) -> list[d
     return records
 
 
-@traceable
 async def evaluate_ragas(records: list[dict[str, Any]], settings: Settings) -> dict[str, Any]:
     from app.evaluation.ragas_metrics import RagasScorer
 

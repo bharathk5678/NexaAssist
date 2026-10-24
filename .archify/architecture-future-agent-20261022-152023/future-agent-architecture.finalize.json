@@ -1,0 +1,374 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-10-22T09:50:29.179Z",
+  "specification": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/candidate.json",
+    "sha256": "2517ff27e7b2e51d28f373e4ba7e51f8d7f76050ee14fa57f857a2b458184a67",
+    "bytes": 4790
+  },
+  "artifact": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html",
+    "sha256": "8ab1c3c34d4107012834d93bf120feaf51c30f3558a1a752d658035c118bbc3d",
+    "bytes": 826272
+  },
+  "stages": {
+    "validate": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": null,
+      "execution": "embedded-in-deliver",
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "/Users/pankaj/.agents/skills/archify/bin/archify.mjs",
+        "deliver",
+        "architecture",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/candidate.json",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html",
+        "--quality",
+        "showcase",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "validate",
+        "specification": {
+          "sha256": "2517ff27e7b2e51d28f373e4ba7e51f8d7f76050ee14fa57f857a2b458184a67",
+          "bytes": 4790
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        }
+      }
+    },
+    "deliver": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 386,
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "/Users/pankaj/.agents/skills/archify/bin/archify.mjs",
+        "deliver",
+        "architecture",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/candidate.json",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html",
+        "--quality",
+        "showcase",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "receiptId": "fdcabc43-327e-4fe2-b239-7d27318b4ac3",
+        "ok": true,
+        "command": "deliver",
+        "type": "architecture",
+        "input": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/candidate.json",
+        "output": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html",
+        "specification": {
+          "sha256": "2517ff27e7b2e51d28f373e4ba7e51f8d7f76050ee14fa57f857a2b458184a67",
+          "bytes": 4790
+        },
+        "artifact": {
+          "sha256": "8ab1c3c34d4107012834d93bf120feaf51c30f3558a1a752d658035c118bbc3d",
+          "bytes": 826272
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        },
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      }
+    },
+    "check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 219,
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "/Users/pankaj/.agents/skills/archify/bin/archify.mjs",
+        "check",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html",
+        "--require-provenance"
+      ],
+      "receipt": {
+        "ok": true,
+        "file": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html",
+        "artifact": {
+          "sha256": "8ab1c3c34d4107012834d93bf120feaf51c30f3558a1a752d658035c118bbc3d",
+          "bytes": 826272
+        },
+        "checks": [
+          {
+            "name": "single_svg",
+            "ok": true,
+            "details": [
+              "found 1 <svg> block(s)"
+            ]
+          },
+          {
+            "name": "finite_svg",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "orthogonal_arrows",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "label_route_clearance",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_crossings",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_corridors",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "container_border_runs",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "route_rhythm",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "legend_clearance",
+            "ok": true,
+            "details": []
+          }
+        ],
+        "composition": {
+          "schemaVersion": 1,
+          "profile": "showcase",
+          "status": "pass",
+          "summary": {
+            "errors": 0,
+            "warnings": 0
+          },
+          "metrics": {
+            "properCrossings": 0,
+            "resolvedCrossovers": 0,
+            "ambiguousCorridors": 0,
+            "arrowheadCollisions": 0,
+            "containerBorderRuns": 0,
+            "labelRouteClearanceIssues": 0,
+            "labelCanvasOverflowIssues": 0,
+            "minLabelRouteClearance": 78,
+            "desktopReadabilityIssues": 0,
+            "viewportHeightIssues": 0,
+            "minProjectedNodeTextPx": 7.5,
+            "maxBends": 0,
+            "routesOverSuggestedBends": 0,
+            "maxStretch": 1,
+            "routesOverSuggestedStretch": 0,
+            "minSegmentPx": 100,
+            "minInteriorSegmentPx": null,
+            "shortSegmentCount": 0,
+            "shortEndpointSegmentCount": 0,
+            "shortInteriorSegmentCount": 0,
+            "microSegmentCount": 0
+          },
+          "suggestedLimits": {
+            "bendsPerRelationship": 2,
+            "stretch": 1.35,
+            "segmentPx": 16,
+            "microSegmentPx": 8
+          },
+          "routeReview": {
+            "crossings": [],
+            "detours": []
+          },
+          "leadingSpace": {
+            "measured": true,
+            "emptyTopPx": 40,
+            "emptyTopRatio": 0.051,
+            "occupiedTop": 40,
+            "viewBoxTop": 0,
+            "canvasHeight": 780,
+            "typicalNodeHeight": 72,
+            "reviewSuggested": false
+          },
+          "desktopReadability": {
+            "budgetBasis": "recognized-declared-wide",
+            "readerContract": "declared-wide-v1",
+            "availableDiagramWidth": 1190.625,
+            "actualBudgetPx": 1190.625,
+            "actualReaderWidth": 1220.625,
+            "desiredReaderWidth": 1220.625,
+            "viewportCap": 1376,
+            "limit": "source-size",
+            "requestedTargetPx": 7.5,
+            "requestedTargetMet": true,
+            "hardFloorPx": 6,
+            "hardFloorMet": true,
+            "minimumOwner": {
+              "kind": "edge",
+              "id": "ui-api",
+              "from": "ui",
+              "to": "api"
+            },
+            "minimumSourceTextPx": 8,
+            "minimumProjectedTextPx": 7.5,
+            "semanticTextCount": 29
+          },
+          "issues": []
+        },
+        "provenance": "current",
+        "deliveryReceiptId": "fdcabc43-327e-4fe2-b239-7d27318b4ac3"
+      }
+    },
+    "browser-check": {
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": 53,
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "/Users/pankaj/.agents/skills/archify/bin/archify.mjs",
+        "browser-check",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html",
+        "--json",
+        "--require-provenance"
+      ],
+      "execution": "in-process",
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": false,
+        "command": "browser-check",
+        "evidenceKind": "automated-browser",
+        "status": "fail",
+        "visualReview": "not-requested",
+        "provenance": "current",
+        "deliveryReceiptId": "fdcabc43-327e-4fe2-b239-7d27318b4ac3",
+        "artifact": {
+          "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html",
+          "sha256": "8ab1c3c34d4107012834d93bf120feaf51c30f3558a1a752d658035c118bbc3d",
+          "bytes": 826272
+        },
+        "state": {
+          "detail": "read",
+          "motion": "still"
+        },
+        "chrome": {
+          "status": "available",
+          "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+        },
+        "diagnostics": [
+          {
+            "code": "viewer/browser-check-runtime",
+            "severity": "error",
+            "message": "browser-check could not complete its Chrome inspection.",
+            "subject": {
+              "artifact": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html"
+            },
+            "evidence": {
+              "reason": "Chrome DevTools read pipe failed: stream ended\nChrome process: still running.\nChrome transport: Node v26.12.0, libuv 1.53.0, darwin; pid=53028, exitCode=null, signalCode=null.\nChrome read pipe: readable=false, ended=true, destroyed=false, receivedBytes=0, messages=0, bufferedBytes=0.\nChrome write pipe: writable=true, ended=false, destroyed=false, completedWrites=1, writtenBytes=50, bufferedBytes=0."
+            },
+            "supportedFixes": [
+              "resolve the reported Chrome inspection error, then rerun browser-check"
+            ]
+          }
+        ],
+        "containment": {
+          "status": "fail",
+          "policy": "fit-or-reader-declared-readable-vertical-scroll",
+          "viewports": []
+        },
+        "themeStates": {
+          "status": "fail",
+          "viewports": []
+        },
+        "readability": {
+          "status": "fail",
+          "minimumProjectedNodeTextPx": 6,
+          "viewports": []
+        },
+        "viewerChrome": {
+          "status": "fail",
+          "viewports": []
+        },
+        "captures": {
+          "status": "not-requested",
+          "screenshots": [],
+          "contactSheet": null
+        },
+        "sidecars": {
+          "receipt": "future-agent-architecture.browser-check.json",
+          "files": []
+        },
+        "error": "Chrome DevTools read pipe failed: stream ended\nChrome process: still running.\nChrome transport: Node v26.12.0, libuv 1.53.0, darwin; pid=53028, exitCode=null, signalCode=null.\nChrome read pipe: readable=false, ended=true, destroyed=false, receivedBytes=0, messages=0, bufferedBytes=0.\nChrome write pipe: writable=true, ended=false, destroyed=false, completedWrites=1, writtenBytes=50, bufferedBytes=0."
+      }
+    }
+  },
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "diagnostics": [
+    {
+      "code": "viewer/browser-check-runtime",
+      "severity": "error",
+      "message": "browser-check could not complete its Chrome inspection.",
+      "subject": {
+        "artifact": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html"
+      },
+      "evidence": {
+        "reason": "Chrome DevTools read pipe failed: stream ended\nChrome process: still running.\nChrome transport: Node v26.12.0, libuv 1.53.0, darwin; pid=53028, exitCode=null, signalCode=null.\nChrome read pipe: readable=false, ended=true, destroyed=false, receivedBytes=0, messages=0, bufferedBytes=0.\nChrome write pipe: writable=true, ended=false, destroyed=false, completedWrites=1, writtenBytes=50, bufferedBytes=0."
+      },
+      "supportedFixes": [
+        "resolve the reported Chrome inspection error, then rerun browser-check"
+      ]
+    }
+  ],
+  "evidence": {
+    "receipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.finalize.json",
+    "summaryReceipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.finalize-summary.json",
+    "browserCheckReceipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.browser-check.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "browser-check",
+  "finishedAt": "2026-10-22T09:50:30.073Z",
+  "durationMs": 893,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-21T16:29:14.324Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

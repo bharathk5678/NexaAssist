@@ -21,7 +21,11 @@ async def answer_policy(request: RetrieveRequest, settings: Settings) -> AnswerR
         return await retrieve_policy(value, settings)
 
     chain = build_answer_chain(RunnableLambda(retrieve), get_chat_model(settings), settings)
-    with LLMObs.workflow(name="policy_answer") if LLMObs.enabled else nullcontext() as span:
+    with (
+        LLMObs.workflow(name="policy_answer", agent_service=settings.dd_service)
+        if LLMObs.enabled
+        else nullcontext()
+    ) as span:
         response = await chain.ainvoke(request)
         if span is not None:
             try:

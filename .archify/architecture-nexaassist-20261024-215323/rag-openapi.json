@@ -1,0 +1,1029 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "NexaAssist",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "summary": "Metrics",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "type": "object",
+                  "title": "Response Metrics Metrics Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics/latency": {
+      "get": {
+        "summary": "Latency Metrics",
+        "description": "Nearest-rank percentiles of the last 1000 successful requests in this process.",
+        "operationId": "latency_metrics_metrics_latency_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  },
+                  "type": "object",
+                  "title": "Response Latency Metrics Metrics Latency Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/retrieve": {
+      "post": {
+        "summary": "Retrieve",
+        "operationId": "retrieve_retrieve_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrieveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrieveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/answer/evaluated": {
+      "post": {
+        "summary": "Evaluated Answer",
+        "operationId": "evaluated_answer_answer_evaluated_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluatedAnswerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluatedAnswerResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/answer": {
+      "post": {
+        "summary": "Answer",
+        "operationId": "answer_answer_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrieveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback": {
+      "post": {
+        "summary": "Submit",
+        "operationId": "submit_feedback_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackRecord"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List Recent",
+        "operationId": "list_recent_feedback_get",
+        "security": [
+          {
+            "FeedbackReviewer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackRecord"
+                  },
+                  "title": "Response List Recent Feedback Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/{feedback_id}/review": {
+      "post": {
+        "summary": "Review",
+        "operationId": "review_feedback__feedback_id__review_post",
+        "security": [
+          {
+            "FeedbackReviewer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "feedback_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Feedback Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackReview"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Review Feedback  Feedback Id  Review Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnswerCitation": {
+        "properties": {
+          "evidence_id": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Evidence Id"
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Quote"
+          },
+          "matched_child": {
+            "$ref": "#/components/schemas/Citation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "evidence_id",
+          "quote",
+          "matched_child"
+        ],
+        "title": "AnswerCitation"
+      },
+      "AnswerQuality": {
+        "properties": {
+          "metrics": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/QualityScore"
+            },
+            "propertyNames": {
+              "enum": [
+                "faithfulness",
+                "answer_relevancy",
+                "context_precision",
+                "context_recall"
+              ]
+            },
+            "type": "object",
+            "title": "Metrics"
+          },
+          "reference_source": {
+            "type": "string",
+            "enum": [
+              "provided",
+              "golden_dataset",
+              "none"
+            ],
+            "title": "Reference Source"
+          },
+          "reference_answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Answer"
+          },
+          "evaluated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Evaluated At"
+          },
+          "datadog_status": {
+            "type": "string",
+            "enum": [
+              "disabled",
+              "queued",
+              "not_scored",
+              "error"
+            ],
+            "title": "Datadog Status",
+            "default": "disabled"
+          },
+          "datadog_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datadog Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "metrics",
+          "reference_source",
+          "evaluated_at"
+        ],
+        "title": "AnswerQuality"
+      },
+      "AnswerResponse": {
+        "properties": {
+          "as_of": {
+            "type": "string",
+            "format": "date",
+            "title": "As Of"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "answered",
+              "insufficient_evidence",
+              "needs_clarification"
+            ],
+            "title": "Status"
+          },
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/AnswerCitation"
+            },
+            "type": "array",
+            "title": "Citations"
+          },
+          "retrieval_timings": {
+            "$ref": "#/components/schemas/RetrieveTimings"
+          },
+          "generation_ms": {
+            "type": "number",
+            "title": "Generation Ms"
+          },
+          "datadog_span_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[1-9][0-9]{0,19}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datadog Span Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "as_of",
+          "status",
+          "answer",
+          "citations",
+          "retrieval_timings",
+          "generation_ms"
+        ],
+        "title": "AnswerResponse"
+      },
+      "Citation": {
+        "properties": {
+          "doc_id": {
+            "type": "string",
+            "title": "Doc Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "policy_version": {
+            "type": "string",
+            "title": "Policy Version"
+          },
+          "clause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clause"
+          },
+          "effective_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Effective Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "doc_id",
+          "title",
+          "policy_version",
+          "clause",
+          "effective_date"
+        ],
+        "title": "Citation"
+      },
+      "EvaluatedAnswerRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Query"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date",
+            "title": "As Of"
+          },
+          "top_k": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "default": 5
+          },
+          "product_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Id"
+          },
+          "jurisdiction": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jurisdiction"
+          },
+          "reference_answer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Answer"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "query",
+          "as_of"
+        ],
+        "title": "EvaluatedAnswerRequest"
+      },
+      "EvaluatedAnswerResponse": {
+        "properties": {
+          "answer": {
+            "$ref": "#/components/schemas/AnswerResponse"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/AnswerQuality"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "answer",
+          "quality"
+        ],
+        "title": "EvaluatedAnswerResponse"
+      },
+      "FeedbackRecord": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/RetrieveRequest"
+          },
+          "response": {
+            "$ref": "#/components/schemas/AnswerResponse"
+          },
+          "helpful": {
+            "type": "boolean",
+            "title": "Helpful"
+          },
+          "submitter_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Submitter Id"
+          },
+          "submission_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Submission Id"
+          },
+          "correction": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Correction",
+            "default": ""
+          },
+          "feedback_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Feedback Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected"
+            ],
+            "title": "Status",
+            "default": "pending"
+          },
+          "reviewer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewer"
+          },
+          "review_note": {
+            "type": "string",
+            "title": "Review Note",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request",
+          "response",
+          "helpful",
+          "feedback_id",
+          "created_at"
+        ],
+        "title": "FeedbackRecord"
+      },
+      "FeedbackRequest": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/RetrieveRequest"
+          },
+          "response": {
+            "$ref": "#/components/schemas/AnswerResponse"
+          },
+          "helpful": {
+            "type": "boolean",
+            "title": "Helpful"
+          },
+          "submitter_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Submitter Id"
+          },
+          "submission_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Submission Id"
+          },
+          "correction": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Correction",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request",
+          "response",
+          "helpful"
+        ],
+        "title": "FeedbackRequest"
+      },
+      "FeedbackReview": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Status"
+          },
+          "reviewer": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Reviewer"
+          },
+          "review_note": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Review Note"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "reviewer",
+          "review_note"
+        ],
+        "title": "FeedbackReview"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "QualityScore": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "scored",
+              "unavailable",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "QualityScore"
+      },
+      "RetrieveHit": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "parent_text": {
+            "type": "string",
+            "title": "Parent Text"
+          },
+          "citation": {
+            "$ref": "#/components/schemas/Citation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rank",
+          "score",
+          "text",
+          "parent_text",
+          "citation"
+        ],
+        "title": "RetrieveHit"
+      },
+      "RetrieveRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Query"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date",
+            "title": "As Of"
+          },
+          "top_k": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "default": 5
+          },
+          "product_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Id"
+          },
+          "jurisdiction": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jurisdiction"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "query",
+          "as_of"
+        ],
+        "title": "RetrieveRequest"
+      },
+      "RetrieveResponse": {
+        "properties": {
+          "as_of": {
+            "type": "string",
+            "format": "date",
+            "title": "As Of"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/RetrieveHit"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "timings": {
+            "$ref": "#/components/schemas/RetrieveTimings"
+          },
+          "amendments": {
+            "items": {
+              "$ref": "#/components/schemas/RetrieveHit"
+            },
+            "type": "array",
+            "title": "Amendments"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "as_of",
+          "results",
+          "timings"
+        ],
+        "title": "RetrieveResponse"
+      },
+      "RetrieveTimings": {
+        "properties": {
+          "search_ms": {
+            "type": "number",
+            "title": "Search Ms"
+          },
+          "parent_ms": {
+            "type": "number",
+            "title": "Parent Ms"
+          },
+          "total_ms": {
+            "type": "number",
+            "title": "Total Ms"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "search_ms",
+          "parent_ms",
+          "total_ms"
+        ],
+        "title": "RetrieveTimings"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "FeedbackReviewer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

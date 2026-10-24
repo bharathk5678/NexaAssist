@@ -9,7 +9,6 @@ from urllib.parse import urlencode
 import structlog
 from ddtrace.llmobs import LLMObs
 from langchain_core.runnables import RunnableLambda
-from langsmith import traceable
 
 from app.chains.answer import build_answer_chain
 from app.chains.context import assemble_context
@@ -25,7 +24,6 @@ logger = structlog.get_logger()
 GOLDEN_DATASET = Path(__file__).resolve().parents[2] / "evaluation/datasets/answer.jsonl"
 
 
-@traceable(name="answer_with_quality")
 async def answer_with_quality(
     request: EvaluatedAnswerRequest, settings: Settings
 ) -> EvaluatedAnswerResponse:
@@ -53,7 +51,9 @@ async def answer_with_quality(
 
     started = datetime.now(UTC)
     with (
-        LLMObs.workflow(name="policy_answer_live_evaluation") if LLMObs.enabled else nullcontext()
+        LLMObs.workflow(name="policy_answer_live_evaluation", agent_service=settings.dd_service)
+        if LLMObs.enabled
+        else nullcontext()
     ) as span:
         retrieved = await retrieve_policy(policy_request, settings)
         chain = build_answer_chain(
@@ -63,7 +63,7 @@ async def answer_with_quality(
         contexts = [
             hit.parent_text
             for hit in assemble_context(
-                retrieved.results, settings.context_max_tokens, settings.token_encoding
+                retrieved.evidence, settings.context_max_tokens, settings.token_encoding
             ).values()
         ]
         metrics = await score_answer(request.query, answer, contexts, reference, settings)

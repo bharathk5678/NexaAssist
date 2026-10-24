@@ -6,6 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pymongo.errors import PyMongoError
 
+from app.api.auth import require_reviewer
 from app.core.config import Settings, get_settings
 from app.models.feedback import FeedbackRecord, FeedbackRequest, FeedbackReview
 from app.services import feedback
@@ -18,11 +19,13 @@ ConfiguredSettings = Annotated[Settings, Depends(get_settings)]
 async def submit(request: FeedbackRequest, settings: ConfiguredSettings) -> FeedbackRecord:
     try:
         return await feedback.submit_feedback(request, settings)
+    except ValueError:
+        raise HTTPException(status_code=409, detail="Feedback submission ID already used") from None
     except PyMongoError:
         raise HTTPException(status_code=503, detail="Feedback store unavailable") from None
 
 
-@router.get("/feedback")
+@router.get("/feedback", dependencies=[Depends(require_reviewer)])
 async def list_recent(
     settings: ConfiguredSettings, limit: Annotated[int, Query(ge=1, le=100)] = 20
 ) -> list[FeedbackRecord]:
@@ -32,7 +35,7 @@ async def list_recent(
         raise HTTPException(status_code=503, detail="Feedback store unavailable") from None
 
 
-@router.post("/feedback/{feedback_id}/review")
+@router.post("/feedback/{feedback_id}/review", dependencies=[Depends(require_reviewer)])
 async def review(
     feedback_id: UUID, request: FeedbackReview, settings: ConfiguredSettings
 ) -> dict[str, str]:

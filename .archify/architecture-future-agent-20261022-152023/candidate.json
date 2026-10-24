@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "NexaAssist proposed Phase 2 architecture",
+    "locale": "en",
+    "output": ".archify/architecture-future-agent-20261022-152023/future-agent-architecture.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "Streamlit UI",
+      "sublabel": "Chat and approval controls",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        140,
+        72
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Agent API",
+      "sublabel": "Authenticated run lifecycle",
+      "pos": [
+        320,
+        220
+      ],
+      "size": [
+        170,
+        72
+      ]
+    },
+    {
+      "id": "graph",
+      "type": "backend",
+      "label": "Four-agent graph",
+      "sublabel": "Route / Retrieve / Validate / Act",
+      "pos": [
+        650,
+        220
+      ],
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "rag",
+      "type": "backend",
+      "label": "Existing RAG API",
+      "sublabel": "POST /retrieve over HTTP",
+      "pos": [
+        1050,
+        220
+      ],
+      "size": [
+        180,
+        72
+      ]
+    },
+    {
+      "id": "checkpoint",
+      "type": "database",
+      "label": "Durable checkpoints",
+      "sublabel": "Proposed MongoDB integration",
+      "pos": [
+        650,
+        40
+      ],
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "approval",
+      "type": "security",
+      "label": "Approval gate",
+      "sublabel": "Validate exact approved payload",
+      "pos": [
+        650,
+        440
+      ],
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "action",
+      "type": "backend",
+      "label": "Action tool",
+      "sublabel": "Allowlisted idempotent write",
+      "pos": [
+        320,
+        440
+      ],
+      "size": [
+        170,
+        72
+      ]
+    },
+    {
+      "id": "bank",
+      "type": "backend",
+      "label": "Banking API mock",
+      "sublabel": "Cases and service requests",
+      "pos": [
+        40,
+        440
+      ],
+      "size": [
+        180,
+        72
+      ]
+    },
+    {
+      "id": "atlas",
+      "type": "database",
+      "label": "Atlas policy stores",
+      "sublabel": "Scoped chunks and parents",
+      "pos": [
+        1050,
+        440
+      ],
+      "size": [
+        180,
+        72
+      ]
+    },
+    {
+      "id": "reviewer",
+      "type": "external",
+      "label": "Authorized reviewer",
+      "sublabel": "Approve or reject proposal",
+      "pos": [
+        650,
+        640
+      ],
+      "size": [
+        220,
+        72
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ui-api",
+      "from": "ui",
+      "to": "api",
+      "label": "HTTPS",
+      "variant": "default"
+    },
+    {
+      "id": "api-graph",
+      "from": "api",
+      "to": "graph",
+      "label": "run / resume",
+      "variant": "emphasis"
+    },
+    {
+      "id": "graph-rag",
+      "from": "graph",
+      "to": "rag",
+      "label": "retrieve evidence",
+      "variant": "emphasis"
+    },
+    {
+      "id": "graph-checkpoint",
+      "from": "graph",
+      "to": "checkpoint",
+      "label": "checkpoint state",
+      "variant": "default"
+    },
+    {
+      "id": "graph-approval",
+      "from": "graph",
+      "to": "approval",
+      "label": "validated proposal",
+      "variant": "security"
+    },
+    {
+      "id": "approval-action",
+      "from": "approval",
+      "to": "action",
+      "label": "approved only",
+      "variant": "security"
+    },
+    {
+      "id": "action-bank",
+      "from": "action",
+      "to": "bank",
+      "label": "HTTP POST",
+      "variant": "emphasis"
+    },
+    {
+      "id": "rag-atlas",
+      "from": "rag",
+      "to": "atlas",
+      "label": "scoped search",
+      "variant": "default"
+    },
+    {
+      "id": "reviewer-approval",
+      "from": "reviewer",
+      "to": "approval",
+      "label": "decision",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Proposed Agent Service",
+      "items": [
+        "Four agent roles coordinate in one LangGraph service.",
+        "Validation and human approval precede every write."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Existing capabilities to reuse",
+      "items": [
+        "RAG service exposes the unchanged POST /retrieve contract.",
+        "Banking API is a synthetic training mock, not a real bank."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Design status and limits",
+      "items": [
+        "Future proposal; agent code and checkpoint adapter are not implemented.",
+        "Current working-tree code informed the retained service boundaries."
+      ]
+    }
+  ]
+}

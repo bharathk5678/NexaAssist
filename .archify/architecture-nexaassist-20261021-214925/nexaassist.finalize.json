@@ -1,0 +1,1270 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-10-21T16:30:02.082Z",
+  "specification": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/candidate.json",
+    "sha256": "47f518ec9895a5f4829878efc0c81663ea536c173e24ae9fc7e94229149bb9e4",
+    "bytes": 17955
+  },
+  "artifact": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+    "sha256": "052082e9ddda2161c52f713be218504701d20315d3595be3b75ee62716955ca7",
+    "bytes": 850661
+  },
+  "stages": {
+    "validate": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": null,
+      "execution": "embedded-in-deliver",
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "/Users/pankaj/.codex/skills/archify/bin/archify.mjs",
+        "deliver",
+        "architecture",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/candidate.json",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/source-snapshot",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "validate",
+        "specification": {
+          "sha256": "47f518ec9895a5f4829878efc0c81663ea536c173e24ae9fc7e94229149bb9e4",
+          "bytes": 17955
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        }
+      }
+    },
+    "deliver": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 510,
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "/Users/pankaj/.codex/skills/archify/bin/archify.mjs",
+        "deliver",
+        "architecture",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/candidate.json",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/source-snapshot",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "receiptId": "634cc613-1d12-4216-b5d0-acee48e0c433",
+        "ok": true,
+        "command": "deliver",
+        "type": "architecture",
+        "input": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/candidate.json",
+        "output": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+        "specification": {
+          "sha256": "47f518ec9895a5f4829878efc0c81663ea536c173e24ae9fc7e94229149bb9e4",
+          "bytes": 17955
+        },
+        "artifact": {
+          "sha256": "052082e9ddda2161c52f713be218504701d20315d3595be3b75ee62716955ca7",
+          "bytes": 850661
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        },
+        "evidence": {
+          "verified": true,
+          "repository": "https://github.com/pankajshakya627/enterprise-ai-training",
+          "revision": "d455ffd5b1e73bf76fac16a6bb11df9538858267",
+          "references": 35,
+          "linkMode": "local-only"
+        },
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      }
+    },
+    "check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 219,
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "/Users/pankaj/.codex/skills/archify/bin/archify.mjs",
+        "check",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+        "--require-provenance"
+      ],
+      "receipt": {
+        "ok": true,
+        "file": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+        "artifact": {
+          "sha256": "052082e9ddda2161c52f713be218504701d20315d3595be3b75ee62716955ca7",
+          "bytes": 850661
+        },
+        "checks": [
+          {
+            "name": "single_svg",
+            "ok": true,
+            "details": [
+              "found 1 <svg> block(s)"
+            ]
+          },
+          {
+            "name": "finite_svg",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "orthogonal_arrows",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "label_route_clearance",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_crossings",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_corridors",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "container_border_runs",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "route_rhythm",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "legend_clearance",
+            "ok": true,
+            "details": []
+          }
+        ],
+        "composition": {
+          "schemaVersion": 1,
+          "profile": "showcase",
+          "status": "pass",
+          "summary": {
+            "errors": 0,
+            "warnings": 0
+          },
+          "metrics": {
+            "properCrossings": 0,
+            "resolvedCrossovers": 8,
+            "ambiguousCorridors": 0,
+            "arrowheadCollisions": 0,
+            "containerBorderRuns": 0,
+            "labelRouteClearanceIssues": 0,
+            "labelCanvasOverflowIssues": 0,
+            "minLabelRouteClearance": 9.1,
+            "desktopReadabilityIssues": 0,
+            "viewportHeightIssues": 0,
+            "minProjectedNodeTextPx": 6.058631921824104,
+            "maxBends": 4,
+            "routesOverSuggestedBends": 5,
+            "maxStretch": 1.319,
+            "routesOverSuggestedStretch": 0,
+            "minSegmentPx": 24,
+            "minInteriorSegmentPx": 100,
+            "shortSegmentCount": 0,
+            "shortEndpointSegmentCount": 0,
+            "shortInteriorSegmentCount": 0,
+            "microSegmentCount": 0
+          },
+          "suggestedLimits": {
+            "bendsPerRelationship": 2,
+            "stretch": 1.35,
+            "segmentPx": 16,
+            "microSegmentPx": 8
+          },
+          "routeReview": {
+            "crossings": [
+              {
+                "left": {
+                  "id": "evaluate-call",
+                  "from": "routes",
+                  "to": "quality",
+                  "label": "Evaluate answer",
+                  "collectionIndex": 2,
+                  "artifactIndex": 3
+                },
+                "right": {
+                  "id": "batch-rag",
+                  "from": "batch",
+                  "to": "rag",
+                  "label": "Local RAG calls",
+                  "collectionIndex": 16,
+                  "artifactIndex": 17
+                },
+                "point": [
+                  600,
+                  232
+                ]
+              },
+              {
+                "left": {
+                  "id": "feedback-call",
+                  "from": "routes",
+                  "to": "feedback",
+                  "label": "Feedback / review",
+                  "collectionIndex": 7,
+                  "artifactIndex": 8
+                },
+                "right": {
+                  "id": "embed-changes",
+                  "from": "ingest",
+                  "to": "provider",
+                  "label": "Embed changes",
+                  "collectionIndex": 14,
+                  "artifactIndex": 15
+                },
+                "point": [
+                  316,
+                  514
+                ]
+              },
+              {
+                "left": {
+                  "id": "feedback-store",
+                  "from": "feedback",
+                  "to": "atlas",
+                  "label": "Save records",
+                  "collectionIndex": 8,
+                  "artifactIndex": 9
+                },
+                "right": {
+                  "id": "api-spans",
+                  "from": "routes",
+                  "to": "agent",
+                  "label": "Spans if enabled",
+                  "collectionIndex": 10,
+                  "artifactIndex": 11
+                },
+                "point": [
+                  452,
+                  658
+                ]
+              },
+              {
+                "left": {
+                  "id": "feedback-store",
+                  "from": "feedback",
+                  "to": "atlas",
+                  "label": "Save records",
+                  "collectionIndex": 8,
+                  "artifactIndex": 9
+                },
+                "right": {
+                  "id": "quality-sdk",
+                  "from": "quality",
+                  "to": "agent",
+                  "label": "ragas_* if scored",
+                  "collectionIndex": 11,
+                  "artifactIndex": 12
+                },
+                "point": [
+                  762,
+                  493
+                ]
+              },
+              {
+                "left": {
+                  "id": "feedback-store",
+                  "from": "feedback",
+                  "to": "atlas",
+                  "label": "Save records",
+                  "collectionIndex": 8,
+                  "artifactIndex": 9
+                },
+                "right": {
+                  "id": "embed-changes",
+                  "from": "ingest",
+                  "to": "provider",
+                  "label": "Embed changes",
+                  "collectionIndex": 14,
+                  "artifactIndex": 15
+                },
+                "point": [
+                  452,
+                  514
+                ]
+              },
+              {
+                "left": {
+                  "id": "api-spans",
+                  "from": "routes",
+                  "to": "agent",
+                  "label": "Spans if enabled",
+                  "collectionIndex": 10,
+                  "artifactIndex": 11
+                },
+                "right": {
+                  "id": "embed-changes",
+                  "from": "ingest",
+                  "to": "provider",
+                  "label": "Embed changes",
+                  "collectionIndex": 14,
+                  "artifactIndex": 15
+                },
+                "point": [
+                  323.40000000000003,
+                  514
+                ]
+              },
+              {
+                "left": {
+                  "id": "api-spans",
+                  "from": "routes",
+                  "to": "agent",
+                  "label": "Spans if enabled",
+                  "collectionIndex": 10,
+                  "artifactIndex": 11
+                },
+                "right": {
+                  "id": "batch-rag",
+                  "from": "batch",
+                  "to": "rag",
+                  "label": "Local RAG calls",
+                  "collectionIndex": 16,
+                  "artifactIndex": 17
+                },
+                "point": [
+                  452,
+                  232.06666666666666
+                ]
+              },
+              {
+                "left": {
+                  "id": "quality-sdk",
+                  "from": "quality",
+                  "to": "agent",
+                  "label": "ragas_* if scored",
+                  "collectionIndex": 11,
+                  "artifactIndex": 12
+                },
+                "right": {
+                  "id": "embed-changes",
+                  "from": "ingest",
+                  "to": "provider",
+                  "label": "Embed changes",
+                  "collectionIndex": 14,
+                  "artifactIndex": 15
+                },
+                "point": [
+                  762,
+                  514
+                ]
+              }
+            ],
+            "detours": [
+              {
+                "relationship": {
+                  "id": "feedback-call",
+                  "from": "routes",
+                  "to": "feedback",
+                  "label": "Feedback / review",
+                  "collectionIndex": 7,
+                  "artifactIndex": 8
+                },
+                "bends": 3,
+                "stretch": 1.072,
+                "directCorridorBlockers": [
+                  {
+                    "id": "batch",
+                    "label": "Batch evaluation CLI",
+                    "box": [
+                      340,
+                      380,
+                      210,
+                      110
+                    ]
+                  }
+                ]
+              },
+              {
+                "relationship": {
+                  "id": "feedback-store",
+                  "from": "feedback",
+                  "to": "atlas",
+                  "label": "Save records",
+                  "collectionIndex": 8,
+                  "artifactIndex": 9
+                },
+                "bends": 4,
+                "stretch": 1.19
+              },
+              {
+                "relationship": {
+                  "id": "api-spans",
+                  "from": "routes",
+                  "to": "agent",
+                  "label": "Spans if enabled",
+                  "collectionIndex": 10,
+                  "artifactIndex": 11
+                },
+                "bends": 4,
+                "stretch": 1.319
+              },
+              {
+                "relationship": {
+                  "id": "write-chunks",
+                  "from": "ingest",
+                  "to": "atlas",
+                  "label": "Upsert chunks",
+                  "collectionIndex": 15,
+                  "artifactIndex": 16
+                },
+                "bends": 3,
+                "stretch": 1.068
+              },
+              {
+                "relationship": {
+                  "id": "batch-rag",
+                  "from": "batch",
+                  "to": "rag",
+                  "label": "Local RAG calls",
+                  "collectionIndex": 16,
+                  "artifactIndex": 17
+                },
+                "bends": 3,
+                "stretch": 1
+              }
+            ]
+          },
+          "leadingSpace": {
+            "measured": true,
+            "emptyTopPx": 40,
+            "emptyTopRatio": 0.045,
+            "occupiedTop": 40,
+            "viewBoxTop": 0,
+            "canvasHeight": 888,
+            "typicalNodeHeight": 110,
+            "reviewSuggested": false
+          },
+          "desktopReadability": {
+            "budgetBasis": "legacy-930",
+            "readerContract": "declared-wide-v1",
+            "availableDiagramWidth": 930,
+            "actualBudgetPx": 930,
+            "limit": "legacy",
+            "requestedTargetPx": 7.5,
+            "requestedTargetMet": false,
+            "hardFloorPx": 6,
+            "hardFloorMet": true,
+            "minimumOwner": {
+              "kind": "edge",
+              "id": "chat-http",
+              "from": "chat",
+              "to": "routes"
+            },
+            "minimumSourceTextPx": 8,
+            "minimumProjectedTextPx": 6.058631921824104,
+            "semanticTextCount": 44
+          },
+          "issues": []
+        },
+        "provenance": "current",
+        "deliveryReceiptId": "634cc613-1d12-4216-b5d0-acee48e0c433"
+      }
+    },
+    "browser-check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 1356,
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "/Users/pankaj/.codex/skills/archify/bin/archify.mjs",
+        "browser-check",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+        "--json",
+        "--require-provenance"
+      ],
+      "execution": "in-process",
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "browser-check",
+        "evidenceKind": "automated-browser",
+        "status": "pass",
+        "visualReview": "not-requested",
+        "provenance": "current",
+        "deliveryReceiptId": "634cc613-1d12-4216-b5d0-acee48e0c433",
+        "artifact": {
+          "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+          "sha256": "052082e9ddda2161c52f713be218504701d20315d3595be3b75ee62716955ca7",
+          "bytes": 850661
+        },
+        "state": {
+          "detail": "read",
+          "motion": "still"
+        },
+        "chrome": {
+          "status": "available",
+          "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+        },
+        "diagnostics": [],
+        "containment": {
+          "status": "pass",
+          "policy": "fit-or-reader-declared-readable-vertical-scroll",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1062,
+              "diagramWidth": 1032,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 52,
+                "diagramChromePx": 78,
+                "svgPx": 746,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 6.723127035830619,
+              "minimumProjectedNonEdgeTextPx": 7.563517915309447,
+              "minimumProjectedEdgeTextPx": 6.723127035830619,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1000,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1109,
+              "diagramWidth": 1079,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 780,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 7.029315960912052,
+              "minimumProjectedNonEdgeTextPx": 7.907980456026058,
+              "minimumProjectedEdgeTextPx": 7.029315960912052,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1080,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1219,
+              "diagramWidth": 1189,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 860,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 7.745928338762215,
+              "minimumProjectedNonEdgeTextPx": 8.714169381107492,
+              "minimumProjectedEdgeTextPx": 7.745928338762215,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1320,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1546,
+              "diagramWidth": 1496,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1082,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 9,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "themeStates": {
+          "status": "pass",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1440,
+              "height": 900,
+              "requestedTheme": "dark",
+              "resolvedTheme": "dark",
+              "ok": true
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "requestedTheme": "dark",
+              "resolvedTheme": "dark",
+              "ok": true
+            }
+          ]
+        },
+        "readability": {
+          "status": "pass",
+          "minimumProjectedNodeTextPx": 6,
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1062,
+              "diagramWidth": 1032,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 52,
+                "diagramChromePx": 78,
+                "svgPx": 746,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 6.723127035830619,
+              "minimumProjectedNonEdgeTextPx": 7.563517915309447,
+              "minimumProjectedEdgeTextPx": 6.723127035830619,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1000,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1109,
+              "diagramWidth": 1079,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 780,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 7.029315960912052,
+              "minimumProjectedNonEdgeTextPx": 7.907980456026058,
+              "minimumProjectedEdgeTextPx": 7.029315960912052,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1080,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1219,
+              "diagramWidth": 1189,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 860,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 7.745928338762215,
+              "minimumProjectedNonEdgeTextPx": 8.714169381107492,
+              "minimumProjectedEdgeTextPx": 7.745928338762215,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1320,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1546,
+              "diagramWidth": 1496,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1082,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 9,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "viewerChrome": {
+          "status": "pass",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1062,
+              "diagramWidth": 1032,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 52,
+                "diagramChromePx": 78,
+                "svgPx": 746,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 6.723127035830619,
+              "minimumProjectedNonEdgeTextPx": 7.563517915309447,
+              "minimumProjectedEdgeTextPx": 6.723127035830619,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1000,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1109,
+              "diagramWidth": 1079,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 780,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 7.029315960912052,
+              "minimumProjectedNonEdgeTextPx": 7.907980456026058,
+              "minimumProjectedEdgeTextPx": 7.029315960912052,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1080,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1219,
+              "diagramWidth": 1189,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 860,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 7.745928338762215,
+              "minimumProjectedNonEdgeTextPx": 8.714169381107492,
+              "minimumProjectedEdgeTextPx": 7.745928338762215,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1320,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": "intrinsic-height",
+              "ok": true,
+              "readerWidth": 1546,
+              "diagramWidth": 1496,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1082,
+                "cardsPx": 0,
+                "viewBoxHeight": 888
+              },
+              "viewBoxWidth": 1228,
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 9,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "JSON / HTTP",
+              "minimumProjectedNodeTextDetail": "edge",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "edge",
+                "id": "chat-http",
+                "from": "chat",
+                "to": "routes"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "captures": {
+          "status": "not-requested",
+          "screenshots": [],
+          "contactSheet": null
+        },
+        "sidecars": {
+          "receipt": "nexaassist.browser-check.json",
+          "files": []
+        }
+      }
+    }
+  },
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "diagnostics": [],
+  "evidence": {
+    "receipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.finalize.json",
+    "summaryReceipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.finalize-summary.json",
+    "browserCheckReceipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.browser-check.json"
+  },
+  "visualReview": "not-requested",
+  "finishedAt": "2026-10-21T16:30:04.324Z",
+  "durationMs": 2242,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-21T16:29:14.324Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

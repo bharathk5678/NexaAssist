@@ -1,0 +1,696 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "NexaAssist: policy RAG and observability",
+    "output": ".archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/pankajshakya627/enterprise-ai-training.git",
+      "revision": "d455ffd5b1e73bf76fac16a6bb11df9538858267",
+      "link_mode": "local-only"
+    },
+    "views": [
+      {
+        "id": "answer",
+        "label": "1. Answer with evidence",
+        "focus": [
+          "chat",
+          "routes",
+          "rag",
+          "atlas",
+          "provider"
+        ],
+        "note": "A chat request retrieves scoped policy evidence, then generates and validates a cited answer."
+      },
+      {
+        "id": "quality-view",
+        "label": "2. RAGAS quality",
+        "focus": [
+          "routes",
+          "quality",
+          "rag",
+          "provider",
+          "agent",
+          "datadog"
+        ],
+        "note": "The evaluated route scores the same answer and context. Scores are submitted to Datadog when enabled."
+      },
+      {
+        "id": "feedback-view",
+        "label": "3. Feedback and review",
+        "focus": [
+          "chat",
+          "routes",
+          "feedback",
+          "atlas",
+          "agent",
+          "datadog"
+        ],
+        "note": "Feedback is saved before optional Datadog submission. Listing and review require a bearer token."
+      },
+      {
+        "id": "ingestion-view",
+        "label": "4. Ingest policies",
+        "focus": [
+          "ingest",
+          "files",
+          "provider",
+          "atlas"
+        ],
+        "note": "The CLI reads authoritative sources, embeds changed child chunks and maintains parent sections."
+      },
+      {
+        "id": "batch-view",
+        "label": "5. Evaluate golden cases",
+        "focus": [
+          "batch",
+          "rag",
+          "quality",
+          "atlas",
+          "provider",
+          "agent"
+        ],
+        "note": "The batch CLI imports shared RAG and scoring code directly and writes a local JSON report."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "chat",
+      "type": "frontend",
+      "label": "Streamlit chat",
+      "sublabel": "Local UI :8501",
+      "tag": "HTTP client only",
+      "pos": [
+        40,
+        70
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/ui/app.py",
+          "line": 124,
+          "end_line": 184,
+          "label": "Question dispatch and answer display"
+        },
+        {
+          "path": "app/ui/app.py",
+          "line": 37,
+          "end_line": 62,
+          "label": "Feedback submission"
+        },
+        {
+          "path": "README.md",
+          "line": 1463,
+          "end_line": 1467,
+          "label": "Local launch commands"
+        }
+      ]
+    },
+    {
+      "id": "routes",
+      "type": "backend",
+      "label": "FastAPI routes",
+      "sublabel": "Local API :8000",
+      "tag": "Thin adapters",
+      "pos": [
+        340,
+        70
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/main.py",
+          "line": 19,
+          "end_line": 37,
+          "label": "Startup and router registration"
+        },
+        {
+          "path": "app/api/answer.py",
+          "line": 24,
+          "end_line": 59,
+          "label": "Plain and evaluated answer routes"
+        },
+        {
+          "path": "app/api/feedback.py",
+          "line": 18,
+          "end_line": 48,
+          "label": "Feedback and review endpoints"
+        }
+      ]
+    },
+    {
+      "id": "rag",
+      "type": "backend",
+      "label": "Shared RAG logic",
+      "sublabel": "LangChain LCEL / in-process",
+      "tag": "Scope + citation checks",
+      "pos": [
+        650,
+        70
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/services/retrieval.py",
+          "line": 20,
+          "end_line": 48,
+          "label": "Retrieval wiring and dependencies"
+        },
+        {
+          "path": "app/chains/retrieval.py",
+          "line": 35,
+          "end_line": 149,
+          "label": "Filters, parent scope, amendments"
+        },
+        {
+          "path": "app/chains/answer.py",
+          "line": 24,
+          "end_line": 111,
+          "label": "Context, structured answer, validation"
+        }
+      ]
+    },
+    {
+      "id": "atlas",
+      "type": "database",
+      "label": "MongoDB Atlas",
+      "sublabel": "Vectors / parents / feedback",
+      "tag": "Manual vector index",
+      "pos": [
+        975,
+        70
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/database/mongo.py",
+          "line": 18,
+          "end_line": 40,
+          "label": "Atlas store initialization"
+        },
+        {
+          "path": "app/database/retrieval.py",
+          "line": 16,
+          "end_line": 82,
+          "label": "Read linked amendment documents"
+        },
+        {
+          "path": "app/database/feedback.py",
+          "line": 10,
+          "end_line": 44,
+          "label": "Idempotent writes and review"
+        }
+      ]
+    },
+    {
+      "id": "ingest",
+      "type": "backend",
+      "label": "Ingestion CLI",
+      "sublabel": "Parse / chunk / embed",
+      "tag": "Incremental writes",
+      "pos": [
+        40,
+        380
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/services/ingestion.py",
+          "line": 28,
+          "end_line": 96,
+          "label": "Register, stores and CLI entry"
+        },
+        {
+          "path": "app/chains/ingestion.py",
+          "line": 103,
+          "end_line": 150,
+          "label": "Changed chunks and parent writes"
+        },
+        {
+          "path": "app/chains/parsing.py",
+          "line": 14,
+          "end_line": 55,
+          "label": "PDF parsing and tables"
+        }
+      ]
+    },
+    {
+      "id": "batch",
+      "type": "backend",
+      "label": "Batch evaluation CLI",
+      "sublabel": "Golden cases / local report",
+      "tag": "Calls shared code directly",
+      "pos": [
+        340,
+        380
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/evaluation/run.py",
+          "line": 82,
+          "end_line": 162,
+          "label": "Retrieve, answer and judge cases"
+        },
+        {
+          "path": "app/evaluation/run.py",
+          "line": 166,
+          "end_line": 208,
+          "label": "Shared RAGAS scorer"
+        },
+        {
+          "path": "app/evaluation/run.py",
+          "line": 265,
+          "end_line": 310,
+          "label": "Publish scores and CLI configuration"
+        }
+      ]
+    },
+    {
+      "id": "quality",
+      "type": "backend",
+      "label": "Quality evaluators",
+      "sublabel": "RAGAS / live + batch",
+      "tag": "Library, not another server",
+      "pos": [
+        650,
+        380
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/services/evaluation.py",
+          "line": 27,
+          "end_line": 128,
+          "label": "Live answer orchestration and export"
+        },
+        {
+          "path": "app/evaluation/live.py",
+          "line": 17,
+          "end_line": 84,
+          "label": "Metric availability and timeouts"
+        },
+        {
+          "path": "app/evaluation/ragas_metrics.py",
+          "line": 15,
+          "end_line": 54,
+          "label": "Judge, embeddings and four metrics"
+        }
+      ]
+    },
+    {
+      "id": "provider",
+      "type": "cloud",
+      "label": "OpenAI provider",
+      "sublabel": "Embeddings / answers / judges",
+      "tag": "Configured models",
+      "pos": [
+        975,
+        380
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/chains/llm.py",
+          "line": 9,
+          "end_line": 17,
+          "label": "Chat model configuration"
+        },
+        {
+          "path": "app/chains/embeddings.py",
+          "line": 8,
+          "end_line": 15,
+          "label": "Embedding configuration"
+        },
+        {
+          "path": "app/evaluation/live.py",
+          "line": 39,
+          "end_line": 45,
+          "label": "Judge and metric embeddings"
+        }
+      ]
+    },
+    {
+      "id": "files",
+      "type": "database",
+      "label": "Policy source files",
+      "sublabel": "Register + authoritative PDFs",
+      "tag": "Local files, not a server",
+      "pos": [
+        40,
+        690
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "nexa_synthetic_data/document_register.json",
+          "line": 1,
+          "end_line": 35,
+          "label": "Registered source metadata"
+        },
+        {
+          "path": "app/services/ingestion.py",
+          "line": 28,
+          "end_line": 47,
+          "label": "Authoritative file selection"
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "type": "backend",
+      "label": "Feedback + review",
+      "sublabel": "Persist first / SDK best effort",
+      "tag": "Review requires bearer",
+      "pos": [
+        340,
+        690
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/services/feedback.py",
+          "line": 15,
+          "end_line": 55,
+          "label": "Save, submit thumbs and review"
+        },
+        {
+          "path": "app/api/auth.py",
+          "line": 14,
+          "end_line": 28,
+          "label": "Reviewer bearer authentication"
+        },
+        {
+          "path": "app/database/feedback.py",
+          "line": 10,
+          "end_line": 44,
+          "label": "Atomic scoped records"
+        }
+      ]
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "Datadog Docker Agent",
+      "sublabel": "18126/TCP + 18125/UDP",
+      "tag": "Maps to 8126 / 8125",
+      "pos": [
+        650,
+        690
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/compose.datadog.yaml",
+          "line": 5,
+          "end_line": 24,
+          "label": "Agent image, bindings and settings"
+        },
+        {
+          "path": ".env.example",
+          "line": 47,
+          "end_line": 62,
+          "label": "Application telemetry destinations"
+        },
+        {
+          "path": "app/core/telemetry.py",
+          "line": 4,
+          "end_line": 14,
+          "label": "Optional instrumentation startup"
+        }
+      ]
+    },
+    {
+      "id": "datadog",
+      "type": "cloud",
+      "label": "Datadog",
+      "sublabel": "APM / LLM / scores / thumbs",
+      "tag": "Cloud receipt not verified",
+      "pos": [
+        975,
+        690
+      ],
+      "size": [
+        210,
+        110
+      ],
+      "sources": [
+        {
+          "path": "app/services/evaluation.py",
+          "line": 76,
+          "end_line": 118,
+          "label": "Submit RAGAS evaluations and link"
+        },
+        {
+          "path": "app/services/feedback.py",
+          "line": 28,
+          "end_line": 46,
+          "label": "Submit user feedback"
+        },
+        {
+          "path": "app/core/observability.py",
+          "line": 18,
+          "end_line": 44,
+          "label": "Versioned prompt annotations"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "MacBook: local processes and shared Python modules",
+      "wraps": [
+        "chat",
+        "routes",
+        "rag",
+        "ingest",
+        "batch",
+        "quality",
+        "files",
+        "feedback",
+        "agent"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Docker container",
+      "wraps": [
+        "agent"
+      ],
+      "pad": 18
+    }
+  ],
+  "connections": [
+    {
+      "id": "chat-http",
+      "from": "chat",
+      "to": "routes",
+      "label": "JSON / HTTP",
+      "variant": "emphasis"
+    },
+    {
+      "id": "answer-call",
+      "from": "routes",
+      "to": "rag",
+      "label": "Answer / retrieve",
+      "variant": "emphasis"
+    },
+    {
+      "id": "evaluate-call",
+      "from": "routes",
+      "to": "quality",
+      "label": "Evaluate answer",
+      "variant": "default"
+    },
+    {
+      "id": "quality-rag",
+      "from": "quality",
+      "to": "rag",
+      "label": "Retrieve once",
+      "variant": "default"
+    },
+    {
+      "id": "rag-atlas",
+      "from": "rag",
+      "to": "atlas",
+      "label": "Scoped reads",
+      "variant": "emphasis"
+    },
+    {
+      "id": "rag-model",
+      "from": "rag",
+      "to": "provider",
+      "label": "Embed / generate",
+      "variant": "emphasis"
+    },
+    {
+      "id": "quality-model",
+      "from": "quality",
+      "to": "provider",
+      "label": "Judge / HTTPS",
+      "variant": "default"
+    },
+    {
+      "id": "feedback-call",
+      "from": "routes",
+      "to": "feedback",
+      "label": "Feedback / review",
+      "variant": "default"
+    },
+    {
+      "id": "feedback-store",
+      "from": "feedback",
+      "to": "atlas",
+      "label": "Save records",
+      "variant": "default"
+    },
+    {
+      "id": "feedback-sdk",
+      "from": "feedback",
+      "to": "agent",
+      "label": "Thumbs if traced",
+      "variant": "default"
+    },
+    {
+      "id": "api-spans",
+      "from": "routes",
+      "to": "agent",
+      "label": "Spans if enabled",
+      "variant": "default"
+    },
+    {
+      "id": "quality-sdk",
+      "from": "quality",
+      "to": "agent",
+      "label": "ragas_* if scored",
+      "variant": "default"
+    },
+    {
+      "id": "agent-cloud",
+      "from": "agent",
+      "to": "datadog",
+      "label": "HTTPS",
+      "variant": "default"
+    },
+    {
+      "id": "read-sources",
+      "from": "ingest",
+      "to": "files",
+      "label": "Read source files",
+      "variant": "dashed"
+    },
+    {
+      "id": "embed-changes",
+      "from": "ingest",
+      "to": "provider",
+      "label": "Embed changes",
+      "variant": "dashed"
+    },
+    {
+      "id": "write-chunks",
+      "from": "ingest",
+      "to": "atlas",
+      "label": "Upsert chunks",
+      "variant": "dashed"
+    },
+    {
+      "id": "batch-rag",
+      "from": "batch",
+      "to": "rag",
+      "label": "Local RAG calls",
+      "variant": "dashed"
+    },
+    {
+      "id": "batch-score",
+      "from": "batch",
+      "to": "quality",
+      "label": "Reuse RAGAS",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Answer with bounded evidence",
+      "items": [
+        "Retrieval filters institution, effective dates, jurisdiction, confidentiality and product. Parent sections must match scope; otherwise child evidence is retained.",
+        "Linked circulars are assembled completely. Context packing uses a token budget; missing required amendments cause abstention.",
+        "The chain validates citation IDs and exact evidence quotes, with at most two drafts. These checks do not prove semantic correctness."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Quality and human feedback",
+      "items": [
+        "Live evaluation reuses one retrieval and scores the final answer/context: faithfulness, answer relevancy, context precision and context recall. Precision/recall need a reference.",
+        "The chat shows an answer, citations and a Datadog link. RAGAS scores belong in Datadog; unavailable metrics are not invented.",
+        "Feedback is stored first. Submitter + submission IDs make retries idempotent. Datadog thumbs require enabled LLM Observability and a target span; SDK failure does not undo persistence.",
+        "Feedback listing and review require a configured bearer token. This is local training authentication, not enterprise SSO."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Ingestion and repeatable evaluation",
+      "items": [
+        "Ingestion reads authoritative register entries and PDFs, chunks clauses/tables, and embeds changed children before updating parent sections. There is no cross-collection transaction or job lock.",
+        "Batch evaluation imports shared RAG and scorer code; it does not call the FastAPI server. It resolves references, runs golden cases and writes a local JSON report.",
+        "RAG and quality nodes are shared library responsibilities within API/CLI processes, not additional deployed services."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Telemetry is a configured flow",
+      "items": [
+        "Mac applications send APM/LLM data to loopback port 18126 and DogStatsD to 18125. Docker maps these to Agent ports 8126 and 8125. The Agent forwards to Datadog.",
+        "When enabled, instrumentation records requests, database/model calls, token usage and versioned prompt annotations. Batch evaluation also submits scores when enabled.",
+        "JSON logs go to stdout and need separate log collection. /health is liveness; /metrics and /metrics/latency are process-local. Queued telemetry is not proof of cloud receipt."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Reading this architecture",
+      "items": [
+        "Choose Live for motion, Still for static viewing, and a guided view to focus a workflow. Select any component for its source passport.",
+        "This is a source-backed illustration of the latest working code, not a live traffic monitor. Exact source bytes are committed only in an isolated local snapshot; nothing was published. See SOURCE_NOTES.md for the working-tree provenance.",
+        "Dense retrieval is the default; hybrid search needs a manual text index and reranking is optional. LangGraph and application MCP are future layers. No LangSmith integration is depicted."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/candidate.json",
+    "sha256": "47f518ec9895a5f4829878efc0c81663ea536c173e24ae9fc7e94229149bb9e4",
+    "bytes": 17955
+  },
+  "artifact": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+    "sha256": "052082e9ddda2161c52f713be218504701d20315d3595be3b75ee62716955ca7",
+    "bytes": 850661
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/review-3/nexaassist.finalize.json",
+    "summaryReceipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/review-3/nexaassist.finalize-summary.json",
+    "browserCheckReceipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/review-3/nexaassist.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-21T16:29:14.324Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 2414,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "resolvedCrossovers": 8,
+      "routesOverSuggestedBends": 5
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [
+        {
+          "left": {
+            "id": "evaluate-call",
+            "from": "routes",
+            "to": "quality",
+            "label": "Evaluate answer",
+            "collectionIndex": 2,
+            "artifactIndex": 3
+          },
+          "right": {
+            "id": "batch-rag",
+            "from": "batch",
+            "to": "rag",
+            "label": "Local RAG calls",
+            "collectionIndex": 16,
+            "artifactIndex": 17
+          },
+          "point": [
+            600,
+            232
+          ]
+        },
+        {
+          "left": {
+            "id": "feedback-call",
+            "from": "routes",
+            "to": "feedback",
+            "label": "Feedback / review",
+            "collectionIndex": 7,
+            "artifactIndex": 8
+          },
+          "right": {
+            "id": "embed-changes",
+            "from": "ingest",
+            "to": "provider",
+            "label": "Embed changes",
+            "collectionIndex": 14,
+            "artifactIndex": 15
+          },
+          "point": [
+            316,
+            514
+          ]
+        },
+        {
+          "left": {
+            "id": "feedback-store",
+            "from": "feedback",
+            "to": "atlas",
+            "label": "Save records",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "right": {
+            "id": "api-spans",
+            "from": "routes",
+            "to": "agent",
+            "label": "Spans if enabled",
+            "collectionIndex": 10,
+            "artifactIndex": 11
+          },
+          "point": [
+            452,
+            658
+          ]
+        },
+        {
+          "left": {
+            "id": "feedback-store",
+            "from": "feedback",
+            "to": "atlas",
+            "label": "Save records",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "right": {
+            "id": "quality-sdk",
+            "from": "quality",
+            "to": "agent",
+            "label": "ragas_* if scored",
+            "collectionIndex": 11,
+            "artifactIndex": 12
+          },
+          "point": [
+            762,
+            493
+          ]
+        },
+        {
+          "left": {
+            "id": "feedback-store",
+            "from": "feedback",
+            "to": "atlas",
+            "label": "Save records",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "right": {
+            "id": "embed-changes",
+            "from": "ingest",
+            "to": "provider",
+            "label": "Embed changes",
+            "collectionIndex": 14,
+            "artifactIndex": 15
+          },
+          "point": [
+            452,
+            514
+          ]
+        },
+        {
+          "left": {
+            "id": "api-spans",
+            "from": "routes",
+            "to": "agent",
+            "label": "Spans if enabled",
+            "collectionIndex": 10,
+            "artifactIndex": 11
+          },
+          "right": {
+            "id": "embed-changes",
+            "from": "ingest",
+            "to": "provider",
+            "label": "Embed changes",
+            "collectionIndex": 14,
+            "artifactIndex": 15
+          },
+          "point": [
+            323.40000000000003,
+            514
+          ]
+        },
+        {
+          "left": {
+            "id": "api-spans",
+            "from": "routes",
+            "to": "agent",
+            "label": "Spans if enabled",
+            "collectionIndex": 10,
+            "artifactIndex": 11
+          },
+          "right": {
+            "id": "batch-rag",
+            "from": "batch",
+            "to": "rag",
+            "label": "Local RAG calls",
+            "collectionIndex": 16,
+            "artifactIndex": 17
+          },
+          "point": [
+            452,
+            232.06666666666666
+          ]
+        },
+        {
+          "left": {
+            "id": "quality-sdk",
+            "from": "quality",
+            "to": "agent",
+            "label": "ragas_* if scored",
+            "collectionIndex": 11,
+            "artifactIndex": 12
+          },
+          "right": {
+            "id": "embed-changes",
+            "from": "ingest",
+            "to": "provider",
+            "label": "Embed changes",
+            "collectionIndex": 14,
+            "artifactIndex": 15
+          },
+          "point": [
+            762,
+            514
+          ]
+        }
+      ],
+      "detours": [
+        {
+          "relationship": {
+            "id": "feedback-call",
+            "from": "routes",
+            "to": "feedback",
+            "label": "Feedback / review",
+            "collectionIndex": 7,
+            "artifactIndex": 8
+          },
+          "bends": 3,
+          "stretch": 1.072,
+          "directCorridorBlockers": [
+            {
+              "id": "batch",
+              "label": "Batch evaluation CLI",
+              "box": [
+                340,
+                380,
+                210,
+                110
+              ]
+            }
+          ]
+        },
+        {
+          "relationship": {
+            "id": "feedback-store",
+            "from": "feedback",
+            "to": "atlas",
+            "label": "Save records",
+            "collectionIndex": 8,
+            "artifactIndex": 9
+          },
+          "bends": 4,
+          "stretch": 1.19
+        },
+        {
+          "relationship": {
+            "id": "api-spans",
+            "from": "routes",
+            "to": "agent",
+            "label": "Spans if enabled",
+            "collectionIndex": 10,
+            "artifactIndex": 11
+          },
+          "bends": 4,
+          "stretch": 1.319
+        },
+        {
+          "relationship": {
+            "id": "write-chunks",
+            "from": "ingest",
+            "to": "atlas",
+            "label": "Upsert chunks",
+            "collectionIndex": 15,
+            "artifactIndex": 16
+          },
+          "bends": 3,
+          "stretch": 1.068
+        },
+        {
+          "relationship": {
+            "id": "batch-rag",
+            "from": "batch",
+            "to": "rag",
+            "label": "Local RAG calls",
+            "collectionIndex": 16,
+            "artifactIndex": 17
+          },
+          "bends": 3,
+          "stretch": 1
+        }
+      ],
+      "truncated": false
+    },
+    "hints": [
+      "routes → quality crosses batch → rag: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "routes → feedback crosses ingest → provider: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "feedback → atlas crosses routes → agent: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "feedback → atlas crosses quality → agent: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "feedback → atlas crosses ingest → provider: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "routes → agent crosses ingest → provider: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "routes → agent crosses batch → rag: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "quality → agent crosses ingest → provider: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

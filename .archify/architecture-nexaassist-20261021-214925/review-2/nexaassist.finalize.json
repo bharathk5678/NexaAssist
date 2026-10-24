@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-10-21T16:30:39.327Z",
+  "specification": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/candidate.json",
+    "sha256": "aaf75bf1892cb8f729fe375471871411e2376278b83b15dcd286596f584529cf",
+    "bytes": 17955
+  },
+  "artifact": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+    "sha256": "052082e9ddda2161c52f713be218504701d20315d3595be3b75ee62716955ca7",
+    "bytes": 850661
+  },
+  "stages": {
+    "validate": {
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": null,
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "/Users/pankaj/.codex/skills/archify/bin/archify.mjs",
+        "deliver",
+        "architecture",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/candidate.json",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/source-snapshot",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": false,
+        "command": "deliver",
+        "receiptId": "fc913bad-f09e-4a45-9e05-bddcf3b8d1ff",
+        "stage": "render",
+        "type": "architecture",
+        "input": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/candidate.json",
+        "output": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+        "error": "Architecture layout validation failed:\n- [composition/label-route-clearance] showcase architecture label \"Answer / retrieve\" on connections[1] id \"answer-call\" \"routes\" -> \"rag\" label \"Answer / retrieve\" is 0px from connections[8] id \"feedback-store\" \"feedback\" -> \"atlas\" label \"Save records\" segment 1 [574, 421] -> [574, 46] (label rect [554, 97, 92, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+        "diagnostics": [
+          {
+            "code": "composition/label-route-clearance",
+            "severity": "error",
+            "message": "[composition/label-route-clearance] showcase architecture label \"Answer / retrieve\" on connections[1] id \"answer-call\" \"routes\" -> \"rag\" label \"Answer / retrieve\" is 0px from connections[8] id \"feedback-store\" \"feedback\" -> \"atlas\" label \"Save records\" segment 1 [574, 421] -> [574, 46] (label rect [554, 97, 92, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 1,
+              "id": "answer-call",
+              "from": "routes",
+              "to": "rag"
+            },
+            "evidence": {
+              "label": "Answer / retrieve",
+              "otherRelationship": {
+                "diagramType": "architecture",
+                "collection": "connections",
+                "index": 8,
+                "id": "feedback-store",
+                "from": "feedback",
+                "to": "atlas"
+              },
+              "segmentIndex": 1,
+              "clearancePx": 0,
+              "minimumPx": 4,
+              "labelRect": {
+                "relation": {
+                  "id": "answer-call",
+                  "from": "routes",
+                  "to": "rag",
+                  "label": "Answer / retrieve",
+                  "variant": "emphasis"
+                },
+                "relationIndex": 1,
+                "label": "Answer / retrieve",
+                "x": 554.2,
+                "y": 96.95,
+                "width": 91.6,
+                "height": 14,
+                "lx": 600,
+                "ly": 106.95
+              },
+              "from": [
+                574,
+                421
+              ],
+              "to": [
+                574,
+                46
+              ]
+            },
+            "supportedFixes": [
+              "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+            ]
+          }
+        ],
+        "provenance": "failed",
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      },
+      "execution": "embedded-in-deliver"
+    },
+    "deliver": {
+      "status": "not-run",
+      "execution": "blocked-by-validate"
+    }
+  },
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "diagnostics": [
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Answer / retrieve\" on connections[1] id \"answer-call\" \"routes\" -> \"rag\" label \"Answer / retrieve\" is 0px from connections[8] id \"feedback-store\" \"feedback\" -> \"atlas\" label \"Save records\" segment 1 [574, 421] -> [574, 46] (label rect [554, 97, 92, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 1,
+        "id": "answer-call",
+        "from": "routes",
+        "to": "rag"
+      },
+      "evidence": {
+        "label": "Answer / retrieve",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 8,
+          "id": "feedback-store",
+          "from": "feedback",
+          "to": "atlas"
+        },
+        "segmentIndex": 1,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "answer-call",
+            "from": "routes",
+            "to": "rag",
+            "label": "Answer / retrieve",
+            "variant": "emphasis"
+          },
+          "relationIndex": 1,
+          "label": "Answer / retrieve",
+          "x": 554.2,
+          "y": 96.95,
+          "width": 91.6,
+          "height": 14,
+          "lx": 600,
+          "ly": 106.95
+        },
+        "from": [
+          574,
+          421
+        ],
+        "to": [
+          574,
+          46
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    }
+  ],
+  "evidence": {
+    "receipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/review-2/nexaassist.finalize.json",
+    "summaryReceipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/review-2/nexaassist.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "validate",
+  "finishedAt": "2026-10-21T16:30:39.754Z",
+  "durationMs": 427,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-21T16:29:14.324Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

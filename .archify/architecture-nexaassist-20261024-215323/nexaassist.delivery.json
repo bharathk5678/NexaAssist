@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "af60c96e-2e82-4b61-bbf5-4b60681f2f73",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261024-215323/candidate.json",
+  "output": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261024-215323/nexaassist.html",
+  "specification": {
+    "sha256": "57d20643c0e7484c58b0ada2a930f4c32c7cb519ea157d32259a956b0a4e2652",
+    "bytes": 21267
+  },
+  "artifact": {
+    "sha256": "24fe9dbcf1a06e680da61040dbcd555be3db6fe804277077b49613e824440c10",
+    "bytes": 848803
+  }
+}

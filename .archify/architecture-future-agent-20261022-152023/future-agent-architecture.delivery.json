@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "a3f1423d-43e2-4034-8568-7ced4b9086c4",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/candidate.json",
+  "output": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-future-agent-20261022-152023/future-agent-architecture.html",
+  "specification": {
+    "sha256": "2517ff27e7b2e51d28f373e4ba7e51f8d7f76050ee14fa57f857a2b458184a67",
+    "bytes": 4790
+  },
+  "artifact": {
+    "sha256": "8ab1c3c34d4107012834d93bf120feaf51c30f3558a1a752d658035c118bbc3d",
+    "bytes": 826272
+  }
+}

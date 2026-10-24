@@ -49,3 +49,13 @@ class RetrieveResponse(BaseModel):
     as_of: date
     results: list[RetrieveHit]
     timings: RetrieveTimings
+    amendments: list[RetrieveHit] = Field(default_factory=list)
+
+    @property
+    def evidence(self) -> list[RetrieveHit]:
+        complete = {(hit.citation.doc_id, hit.citation.policy_version) for hit in self.amendments}
+        return self.amendments + [
+            hit
+            for hit in self.results
+            if (hit.citation.doc_id, hit.citation.policy_version) not in complete
+        ]

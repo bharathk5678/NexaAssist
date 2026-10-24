@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/candidate.json",
+    "sha256": "aaf75bf1892cb8f729fe375471871411e2376278b83b15dcd286596f584529cf",
+    "bytes": 17955
+  },
+  "artifact": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/nexaassist.html",
+    "sha256": "052082e9ddda2161c52f713be218504701d20315d3595be3b75ee62716955ca7",
+    "bytes": 850661
+  },
+  "gates": {
+    "validate": "fail",
+    "deliver": "not-run",
+    "check": "not-run",
+    "browser-check": "not-run"
+  },
+  "failedStage": "validate",
+  "diagnostics": [
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Answer / retrieve\" on connections[1] id \"answer-call\" \"routes\" -> \"rag\" label \"Answer / retrieve\" is 0px from connections[8] id \"feedback-store\" \"feedback\" -> \"atlas\" label \"Save records\" segment 1 [574, 421] -> [574, 46] (label rect [554, 97, 92, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 1,
+        "id": "answer-call",
+        "from": "routes",
+        "to": "rag"
+      },
+      "evidence": {
+        "label": "Answer / retrieve",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 8,
+          "id": "feedback-store",
+          "from": "feedback",
+          "to": "atlas"
+        },
+        "segmentIndex": 1,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "answer-call",
+            "from": "routes",
+            "to": "rag",
+            "label": "Answer / retrieve",
+            "variant": "emphasis"
+          },
+          "relationIndex": 1,
+          "label": "Answer / retrieve",
+          "x": 554.2,
+          "y": 96.95,
+          "width": 91.6,
+          "height": 14,
+          "lx": 600,
+          "ly": 106.95
+        },
+        "from": [
+          574,
+          421
+        ],
+        "to": [
+          574,
+          46
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    }
+  ],
+  "diagnosticSummary": {
+    "total": 1,
+    "shown": 1,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/review-2/nexaassist.finalize.json",
+    "summaryReceipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/review-2/nexaassist.finalize-summary.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-21T16:29:14.324Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 427,
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "nextAction": {
+    "action": "edit-in-place",
+    "candidate": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261021-214925/candidate.json",
+    "constraint": "Preserve unaffected semantics and geometry; apply each diagnostic's supportedFixes, or the fix its message names, and do not replace the whole candidate.",
+    "then": "finalize-once"
+  }
+}

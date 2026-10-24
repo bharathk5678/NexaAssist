@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 
 import structlog
-from langsmith import traceable
 from pydantic import ValidationError
 
 from app.chains.embeddings import get_embeddings
@@ -15,7 +14,6 @@ from app.models.evaluation import METRIC_NAMES, MetricName, QualityScore
 logger = structlog.get_logger()
 
 
-@traceable(name="live_ragas_metrics")
 async def score_answer(
     query: str,
     answer: AnswerResponse,
