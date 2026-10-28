@@ -20,6 +20,9 @@ This guide covers ingestion, dense/hybrid retrieval, local reranker integration,
 | 5 | Failure diagnosis, health and counters | `evaluation/rag_failure_modes.py`, `evaluation/rag_failure_examples.py`, `database/diagnostics.py`, `api/operations.py` |
 | 6 | Atlas hybrid/RRF and local Qwen reranker adapter | `database/retrieval.py`, `chains/rerank.py`, `chains/prompts/rerank.py` |
 | 7 | Token-budgeted context, configured chat model, answer generation and citation checks | `chains/answer.py`, `chains/llm.py`, `chains/prompts/answer.py`, `services/answer.py`, `models/answer.py`, `api/answer.py` |
+| 8 | **Arize Phoenix Observability** | `app/core/phoenix.py`, `run_phoenix.py`, `tests/test_phoenix_ragas.py`, OpenTelemetry LangChain instrumentor (`http://localhost:6006`) |
+| 8 | **RAGAS Evaluation & Testing** | `app/evaluation/ragas_metrics.py`, `test_phoenix_ragas.py`, Faithfulness, Answer Relevancy, Context Precision/Recall |
+| 8 | **Information Retrieval Metrics** | `verify_retrieval_metrics.py`, `tests/test_retrieval_metrics.py`, Precision@k, Recall@k, MRR, nDCG@k |
 
 Sessions 1 and 2 also have standalone teaching notebooks under `notebooks/` (`phase1_session1_ingestion.ipynb`, `phase1_session2_chunking.ipynb`). These two notebooks do not import `app/`; they repeat the stages cell by cell. The separate `direct_ingestion_with_metadata.ipynb` notebook calls the application service.
 

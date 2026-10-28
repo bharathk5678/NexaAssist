@@ -10,9 +10,12 @@ This repository contains the Week 1 ingestion and retrieval paths, plus the firs
 | Orchestration | LangChain (LCEL runnables) |
 | Vector store | MongoDB Atlas Vector Search via `langchain-mongodb` |
 | Embeddings | OpenAI `text-embedding-3-small`, 1536 dimensions |
+| Observability | **Arize Phoenix** (local UI on `http://localhost:6006`), OpenTelemetry, optional Datadog |
+| Evaluation | **RAGAS** (Faithfulness, Answer Relevancy, Context Precision/Recall) & **IR Metrics** (Precision@k, Recall@k, MRR, nDCG@k) |
+| Web UI & API | Streamlit (`localhost:8501`) & FastAPI (`localhost:8000`) |
 | PDF parsing | `pdfplumber` (tables and headings), `unstructured` (element types) |
 | Chunking | Clause-aware rules in `app/chains/chunking.py`, `langchain-text-splitters` for oversized clauses |
-| Config and logging | `pydantic-settings`, `structlog` (JSON), optional `ddtrace` |
+| Config and logging | `pydantic-settings`, `structlog` (JSON) |
 | Package manager | `uv` |
 
 ## Table of contents
@@ -390,9 +393,15 @@ sequenceDiagram
 ```text
 .
 ├── README.md
-├── CLAUDE.md                       Rules for how the code is written
+├── APP_COMPONENT_GUIDE.md          Component guide and architecture
+├── CLAUDE.md                       Development rules and CLI commands
+├── AGENTS.md                       Agent rules
 ├── pyproject.toml                  Dependencies and tool config
 ├── .env.example                    Template for required environment variables
+├── run_phoenix.py                  Standalone runner for Arize Phoenix server (port 6006)
+├── test_phoenix_ragas.py           Verification runner for Phoenix tracing and RAGAS metrics
+├── verify_retrieval_metrics.py     Precision@k, Recall@k, MRR, and nDCG calculation and evaluation
+│
 ├── notebooks/
 │   ├── phase1_session1_ingestion.ipynb Standalone teaching notebook for Session 1
 │   └── phase1_session2_chunking.ipynb  Standalone teaching notebook for Session 2
@@ -401,11 +410,15 @@ sequenceDiagram
 │   ├── core/                       Cross-cutting infrastructure
 │   │   ├── config.py               Settings: every env var, typed
 │   │   ├── logging.py              JSON logging setup
+│   │   ├── phoenix.py              Arize Phoenix & OpenTelemetry LangChain instrumentor
 │   │   └── telemetry.py            Datadog APM switch
 │   ├── models/
+│   │   ├── answer.py               AnswerRequest, AnswerResponse
+│   │   ├── evaluation.py           QualityScore, RAGAS definitions
 │   │   ├── ingestion.py            IngestRequest, IngestResponse
 │   │   └── retrieval.py            RetrieveRequest, RetrieveResponse, citations
 │   ├── chains/                     Pure LangChain: no web or UI imports
+│   │   ├── answer.py               Structured answer generation & citations
 │   │   ├── parsing.py              PDF to structured elements
 │   │   ├── chunking.py             Clause-aware chunking (structure first, size second)
 │   │   ├── embeddings.py           OpenAI embeddings client
@@ -415,20 +428,26 @@ sequenceDiagram
 │   │   ├── mongo.py                Vector store, parent store, stale-chunk removal
 │   │   └── indexes.md              The Atlas Vector Search index JSON (created by hand), parent collection
 │   ├── services/
+│   │   ├── answer.py               Answer orchestration service
 │   │   ├── ingestion.py            Entry point: register to requests, run the chain
 │   │   └── retrieval.py            Retrieval wiring and operational counters
-│   ├── api/                       FastAPI retrieval, health and metrics routes
-│   └── main.py                    FastAPI application
+│   ├── api/                        FastAPI retrieval, health, answer and metrics routes
+│   ├── ui/                         Streamlit interactive policy chat interface
+│   ├── main.py                     FastAPI application entrypoint
+│   └── streamlit_app.py            Streamlit web client entrypoint
 │
 ├── tests/
 │   ├── test_ingestion.py           Ingestion checks
-│   └── test_retrieval.py           Retrieval and API checks
+│   ├── test_retrieval.py           Retrieval and API checks
+│   ├── test_retrieval_metrics.py   IR metrics (P@k, R@k, MRR, nDCG) unit checks
+│   ├── test_phoenix_ragas.py       Arize Phoenix and tracing unit checks
+│   ├── test_answer.py              Answer generation tests
+│   └── test_ui.py                  Streamlit UI interaction tests
 │
-└── nexa_synthetic_data/            The corpus (see its own README.md)
+└── nexa_synthetic_data/            The corpus
     ├── document_register.json      Controlled library: versions, windows, supersession
     ├── policies/                   8 PDFs
-    ├── golden_qa/                  97 Q&As for evaluation (used from Week 2)
-    ├── catalog/  customers/  uploads/  api/  generator/
+    ├── golden_qa/                  97 Q&As for evaluation
     └── README.md
 ```
 
@@ -803,6 +822,23 @@ python -m app.services.ingestion nexa_synthetic_data/document_register.json
 
 What happens, in order: settings load from `.env`, logging is configured, the register is read, and each of the eight documents is parsed, chunked, embedded and upserted. It finishes after eight `document_ingested` log lines (see below). To ingest a different register or a copy of it, pass its path as the argument.
 
+#### Running the Services
+
+```bash
+# 1. Start Arize Phoenix Observability UI (port 6006)
+uv run python run_phoenix.py
+
+# 2. Start FastAPI Backend (port 8000)
+uv run uvicorn app.main:app --reload --port 8000
+
+# 3. Start Streamlit Web UI (port 8501)
+uv run streamlit run app/streamlit_app.py
+```
+
+* **Streamlit UI**: [http://localhost:8501](http://localhost:8501)
+* **Arize Phoenix UI**: [http://localhost:6006](http://localhost:6006)
+* **FastAPI Swagger Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
 #### Retrieval API (needs `.env`, re-ingested chunks, and the rebuilt index)
 
 ```bash
@@ -811,9 +847,34 @@ curl -X POST http://127.0.0.1:8000/retrieve -H 'Content-Type: application/json' 
   -d '{"query":"What is the NexaHome processing fee?","as_of":"2026-10-01","top_k":5,"product_id":"NEXA-HL","jurisdiction":"IN"}'
 ```
 
-`/retrieve` returns ranked child passages, citations (`doc_id`, title, version, clause, effective date), parent-section text, and search/parent/total timings in milliseconds. `as_of` is required; `top_k` defaults to 5 and is limited to 1–20. Invalid bodies return 422, and retrieval failures return a generic 503. `GET /health` reports process liveness; `GET /metrics` reports per-process retrieval requests, errors, empty results, and accumulated latency. To enable Datadog APM, run with a Datadog Agent and `uv run --env-file .env ddtrace-run uvicorn app.main:app --host 127.0.0.1`.
+`/retrieve` returns ranked child passages, citations (`doc_id`, title, version, clause, effective date), parent-section text, and search/parent/total timings in milliseconds. `as_of` is required; `top_k` defaults to 5 and is limited to 1–20. Invalid bodies return 422, and retrieval failures return a generic 503. `GET /health` reports process liveness; `GET /metrics` reports per-process retrieval requests, errors, empty results, and accumulated latency.
 
-The API has no authentication because this is a synthetic training corpus. Keep it bound to localhost until an access-control contract is defined. The as-of filter handles document effective windows; it does not yet resolve a circular that supersedes only selected clauses in a still-current policy.
+#### Evaluation & Metrics
+
+##### 1. Information Retrieval Metrics (Precision@k, Recall@k, MRR, nDCG@k)
+Compute standard IR ranking metrics against textbook test cases or the golden dataset:
+
+```bash
+# Mathematical verification mode (textbook unit checks):
+uv run python verify_retrieval_metrics.py --verify
+
+# Live evaluation against golden dataset in MongoDB Atlas:
+uv run python verify_retrieval_metrics.py
+```
+
+##### 2. Arize Phoenix & RAGAS Verification
+Test LangChain OpenInference tracing and evaluate RAG triad metrics (Faithfulness, Answer Relevancy, Context Precision, Context Recall):
+
+```bash
+# Self-contained verification:
+uv run python test_phoenix_ragas.py
+
+# Live evaluation with OpenAI judge model:
+uv run python test_phoenix_ragas.py --live
+
+# Interactive Phoenix server:
+uv run python test_phoenix_ragas.py --interactive
+```
 
 #### Session 5: RAG production failure modes
 

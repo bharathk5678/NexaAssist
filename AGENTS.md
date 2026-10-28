@@ -15,13 +15,13 @@ This is a production-grade AI application built in strictly separated LAYERS. Do
 5.  **Layer 5 (Future): FastMCP** - Expose tools and resources via MCP server.
 6.  **Layer 6 (Continuous): Observability & Evaluations** - Unit tests, LLM evaluations (LangSmith/Ragas), and operational telemetry (Datadog).
 
-**Tech Stack:**
+- **Tech Stack:**
 - **Primary:** LangChain / LangChain-Core
 - **Vector DB:** MongoDB Atlas Vector Search (`langchain-mongodb`)
 - **API:** FastAPI + Pydantic v2
 - **UI:** Streamlit
-- **Observability:** Datadog (APM & LLM Observability) + LangSmith
-- **Evaluation:** LangSmith, Ragas, DeepEval, pytest
+- **Observability:** Arize Phoenix (Local UI at `http://localhost:6006`), OpenTelemetry, Datadog + LangSmith
+- **Evaluation:** Ragas, IR Metrics (P@k, R@k, MRR, nDCG), LangSmith, pytest
 
 ## 2. CORE PRINCIPLES - NON-NEGOTIABLE
 
@@ -160,10 +160,13 @@ When responding to tasks, format your thought process inside XML tags, followed 
 
 ## 9. Environment & Commands
 
-* **Package Manager:** `uv` (preferred)
-* **Datadog APM Runner:** `DD_SERVICE="ai-app" DD_ENV="dev" ddtrace-run uvicorn main:app --reload`
-* **Run UI:** `streamlit run streamlit_app.py`
-* **Run Evals:** `python -m evaluation.run --type rag` or `pytest tests/`
+* **Package Manager:** `uv`
+* **FastAPI Backend:** `uv run uvicorn app.main:app --reload --port 8000`
+* **Streamlit UI:** `uv run streamlit run app/streamlit_app.py`
+* **Arize Phoenix Server:** `uv run python run_phoenix.py` (Dashboard: `http://localhost:6006`)
+* **IR Metrics Verification:** `uv run python verify_retrieval_metrics.py --verify`
+* **Phoenix & Ragas Evaluation:** `uv run python test_phoenix_ragas.py`
+* **Run Tests:** `uv run pytest -q`
 * **Lint/Format:** `ruff check . && mypy .`
 
 ---
