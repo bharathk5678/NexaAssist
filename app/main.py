@@ -3,6 +3,11 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
+import sys
+
+# Ensure repository root is on sys.path so 'app' package can be imported
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from fastapi import FastAPI
 
@@ -13,6 +18,7 @@ from app.api.retrieval import router as retrieval_router
 from app.chains.context import token_encoder
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+from app.core.phoenix import init_phoenix
 from app.core.telemetry import init_telemetry
 
 
@@ -20,6 +26,8 @@ from app.core.telemetry import init_telemetry
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     init_telemetry(settings.dd_trace_enabled)
+    if settings.phoenix_enabled:
+        init_phoenix(settings.phoenix_port)
     configure_logging(settings.log_level)
     await asyncio.to_thread(token_encoder, settings.token_encoding)
     yield

@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "NexaAssist: enterprise policy and compliance RAG (Phase 1)"
 requires-python = ">=3.14"
 dependencies = [
+    "arize-phoenix>=20.19.0",
     "ddtrace",
     "fastapi",
     "httpx",
@@ -11,6 +12,7 @@ dependencies = [
     "langchain-mongodb",
     "langchain-openai",
     "langchain-text-splitters>=1.1.3",
+    "openinference-instrumentation-langchain>=0.1.80",
     "pdfplumber",
     "pydantic>=2",
     "pydantic-settings",

@@ -320,12 +320,19 @@ def main() -> None:
         "Each question is checked independently. Include the product and relevant details "
         "in your message. Verify the cited policy before making a decision."
     )
-    prompt = st.chat_input(
-        "Ask NexaAssist about a policy…",
-        key="policy_chat_input",
-        max_chars=2000,
-        submit_mode="disable",
-    )
+    try:
+        prompt = st.chat_input(
+            "Ask NexaAssist about a policy…",
+            key="policy_chat_input",
+            max_chars=2000,
+            submit_mode="disable",
+        )
+    except TypeError:
+        prompt = st.chat_input(
+            "Ask NexaAssist about a policy…",
+            key="policy_chat_input",
+            max_chars=2000,
+        )
     if retry is not None:
         send_question(client, retry)
         st.rerun()

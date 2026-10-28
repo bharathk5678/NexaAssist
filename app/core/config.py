@@ -47,6 +47,8 @@ class Settings(BaseSettings):
     dd_trace_enabled: bool = False
     dd_service: str = "nexaassist-api"
     dd_site: str = Field(default="datadoghq.com", pattern=r"^[a-z0-9.-]+$")
+    phoenix_enabled: bool = False
+    phoenix_port: int = 6006
 
     @model_validator(mode="after")
     def valid_overlap(self) -> Settings:

@@ -1,0 +1,97 @@
+{
+  "status": "completed",
+  "captured_at": "2026-10-22T15:31:49.891801+00:00",
+  "model": "gpt-6-luna",
+  "judge_model": "gpt-6-sol",
+  "judge_prompt_version": "policy-judge-v2",
+  "judge_limitation": "Stochastic scoring; review with humans. A separate judge model does not guarantee independent errors.",
+  "retrieval_mode": "dense",
+  "rerank_enabled": false,
+  "rerank_model": null,
+  "ragas_version": "0.4.3",
+  "empty_context_policy": "Answerable cases with no evidence receive zero metrics.",
+  "records": [
+    {
+      "user_input": "What is the maximum loan amount for a NexaHome Loan?",
+      "response": "I cannot answer this question reliably from the retrieved policy evidence.",
+      "reference": "The maximum NexaHome Loan amount is ₹7,50,00,000 (₹7.5 crore). The minimum is ₹5,00,000. This is the limit under POL-HL-V3, clause 4.1.",
+      "reference_contexts": [
+        "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 4. Loan amount and tenure]\n4.1 Loan amount. Minimum loan amount is ₹5,00,000. Maximum loan amount is ₹7,50,00,000."
+      ],
+      "retrieved_contexts": [],
+      "expected_status": "answered",
+      "actual_status": "insufficient_evidence",
+      "request": {
+        "query": "What is the maximum loan amount for a NexaHome Loan?",
+        "as_of": "2026-10-01",
+        "top_k": 20,
+        "product_id": "NEXA-HL",
+        "jurisdiction": null
+      },
+      "retrieval_timings": {
+        "search_ms": 975.49,
+        "parent_ms": 0.03,
+        "total_ms": 976.2
+      },
+      "generation_ms": 0.0,
+      "trace": [
+        {
+          "name": "evaluation_retrieval",
+          "run_type": "chain",
+          "duration_ms": 982.58,
+          "failed": false
+        },
+        {
+          "name": "retrieve_policy",
+          "run_type": "chain",
+          "duration_ms": 977.74,
+          "failed": false
+        },
+        {
+          "name": "answer_policy",
+          "run_type": "chain",
+          "duration_ms": 0.92,
+          "failed": false
+        },
+        {
+          "name": "replay",
+          "run_type": "chain",
+          "duration_ms": 0.33,
+          "failed": false
+        }
+      ],
+      "judge": {
+        "correctness": 0.0,
+        "groundedness": 1.0,
+        "rationale": "The response does not provide the maximum loan amount, so it does not satisfy the expected answer. Because no policy evidence was actually retrieved, its statement that it cannot answer reliably is appropriately grounded.",
+        "status_matches": false
+      }
+    }
+  ],
+  "ragas": {
+    "status": "completed",
+    "case_count": 1,
+    "scores": [
+      {
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "context_precision": 0.0,
+        "context_recall": 0.0
+      }
+    ],
+    "means": {
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.0,
+      "context_precision": 0.0,
+      "context_recall": 0.0
+    }
+  },
+  "datadog": {
+    "status": "disabled"
+  },
+  "dataset": "/Users/bharathkokkula/AI/NexaAssist/evaluation/datasets/answer.jsonl",
+  "gate": {
+    "minimum": null,
+    "status": "not_configured"
+  }
+}
