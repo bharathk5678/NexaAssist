@@ -35,7 +35,6 @@ def build_retrieval_chain(
     async def retrieve(request: RetrieveRequest) -> RetrieveResponse:
         as_of = request.as_of.isoformat()
         filters: list[dict[str, object]] = [
-            {"institution": settings.institution},
             {"effective_date": {"$lte": as_of}},
             {"effective_to_search": {"$gte": as_of}},
             {"jurisdiction": request.jurisdiction or settings.jurisdiction},
