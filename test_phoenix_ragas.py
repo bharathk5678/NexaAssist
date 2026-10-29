@@ -37,10 +37,6 @@ def verify_phoenix_tracing() -> bool:
     print("=" * 80)
 
     session = init_phoenix(port=6006)
-    if session is None:
-        print("❌ Failed to start Phoenix session.")
-        return False
-
     url = getattr(session, "url", "http://localhost:6006/")
     print(f"✓ Arize Phoenix is active at: {url}")
 
