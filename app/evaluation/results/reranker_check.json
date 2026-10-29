@@ -1,0 +1,18 @@
+{
+  "captured_at": "2026-10-29T00:31:26.292982+00:00",
+  "model": "nexaassist-reranker:0.6b-mlx",
+  "endpoint": "http://127.0.0.1:11434",
+  "api": "ollama",
+  "status": "passed",
+  "input_kind": "fixed fictional passages; no Atlas or OpenAI cloud calls",
+  "scores": [
+    {
+      "text": "A home loan processing fee is 0.35 percent of the amount.",
+      "score": 0.7660021041055394
+    },
+    {
+      "text": "A car loan requires a vehicle invoice.",
+      "score": 0.5629035657666271
+    }
+  ]
+}
