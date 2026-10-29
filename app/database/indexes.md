@@ -14,6 +14,7 @@ Create this index manually in Atlas (Atlas UI > Atlas Search > Create Search Ind
       "numDimensions": 1536,
       "similarity": "cosine"
     },
+    { "type": "filter", "path": "institution" },
     { "type": "filter", "path": "product_id" },
     { "type": "filter", "path": "jurisdiction" },
     { "type": "filter", "path": "effective_date" },
@@ -54,9 +55,25 @@ The vector branch uses `pre_filter`; the integration's text branch applies the
 same MongoDB filter immediately after `$search`, before its candidate limit and
 RRF. Text metadata filtering therefore does not require extra Atlas Search token
 mappings, though this post-search filtering can cost more at scale. Both branches
-enforce the same date, product, jurisdiction and confidentiality restrictions.
+enforce the same institution, date, product, jurisdiction and confidentiality restrictions.
 Index creation is always manual; there is no fallback to dense search on a missing
 text index. Dense mode remains available for baseline comparisons.
+
+Existing vector indexes must also include the `institution` filter before running
+the updated API. Update the existing definition in Atlas, retaining its vector
+dimensions and other fields, and wait for it to be queryable.
+
+Linked circulars are additionally read through a scoped MongoDB query on `doc_type`
+and `supersedes`. Complete instruments include their applicability and grandfathering
+clauses, even when their semantic rank falls outside `top_k`. They appear separately
+as `amendments` in retrieval responses; `results` still respects `top_k`. No embedding
+or source-document rewrite is required for this read-path change.
+Circular-to-circular links are followed until no new document ID remains. Each
+discovered instrument is read in full under its institution/document/version
+identity and must have consistent source scope metadata across its stored chunks.
+Inconsistent dates, product or other source scope fail closed with a service
+error; the API does not silently answer from a partial circular. This validation
+cannot detect an entirely absent chunk without a source ingestion manifest.
 
 References: [LangChain MongoDB hybrid retriever](https://langchain-mongodb.readthedocs.io/en/latest/_modules/langchain_mongodb/retrievers/hybrid_search.html),
 [MongoDB text-search stage](https://langchain-mongodb.readthedocs.io/en/latest/_modules/langchain_mongodb/pipelines.html).

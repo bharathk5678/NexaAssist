@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import Field, HttpUrl, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,6 +16,12 @@ class Settings(BaseSettings):
     vector_index_name: str = "policy_chunks_v1"
     mongodb_parent_collection: str = "policy_sections"
     mongodb_feedback_collection: str = "policy_feedback"
+    feedback_reviewer_token: SecretStr | None = Field(default=None, min_length=32)
+
+    @field_validator("feedback_reviewer_token", mode="before")
+    @classmethod
+    def empty_reviewer_token(cls, value: object) -> object:
+        return None if value == "" else value
 
     openai_api_key: SecretStr
     embedding_model: str = "text-embedding-3-small"
@@ -72,3 +78,16 @@ class UISettings(BaseSettings):
 @lru_cache
 def get_ui_settings() -> UISettings:
     return UISettings()
+
+
+class AgentSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    rag_base_url: HttpUrl = HttpUrl("http://127.0.0.1:8000/")
+    agent_http_timeout_seconds: float = Field(default=60, gt=0, le=300)
+    agent_run_timeout_seconds: float = Field(default=180, gt=0, le=600)
+
+
+@lru_cache
+def get_agent_settings() -> AgentSettings:
+    return AgentSettings()

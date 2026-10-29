@@ -4,7 +4,6 @@ import json
 from functools import lru_cache
 
 import tiktoken
-from langsmith import traceable
 
 from app.models.retrieval import RetrieveHit
 
@@ -28,7 +27,6 @@ def render_context(sources: dict[int, RetrieveHit]) -> str:
     )
 
 
-@traceable
 def assemble_context(
     hits: list[RetrieveHit], max_tokens: int, encoding: str
 ) -> dict[int, RetrieveHit]:

@@ -5,6 +5,7 @@ from datetime import date
 from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
+import pytest
 from fastapi.testclient import TestClient
 from langchain_core.documents import Document
 from langchain_core.stores import InMemoryStore
@@ -42,13 +43,34 @@ def test_retrieval_filters_and_expands_parent() -> None:
             "policy_version": "2.0",
             "clause": "6.2",
             "effective_date": "2024-04-01",
+            "product_id": "NEXA-HL",
             "parent_id": "POL-HL-V2_s06",
         },
     )
     store = Mock(spec=VectorStore)
     store.asimilarity_search_with_score = AsyncMock(return_value=[(document, 0.91)])
     parents = InMemoryStore()
-    asyncio.run(parents.amset([("POL-HL-V2_s06", Document(page_content="Whole fee section"))]))
+    asyncio.run(
+        parents.amset(
+            [
+                (
+                    "POL-HL-V2_s06",
+                    Document(
+                        page_content="Whole fee section",
+                        metadata={
+                            "institution": "NexaBank",
+                            "jurisdiction": "IN",
+                            "confidentiality_level": "internal",
+                            "doc_id": "POL-HL-V2",
+                            "policy_version": "2.0",
+                            "product_id": "NEXA-HL",
+                            "effective_date": "2024-04-01",
+                        },
+                    ),
+                )
+            ]
+        )
+    )
     request = RetrieveRequest(
         query="processing fee", as_of=date(2025, 9, 30), product_id="NEXA-HL", top_k=3
     )
@@ -66,6 +88,7 @@ def test_retrieval_filters_and_expands_parent() -> None:
         "k": 3,
         "pre_filter": {
             "$and": [
+                {"institution": "NexaBank"},
                 {"effective_date": {"$lte": "2025-09-30"}},
                 {"effective_to_search": {"$gte": "2025-09-30"}},
                 {"jurisdiction": "IN"},
@@ -74,6 +97,59 @@ def test_retrieval_filters_and_expands_parent() -> None:
             ]
         },
     }
+
+
+@pytest.mark.parametrize(
+    "changed_field,changed_value",
+    [
+        ("institution", "OtherBank"),
+        ("product_id", "NEXA-PL"),
+        ("effective_date", "2027-01-01"),
+        ("effective_to", "2025-12-31"),
+    ],
+)
+def test_out_of_scope_parent_cannot_replace_scoped_child(
+    changed_field: str, changed_value: str
+) -> None:
+    metadata = {
+        "institution": "NexaBank",
+        "jurisdiction": "IN",
+        "confidentiality_level": "internal",
+        "product_id": "NEXA-HL",
+        "doc_id": "POL-HL-V3",
+        "title": "NexaHome Loan Policy",
+        "policy_version": "3.0",
+        "effective_date": "2025-10-01",
+        "effective_to": "2026-12-31",
+    }
+    document = Document(
+        page_content="Scoped child evidence",
+        metadata={
+            **metadata,
+            "clause": "4.1",
+            "parent_id": "shared-parent",
+        },
+    )
+    store = Mock(spec=VectorStore)
+    store.asimilarity_search_with_score = AsyncMock(return_value=[(document, 0.9)])
+    parents = InMemoryStore()
+    parents.mset(
+        [
+            (
+                "shared-parent",
+                Document(
+                    page_content="Other bank's confidential text",
+                    metadata={**metadata, changed_field: changed_value},
+                ),
+            )
+        ]
+    )
+    result = asyncio.run(
+        build_retrieval_chain(store, parents, settings()).ainvoke(
+            RetrieveRequest(query="maximum", as_of="2026-10-01", product_id="NEXA-HL")
+        )
+    )
+    assert result.results[0].parent_text == "Scoped child evidence"
 
 
 def test_retrieval_empty_and_missing_parent() -> None:
@@ -125,6 +201,7 @@ def test_api_returns_safe_failure_and_validates_body(monkeypatch: Any) -> None:
     assert client.post("/retrieve", json={"query": "fee", "as_of": "2026-10-01"}).json() == {
         "as_of": "2026-10-01",
         "results": [],
+        "amendments": [],
         "timings": {"search_ms": 1.0, "parent_ms": 0.0, "total_ms": 1.0},
     }
     assert client.post("/retrieve", json={"query": "", "as_of": "2026-10-01"}).status_code == 422

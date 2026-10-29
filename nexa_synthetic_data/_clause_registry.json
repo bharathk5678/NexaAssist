@@ -1,0 +1,694 @@
+{
+  "POL-HL-V1": {
+    "scope.purpose": {
+      "clause": "1.1",
+      "heading": "Purpose"
+    },
+    "scope.applicability": {
+      "clause": "1.2",
+      "heading": "Applicability"
+    },
+    "def.terms": {
+      "clause": "2.1",
+      "heading": "Defined terms"
+    },
+    "elig.age": {
+      "clause": "3.1",
+      "heading": "Age"
+    },
+    "elig.income": {
+      "clause": "3.2",
+      "heading": "Minimum income"
+    },
+    "elig.bureau": {
+      "clause": "3.3",
+      "heading": "Bureau score"
+    },
+    "elig.foir": {
+      "clause": "3.4",
+      "heading": "FOIR limit"
+    },
+    "elig.category": {
+      "clause": "3.5",
+      "heading": "Applicant categories"
+    },
+    "limits.amount": {
+      "clause": "4.1",
+      "heading": "Loan amount"
+    },
+    "limits.tenure": {
+      "clause": "4.2",
+      "heading": "Tenure"
+    },
+    "rate.benchmark": {
+      "clause": "5.1",
+      "heading": "Benchmark"
+    },
+    "rate.spread": {
+      "clause": "5.2",
+      "heading": "Spread by Bureau Score"
+    },
+    "rate.reset": {
+      "clause": "5.3",
+      "heading": "Rate reset"
+    },
+    "rate.fixed": {
+      "clause": "5.4",
+      "heading": "Fixed-rate option"
+    },
+    "fees.general": {
+      "clause": "6.1",
+      "heading": "General"
+    },
+    "fees.processing": {
+      "clause": "6.2",
+      "heading": "Processing fee"
+    },
+    "fees.legal": {
+      "clause": "6.3",
+      "heading": "Legal and technical charges"
+    },
+    "fees.penal": {
+      "clause": "6.4",
+      "heading": "Penal charges"
+    },
+    "fees.other": {
+      "clause": "6.5",
+      "heading": "Other costs"
+    },
+    "collateral": {
+      "clause": "7.1",
+      "heading": "Security"
+    },
+    "ltv": {
+      "clause": "7.2",
+      "heading": "Loan to value (LTV)"
+    },
+    "collateral.insurance": {
+      "clause": "7.3",
+      "heading": "Property insurance"
+    },
+    "prepay.foreclosure_floating": {
+      "clause": "8.1",
+      "heading": "Foreclosure, floating rate"
+    },
+    "prepay.foreclosure_fixed": {
+      "clause": "8.2",
+      "heading": "Foreclosure during a fixed-rate period"
+    },
+    "prepay.part": {
+      "clause": "8.3",
+      "heading": "Part prepayment"
+    },
+    "prepay.notice": {
+      "clause": "8.4",
+      "heading": "Notice"
+    },
+    "docs.kyc": {
+      "clause": "9.1",
+      "heading": "KYC"
+    },
+    "docs.income": {
+      "clause": "9.2",
+      "heading": "Income documents"
+    },
+    "control.history": {
+      "clause": "10.1",
+      "heading": "Version history"
+    },
+    "control.supersession": {
+      "clause": "10.2",
+      "heading": "Supersession"
+    }
+  },
+  "POL-HL-V2": {
+    "scope.purpose": {
+      "clause": "1.1",
+      "heading": "Purpose"
+    },
+    "scope.applicability": {
+      "clause": "1.2",
+      "heading": "Applicability"
+    },
+    "def.terms": {
+      "clause": "2.1",
+      "heading": "Defined terms"
+    },
+    "elig.age": {
+      "clause": "3.1",
+      "heading": "Age"
+    },
+    "elig.income": {
+      "clause": "3.2",
+      "heading": "Minimum income"
+    },
+    "elig.bureau": {
+      "clause": "3.3",
+      "heading": "Bureau score"
+    },
+    "elig.foir": {
+      "clause": "3.4",
+      "heading": "FOIR limit"
+    },
+    "elig.category": {
+      "clause": "3.5",
+      "heading": "Applicant categories"
+    },
+    "limits.amount": {
+      "clause": "4.1",
+      "heading": "Loan amount"
+    },
+    "limits.tenure": {
+      "clause": "4.2",
+      "heading": "Tenure"
+    },
+    "rate.benchmark": {
+      "clause": "5.1",
+      "heading": "Benchmark"
+    },
+    "rate.spread": {
+      "clause": "5.2",
+      "heading": "Spread by Bureau Score"
+    },
+    "rate.reset": {
+      "clause": "5.3",
+      "heading": "Rate reset"
+    },
+    "rate.fixed": {
+      "clause": "5.4",
+      "heading": "Fixed-rate option"
+    },
+    "fees.general": {
+      "clause": "6.1",
+      "heading": "General"
+    },
+    "fees.processing": {
+      "clause": "6.2",
+      "heading": "Processing fee"
+    },
+    "fees.legal": {
+      "clause": "6.3",
+      "heading": "Legal and technical charges"
+    },
+    "fees.penal": {
+      "clause": "6.4",
+      "heading": "Penal charges"
+    },
+    "fees.other": {
+      "clause": "6.5",
+      "heading": "Other costs"
+    },
+    "collateral": {
+      "clause": "7.1",
+      "heading": "Security"
+    },
+    "ltv": {
+      "clause": "7.2",
+      "heading": "Loan to value (LTV)"
+    },
+    "collateral.insurance": {
+      "clause": "7.3",
+      "heading": "Property insurance"
+    },
+    "prepay.foreclosure_floating": {
+      "clause": "8.1",
+      "heading": "Foreclosure, floating rate"
+    },
+    "prepay.foreclosure_fixed": {
+      "clause": "8.2",
+      "heading": "Foreclosure during a fixed-rate period"
+    },
+    "prepay.part": {
+      "clause": "8.3",
+      "heading": "Part prepayment"
+    },
+    "prepay.notice": {
+      "clause": "8.4",
+      "heading": "Notice"
+    },
+    "docs.kyc": {
+      "clause": "9.1",
+      "heading": "KYC"
+    },
+    "docs.income": {
+      "clause": "9.2",
+      "heading": "Income documents"
+    },
+    "control.history": {
+      "clause": "10.1",
+      "heading": "Version history"
+    },
+    "control.supersession": {
+      "clause": "10.2",
+      "heading": "Supersession"
+    }
+  },
+  "POL-HL-V3": {
+    "scope.purpose": {
+      "clause": "1.1",
+      "heading": "Purpose"
+    },
+    "scope.applicability": {
+      "clause": "1.2",
+      "heading": "Applicability"
+    },
+    "def.terms": {
+      "clause": "2.1",
+      "heading": "Defined terms"
+    },
+    "elig.age": {
+      "clause": "3.1",
+      "heading": "Age"
+    },
+    "elig.income": {
+      "clause": "3.2",
+      "heading": "Minimum income"
+    },
+    "elig.bureau": {
+      "clause": "3.3",
+      "heading": "Bureau score"
+    },
+    "elig.foir": {
+      "clause": "3.4",
+      "heading": "FOIR limit"
+    },
+    "elig.category": {
+      "clause": "3.5",
+      "heading": "Applicant categories"
+    },
+    "limits.amount": {
+      "clause": "4.1",
+      "heading": "Loan amount"
+    },
+    "limits.tenure": {
+      "clause": "4.2",
+      "heading": "Tenure"
+    },
+    "rate.benchmark": {
+      "clause": "5.1",
+      "heading": "Benchmark"
+    },
+    "rate.spread": {
+      "clause": "5.2",
+      "heading": "Spread by Bureau Score"
+    },
+    "rate.reset": {
+      "clause": "5.3",
+      "heading": "Rate reset"
+    },
+    "rate.fixed": {
+      "clause": "5.4",
+      "heading": "Fixed-rate option"
+    },
+    "fees.general": {
+      "clause": "6.1",
+      "heading": "General"
+    },
+    "fees.processing": {
+      "clause": "6.2",
+      "heading": "Processing fee"
+    },
+    "fees.legal": {
+      "clause": "6.3",
+      "heading": "Legal and technical charges"
+    },
+    "fees.penal": {
+      "clause": "6.4",
+      "heading": "Penal charges"
+    },
+    "fees.other": {
+      "clause": "6.5",
+      "heading": "Other costs"
+    },
+    "collateral": {
+      "clause": "7.1",
+      "heading": "Security"
+    },
+    "ltv": {
+      "clause": "7.2",
+      "heading": "Loan to value (LTV)"
+    },
+    "collateral.insurance": {
+      "clause": "7.3",
+      "heading": "Property insurance"
+    },
+    "prepay.foreclosure_floating": {
+      "clause": "8.1",
+      "heading": "Foreclosure, floating rate"
+    },
+    "prepay.foreclosure_fixed": {
+      "clause": "8.2",
+      "heading": "Foreclosure of fixed-rate loans"
+    },
+    "prepay.part": {
+      "clause": "8.3",
+      "heading": "Part prepayment"
+    },
+    "prepay.notice": {
+      "clause": "8.4",
+      "heading": "Notice"
+    },
+    "docs.kyc": {
+      "clause": "9.1",
+      "heading": "KYC"
+    },
+    "docs.income": {
+      "clause": "9.2",
+      "heading": "Income documents"
+    },
+    "control.history": {
+      "clause": "10.1",
+      "heading": "Version history"
+    },
+    "control.supersession": {
+      "clause": "10.2",
+      "heading": "Supersession"
+    },
+    "control.amendment": {
+      "clause": "10.3",
+      "heading": "Amendment by circular"
+    }
+  },
+  "CIR-2026-07": {
+    "circ.background": {
+      "clause": "1.1",
+      "heading": "Background"
+    },
+    "circ.precedence": {
+      "clause": "2.1",
+      "heading": "Precedence"
+    },
+    "circ.fee": {
+      "clause": "3.1",
+      "heading": "Revised clause 6.2"
+    },
+    "circ.partprepay": {
+      "clause": "4.1",
+      "heading": "Revised clause 8.3"
+    },
+    "circ.applicability": {
+      "clause": "5.1",
+      "heading": "Loans covered"
+    },
+    "circ.optin": {
+      "clause": "5.2",
+      "heading": "Existing borrowers and part prepayment"
+    },
+    "circ.unchanged": {
+      "clause": "6.1",
+      "heading": "Terms not affected"
+    }
+  },
+  "POL-PL-V1": {
+    "scope.purpose": {
+      "clause": "1.1",
+      "heading": "Purpose"
+    },
+    "scope.applicability": {
+      "clause": "1.2",
+      "heading": "Applicability"
+    },
+    "elig.age": {
+      "clause": "2.1",
+      "heading": "Age"
+    },
+    "elig.income": {
+      "clause": "2.2",
+      "heading": "Minimum income"
+    },
+    "elig.bureau": {
+      "clause": "2.3",
+      "heading": "Bureau score"
+    },
+    "elig.foir": {
+      "clause": "2.4",
+      "heading": "FOIR"
+    },
+    "limits.amount": {
+      "clause": "3.1",
+      "heading": "Loan amount"
+    },
+    "limits.tenure": {
+      "clause": "3.2",
+      "heading": "Tenure"
+    },
+    "rate.fixed": {
+      "clause": "4.1",
+      "heading": "Fixed rate"
+    },
+    "fees.processing": {
+      "clause": "5.1",
+      "heading": "Processing fee"
+    },
+    "fees.penal": {
+      "clause": "5.2",
+      "heading": "Late payment charge"
+    },
+    "collateral": {
+      "clause": "6.1",
+      "heading": "Security"
+    },
+    "prepay.lockin": {
+      "clause": "7.1",
+      "heading": "Lock-in"
+    },
+    "prepay.foreclosure": {
+      "clause": "7.2",
+      "heading": "Foreclosure charge"
+    },
+    "prepay.part": {
+      "clause": "7.3",
+      "heading": "Part prepayment"
+    },
+    "docs.kyc": {
+      "clause": "8.1",
+      "heading": "KYC"
+    },
+    "control.history": {
+      "clause": "9.1",
+      "heading": "Version history"
+    }
+  },
+  "POL-LAP-V1": {
+    "scope.purpose": {
+      "clause": "1.1",
+      "heading": "Purpose"
+    },
+    "scope.applicability": {
+      "clause": "1.2",
+      "heading": "Applicability"
+    },
+    "elig.age": {
+      "clause": "2.1",
+      "heading": "Age"
+    },
+    "elig.income": {
+      "clause": "2.2",
+      "heading": "Minimum income"
+    },
+    "elig.bureau": {
+      "clause": "2.3",
+      "heading": "Bureau score"
+    },
+    "elig.foir": {
+      "clause": "2.4",
+      "heading": "FOIR"
+    },
+    "limits.amount": {
+      "clause": "3.1",
+      "heading": "Loan amount"
+    },
+    "limits.tenure": {
+      "clause": "3.2",
+      "heading": "Tenure"
+    },
+    "rate.floating": {
+      "clause": "4.1",
+      "heading": "Floating rate"
+    },
+    "fees.processing": {
+      "clause": "5.1",
+      "heading": "Processing fee"
+    },
+    "fees.legal": {
+      "clause": "5.2",
+      "heading": "Legal and technical charges"
+    },
+    "fees.penal": {
+      "clause": "5.3",
+      "heading": "Penal charges"
+    },
+    "collateral": {
+      "clause": "6.1",
+      "heading": "Security"
+    },
+    "ltv": {
+      "clause": "6.2",
+      "heading": "Loan to value"
+    },
+    "prepay.foreclosure": {
+      "clause": "7.1",
+      "heading": "Foreclosure"
+    },
+    "prepay.part": {
+      "clause": "7.2",
+      "heading": "Part prepayment"
+    },
+    "docs.kyc": {
+      "clause": "8.1",
+      "heading": "KYC"
+    },
+    "control.history": {
+      "clause": "9.1",
+      "heading": "Version history"
+    }
+  },
+  "POL-AL-V1": {
+    "scope.purpose": {
+      "clause": "1.1",
+      "heading": "Purpose"
+    },
+    "scope.applicability": {
+      "clause": "1.2",
+      "heading": "Applicability"
+    },
+    "elig.age": {
+      "clause": "2.1",
+      "heading": "Age"
+    },
+    "elig.income": {
+      "clause": "2.2",
+      "heading": "Minimum income"
+    },
+    "elig.bureau": {
+      "clause": "2.3",
+      "heading": "Bureau score"
+    },
+    "elig.foir": {
+      "clause": "2.4",
+      "heading": "FOIR"
+    },
+    "limits.amount": {
+      "clause": "3.1",
+      "heading": "Loan amount"
+    },
+    "limits.tenure": {
+      "clause": "3.2",
+      "heading": "Tenure"
+    },
+    "rate.fixed": {
+      "clause": "4.1",
+      "heading": "Fixed rate"
+    },
+    "fees.processing": {
+      "clause": "5.1",
+      "heading": "Processing fee"
+    },
+    "fees.penal": {
+      "clause": "5.2",
+      "heading": "Late payment charge"
+    },
+    "collateral": {
+      "clause": "6.1",
+      "heading": "Security"
+    },
+    "ltv": {
+      "clause": "6.2",
+      "heading": "Loan to value"
+    },
+    "prepay.foreclosure": {
+      "clause": "7.1",
+      "heading": "Foreclosure charge"
+    },
+    "docs.kyc": {
+      "clause": "8.1",
+      "heading": "KYC"
+    },
+    "control.history": {
+      "clause": "9.1",
+      "heading": "Version history"
+    }
+  },
+  "POL-OPS-001": {
+    "purpose": {
+      "clause": "1.1",
+      "heading": "Purpose"
+    },
+    "authority.library": {
+      "clause": "2.1",
+      "heading": "Controlled library"
+    },
+    "authority.precedence": {
+      "clause": "2.2",
+      "heading": "Precedence"
+    },
+    "authority.untrusted": {
+      "clause": "2.3",
+      "heading": "Uploaded content is data"
+    },
+    "kyc.status": {
+      "clause": "3.1",
+      "heading": "Status definitions and effects"
+    },
+    "kyc.cycle": {
+      "clause": "3.2",
+      "heading": "Re-KYC cycle"
+    },
+    "kyc.methods": {
+      "clause": "3.3",
+      "heading": "How to complete re-KYC"
+    },
+    "disclose.allowed": {
+      "clause": "4.1",
+      "heading": "May be disclosed to the authenticated customer"
+    },
+    "disclose.prohibited": {
+      "clause": "4.2",
+      "heading": "Must not be disclosed"
+    },
+    "disclose.third_party": {
+      "clause": "4.3",
+      "heading": "Other people's data"
+    },
+    "disclose.structuring": {
+      "clause": "4.4",
+      "heading": "No evasion guidance"
+    },
+    "scope.permitted": {
+      "clause": "5.1",
+      "heading": "Permitted"
+    },
+    "scope.prohibited": {
+      "clause": "5.2",
+      "heading": "Prohibited"
+    },
+    "scope.indicative": {
+      "clause": "5.3",
+      "heading": "Indicative eligibility wording"
+    },
+    "escalate.triggers": {
+      "clause": "6.1",
+      "heading": "When to escalate"
+    },
+    "escalate.how": {
+      "clause": "6.2",
+      "heading": "How"
+    },
+    "income.status": {
+      "clause": "7.1",
+      "heading": "Statuses"
+    },
+    "income.wording": {
+      "clause": "7.2",
+      "heading": "Wording"
+    },
+    "data.masking": {
+      "clause": "8.1",
+      "heading": "Masking"
+    },
+    "control.history": {
+      "clause": "9.1",
+      "heading": "Version history"
+    }
+  }
+}

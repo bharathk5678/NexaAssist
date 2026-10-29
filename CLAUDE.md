@@ -13,15 +13,14 @@ This is a production-grade AI application built in strictly separated LAYERS. Do
 3.  **Layer 3 (UI): Streamlit** - UI on top of FastAPI. No business logic in the UI.
 4.  **Layer 4 (Future): LangGraph** - Convert chains to stateful graphs / agents only when complexity demands it.
 5.  **Layer 5 (Future): FastMCP** - Expose tools and resources via MCP server.
-6.  **Layer 6 (Continuous): Observability & Evaluations** - Unit tests, LLM evaluations (LangSmith/Ragas), and operational telemetry (Datadog).
+6.  **Layer 6 (Continuous): Observability & Evaluations** - Unit tests, LLM evaluations (Ragas and structured judges), and operational telemetry (Datadog).
 
 - **Tech Stack:**
 - **Primary:** LangChain / LangChain-Core
 - **Vector DB:** MongoDB Atlas Vector Search (`langchain-mongodb`)
 - **API:** FastAPI + Pydantic v2
-- **UI:** Streamlit
-- **Observability:** Arize Phoenix (Local UI at `http://localhost:6006`), OpenTelemetry, Datadog + LangSmith
-- **Evaluation:** Ragas, IR Metrics (P@k, R@k, MRR, nDCG), LangSmith, pytest
+- **Observability:** Arize Phoenix (Local UI at `http://localhost:6006`), OpenTelemetry, Datadog (APM & LLM Observability), LangSmith
+- **Evaluation:** Ragas, IR Metrics (P@k, R@k, MRR, nDCG), structured LLM judges, DeepEval, pytest
 
 ## 2. CORE PRINCIPLES - NON-NEGOTIABLE
 
@@ -49,7 +48,7 @@ Adhere to this directory structure. Do not create files outside unless explicitl
 ```text
 /
 ├── pyproject.toml      # Modern dependency and tool configuration
-├── .env.example        # Template for required environment variables (Mongo, Datadog, LangSmith)
+├── .env.example        # Template for required environment variables (Mongo, Datadog)
 ├── /tests              # Traditional unit and integration tests (pytest)
 ├── /app
 │   ├── /chains         # Layer 1: Pure LangChain - prompts, llms, rag chains, retrievers
@@ -89,11 +88,11 @@ Adhere to this directory structure. Do not create files outside unless explicitl
 * **Initialization:** Use connection strings. Pass `collection`, `embedding`, and `index_name` explicitly.
 * **Search:** Leverage Atlas Vector Search capabilities like `similarity_score_threshold` and MMR. NEVER hallucinate index creation commands; document the needed manual index JSON definition in `database/indexes.md`.
 
-### 4.3 Observability (Datadog + LangSmith)
+### 4.3 Observability (Datadog)
 
-* **Dual Tracking Strategy:**
+* **Telemetry and evaluation:**
 * **Datadog:** Primary for APM, infrastructure, latency profiling, and generic LLM Observability (`ddtrace`). Ensure `ddtrace.patch_all()` is executed at application startup to trace FastAPI and PyMongo.
-* **LangSmith:** Primary for deep LLM logic debugging, complex LCEL trajectory tracing, and dataset-driven evaluations.
+* **Ragas and structured judges:** Compute answer-quality scores against local golden datasets and submit scored results to Datadog.
 
 
 * **Logging:** Use `structlog` configured to output JSON for Datadog ingestion. Never use standard `print()`.
@@ -109,7 +108,7 @@ Adhere to this directory structure. Do not create files outside unless explicitl
 I will prompt you to build incrementally. You must respect this phase order.
 
 1. **Phase 1 - Foundation & Vector DB:** Setup `core/config.py`, initialize `langchain_mongodb` integration, set up `chains/llm.py`. Build ONE chain end-to-end and test via script.
-2. **Phase 2 - FastAPI & Telemetry:** Wrap Phase 1 chains in `services/`. Expose via `api/` routers. Integrate `ddtrace` for Datadog and ensure LangSmith traces map cleanly. Add `main.py`.
+2. **Phase 2 - FastAPI & Telemetry:** Wrap Phase 1 chains in `services/`. Expose via `api/` routers. Integrate `ddtrace` for Datadog and ensure request and LLM workflow spans map cleanly. Add `main.py`.
 3. **Phase 3 - Streamlit UI:** Build `streamlit_app.py` consuming FastAPI.
 4. **Phase 4 - LangGraph Upgrade:** Migrate complex chains to graphs in `agents/`. Maintain FastAPI contract.
 5. **Phase 5 - FastMCP:** Expose tools via MCP server in `mcp/`.
@@ -124,10 +123,10 @@ Production means measured, not just working.
 * **APM:** Ensure FastAPI spans, MongoDB query times, and HTTP request latencies are logged.
 * **LLM Observability:** Track token usage, prompt latency, and systemic error rates per model via the Datadog Agent.
 
-### 6.2 LangSmith & Deep Evals (AI Quality)
+### 6.2 Ragas & Deep Evals (AI Quality)
 
 * Keep golden datasets in `/evaluation/datasets/` as JSONL (`input`, `expected_output`, `context`).
-* Enable LangSmith via environment variables: `LANGCHAIN_TRACING_V2=true` and `LANGCHAIN_PROJECT`.
+* Keep golden datasets local and submit scored evaluations to Datadog LLM Observability.
 * **RAG Eval:** Measure Context Precision, Recall, and Answer Relevancy using Ragas or DeepEval against the retrieved MongoDB documents.
 * **Agent Eval:** Measure tool accuracy and trajectory traces.
 
@@ -135,7 +134,7 @@ Production means measured, not just working.
 
 1. When you create a chain, create 10 golden QAs in `evaluation/datasets/`.
 2. When you configure the Vector Store, you must output the exact JSON required for the MongoDB Atlas Vector Search Index.
-3. Always add the LangSmith `@traceable` decorator to complex custom functions that LCEL doesn't auto-trace.
+3. Use Datadog workflow spans for complex custom operations that automatic instrumentation does not cover.
 
 ## 7. What You MUST NOT Do
 
@@ -171,7 +170,7 @@ When responding to tasks, format your thought process inside XML tags, followed 
 
 ---
 
-**Final Rule:** Build in layers. Back everything with MongoDB Atlas Vector Search. Monitor operationally with Datadog and semantically with LangSmith. If in doubt, write LESS code, not more.
+**Final Rule:** Build in layers. Back everything with MongoDB Atlas Vector Search. Monitor operations and LLM workflows with Datadog; evaluate quality with Ragas and structured judges. If in doubt, write LESS code, not more.
 
 # context0 context handoff (Claude Code)
 

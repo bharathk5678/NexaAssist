@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from langchain_core.prompts import ChatPromptTemplate
 
+JUDGE_PROMPT_ID = "nexaassist-policy-judge"
 JUDGE_VERSION = "policy-judge-v2"
 JUDGE_PROMPT = ChatPromptTemplate.from_messages(
     [

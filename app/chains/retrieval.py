@@ -28,12 +28,14 @@ def build_retrieval_chain(
     *,
     candidate_search: Runnable[dict[str, Any], list[tuple[Document, float]]] | None = None,
     reranker: Runnable[dict[str, Any], list[tuple[Document, float]]] | None = None,
+    amendment_search: Runnable[dict[str, Any], list[Document]] | None = None,
 ) -> Runnable[RetrieveRequest, RetrieveResponse]:
     """Search indexed policy chunks, then expand each hit to its parent section."""
 
     async def retrieve(request: RetrieveRequest) -> RetrieveResponse:
         as_of = request.as_of.isoformat()
         filters: list[dict[str, object]] = [
+            {"institution": settings.institution},
             {"effective_date": {"$lte": as_of}},
             {"effective_to_search": {"$gte": as_of}},
             {"jurisdiction": request.jurisdiction or settings.jurisdiction},
@@ -61,11 +63,25 @@ def build_retrieval_chain(
         parent_ids = list(dict.fromkeys(document.metadata["parent_id"] for document, _ in rows))
         parents = await parent_store.amget(parent_ids) if parent_ids else []
         parent_lookup = dict(zip(parent_ids, parents, strict=True))
-        expanded = perf_counter()
 
         hits = []
         for rank, (document, score) in enumerate(rows, 1):
             parent = parent_lookup[document.metadata["parent_id"]]
+            expected_scope = {
+                "institution": settings.institution,
+                "jurisdiction": request.jurisdiction or settings.jurisdiction,
+                "confidentiality_level": settings.confidentiality_level,
+                "doc_id": document.metadata["doc_id"],
+                "policy_version": document.metadata["policy_version"],
+                "product_id": document.metadata.get("product_id"),
+                "effective_date": document.metadata["effective_date"],
+                "effective_to": document.metadata.get("effective_to"),
+            }
+            if parent is not None and any(
+                parent.metadata.get(key) != value for key, value in expected_scope.items()
+            ):
+                logger.warning("parent_scope_mismatch", parent_id=document.metadata["parent_id"])
+                parent = None
             if parent is None:
                 logger.warning("parent_section_missing", parent_id=document.metadata["parent_id"])
             hits.append(
@@ -89,6 +105,30 @@ def build_retrieval_chain(
                 )
             )
 
+        amendments = []
+        if amendment_search is not None and rows:
+            documents = await amendment_search.ainvoke(
+                {
+                    "doc_ids": list(
+                        dict.fromkeys(document.metadata["doc_id"] for document, _ in rows)
+                    ),
+                    "pre_filter": {"$and": filters},
+                }
+            )
+            amendments = [
+                RetrieveHit(
+                    rank=rank,
+                    score=0,
+                    text=document.page_content,
+                    parent_text=document.page_content,
+                    citation=Citation.model_validate(
+                        {key: document.metadata[key] for key in Citation.model_fields}
+                    ),
+                )
+                for rank, document in enumerate(documents, 1)
+            ]
+
+        expanded = perf_counter()
         logger.info(
             "retrieval_stages",
             candidate_count=candidate_count,
@@ -98,6 +138,7 @@ def build_retrieval_chain(
         return RetrieveResponse(
             as_of=request.as_of,
             results=hits,
+            amendments=amendments,
             timings=RetrieveTimings(
                 search_ms=round((searched - started) * 1000, 2),
                 parent_ms=round((expanded - reranked) * 1000, 2),

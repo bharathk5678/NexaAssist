@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261024-215323/candidate.json",
+    "sha256": "57d20643c0e7484c58b0ada2a930f4c32c7cb519ea157d32259a956b0a4e2652",
+    "bytes": 21267
+  },
+  "artifact": {
+    "path": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261024-215323/nexaassist.html",
+    "sha256": "24fe9dbcf1a06e680da61040dbcd555be3db6fe804277077b49613e824440c10",
+    "bytes": 848803
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261024-215323/review-4/nexaassist.finalize.json",
+    "summaryReceipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261024-215323/review-4/nexaassist.finalize-summary.json",
+    "browserCheckReceipt": "/Users/pankaj/Library/CloudStorage/GoogleDrive-pankajshakya627@gmail.com/My Drive/TeacherOn/Enterprise_training/Week_1_code/.archify/architecture-nexaassist-20261024-215323/review-4/nexaassist.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-24T16:29:36.678Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 2392,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "resolvedCrossovers": 5,
+      "routesOverSuggestedBends": 1
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [
+        {
+          "left": {
+            "id": "direct-agent",
+            "from": "clients",
+            "to": "agent",
+            "label": "POST /agent",
+            "collectionIndex": 3,
+            "artifactIndex": 4
+          },
+          "right": {
+            "id": "adapter-rag",
+            "from": "http-adapter",
+            "to": "rag-api",
+            "label": "HTTP /retrieve",
+            "collectionIndex": 7,
+            "artifactIndex": 8
+          },
+          "point": [
+            341,
+            319
+          ]
+        },
+        {
+          "left": {
+            "id": "agent-provider",
+            "from": "agent",
+            "to": "provider",
+            "label": "classify + draft",
+            "collectionIndex": 4,
+            "artifactIndex": 5
+          },
+          "right": {
+            "id": "trace-core",
+            "from": "rag-core",
+            "to": "telemetry",
+            "label": "if enabled",
+            "collectionIndex": 12,
+            "artifactIndex": 13
+          },
+          "point": [
+            576.5999999999999,
+            319
+          ]
+        },
+        {
+          "left": {
+            "id": "agent-retrieve",
+            "from": "agent",
+            "to": "http-adapter",
+            "label": "policy only",
+            "collectionIndex": 6,
+            "artifactIndex": 7
+          },
+          "right": {
+            "id": "trace-core",
+            "from": "rag-core",
+            "to": "telemetry",
+            "label": "if enabled",
+            "collectionIndex": 12,
+            "artifactIndex": 13
+          },
+          "point": [
+            469.0999999999999,
+            516.0000000000001
+          ]
+        },
+        {
+          "left": {
+            "id": "adapter-rag",
+            "from": "http-adapter",
+            "to": "rag-api",
+            "label": "HTTP /retrieve",
+            "collectionIndex": 7,
+            "artifactIndex": 8
+          },
+          "right": {
+            "id": "trace-core",
+            "from": "rag-core",
+            "to": "telemetry",
+            "label": "if enabled",
+            "collectionIndex": 12,
+            "artifactIndex": 13
+          },
+          "point": [
+            341.00000000000006,
+            516.0000000000001
+          ]
+        },
+        {
+          "left": {
+            "id": "ingest-provider",
+            "from": "ingestion",
+            "to": "provider",
+            "label": "embed changes",
+            "collectionIndex": 9,
+            "artifactIndex": 10
+          },
+          "right": {
+            "id": "live-quality",
+            "from": "rag-core",
+            "to": "evaluation",
+            "label": "if evaluated",
+            "collectionIndex": 10,
+            "artifactIndex": 11
+          },
+          "point": [
+            909,
+            319
+          ]
+        }
+      ],
+      "detours": [
+        {
+          "relationship": {
+            "id": "trace-core",
+            "from": "rag-core",
+            "to": "telemetry",
+            "label": "if enabled",
+            "collectionIndex": 12,
+            "artifactIndex": 13
+          },
+          "bends": 3,
+          "stretch": 1
+        }
+      ],
+      "truncated": false
+    },
+    "hints": [
+      "clients → agent crosses http-adapter → rag-api: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "agent → provider crosses rag-core → telemetry: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "agent → http-adapter crosses rag-core → telemetry: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "http-adapter → rag-api crosses rag-core → telemetry: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "ingestion → provider crosses rag-core → evaluation: move the node of whichever is a branch, return, or second entrance to the other side of the main path, so that relationship runs through an empty corridor.",
+      "rag-core → telemetry needs 3 bends: move node rag-core or telemetry so they share a row or column with matching centers, or sit diagonally with a clear corner."
+    ],
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

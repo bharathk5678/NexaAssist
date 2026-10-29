@@ -1,0 +1,590 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "NexaAssist \u2014 current repository architecture",
+    "locale": "en",
+    "output": ".archify/architecture-nexaassist-20261024-215323/nexaassist.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/pankajshakya627/enterprise-ai-training.git",
+      "revision": "f60cdc91dff45b8aca880f19db71e2834b8ecc58",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "Streamlit workspace",
+      "sublabel": "Chat, sources, feedback",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/streamlit_app.py",
+          "line": 1,
+          "end_line": 6
+        },
+        {
+          "path": "app/ui/app.py",
+          "line": 124,
+          "end_line": 157
+        },
+        {
+          "path": "app/ui/app.py",
+          "line": 37,
+          "end_line": 62
+        }
+      ]
+    },
+    {
+      "id": "rag-api",
+      "type": "backend",
+      "label": "RAG HTTP API",
+      "sublabel": "app.main:app",
+      "pos": [
+        365,
+        40
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/main.py",
+          "line": 28,
+          "end_line": 34
+        },
+        {
+          "path": "app/api/answer.py",
+          "line": 1,
+          "end_line": 59
+        },
+        {
+          "path": "app/api/feedback.py",
+          "line": 1,
+          "end_line": 48
+        }
+      ]
+    },
+    {
+      "id": "rag-core",
+      "type": "backend",
+      "label": "RAG services & chains",
+      "sublabel": "Retrieve, answer, review",
+      "pos": [
+        695,
+        40
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/services/retrieval.py",
+          "line": 20,
+          "end_line": 48
+        },
+        {
+          "path": "app/chains/answer.py",
+          "line": 24,
+          "end_line": 113
+        },
+        {
+          "path": "app/services/feedback.py",
+          "line": 1,
+          "end_line": 55
+        }
+      ]
+    },
+    {
+      "id": "atlas",
+      "type": "database",
+      "label": "MongoDB Atlas",
+      "sublabel": "Chunks, parents, feedback",
+      "pos": [
+        1020,
+        40
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/database/mongo.py",
+          "line": 1,
+          "end_line": 90
+        },
+        {
+          "path": "app/database/retrieval.py",
+          "line": 16,
+          "end_line": 82
+        },
+        {
+          "path": "app/database/feedback.py",
+          "line": 1,
+          "end_line": 53
+        }
+      ]
+    },
+    {
+      "id": "clients",
+      "type": "external",
+      "label": "Agent API consumers",
+      "sublabel": "Direct HTTP clients",
+      "pos": [
+        40,
+        280
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/api/agent.py",
+          "line": 42,
+          "end_line": 60
+        }
+      ]
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "Agent Service",
+      "sublabel": "LangGraph + scope gates",
+      "pos": [
+        365,
+        280
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/api/agent.py",
+          "line": 42,
+          "end_line": 60
+        },
+        {
+          "path": "app/services/agent.py",
+          "line": 31,
+          "end_line": 71
+        },
+        {
+          "path": "app/agents/orchestrator.py",
+          "line": 23,
+          "end_line": 160
+        }
+      ],
+      "tag": "No banking actions"
+    },
+    {
+      "id": "provider",
+      "type": "cloud",
+      "label": "OpenAI integrations",
+      "sublabel": "Chat + text embeddings",
+      "pos": [
+        695,
+        280
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/chains/llm.py",
+          "line": 1,
+          "end_line": 17
+        },
+        {
+          "path": "app/chains/embeddings.py",
+          "line": 1,
+          "end_line": 15
+        }
+      ]
+    },
+    {
+      "id": "ingestion",
+      "type": "backend",
+      "label": "Ingestion CLI",
+      "sublabel": "Parse, chunk, hash, upsert",
+      "pos": [
+        1020,
+        280
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/services/ingestion.py",
+          "line": 1,
+          "end_line": 96
+        },
+        {
+          "path": "app/chains/ingestion.py",
+          "line": 33,
+          "end_line": 150
+        },
+        {
+          "path": "app/chains/parsing.py",
+          "line": 14,
+          "end_line": 18
+        }
+      ]
+    },
+    {
+      "id": "telemetry",
+      "type": "cloud",
+      "label": "Datadog & JSON logs",
+      "sublabel": "Optional telemetry",
+      "pos": [
+        40,
+        540
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/core/telemetry.py",
+          "line": 1,
+          "end_line": 14
+        },
+        {
+          "path": "app/core/observability.py",
+          "line": 1,
+          "end_line": 61
+        },
+        {
+          "path": "app/compose.datadog.yaml",
+          "line": 1,
+          "end_line": 24
+        }
+      ]
+    },
+    {
+      "id": "http-adapter",
+      "type": "backend",
+      "label": "HTTP retrieval adapter",
+      "sublabel": "Strict schema + date check",
+      "pos": [
+        365,
+        540
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/services/agent_retrieval.py",
+          "line": 1,
+          "end_line": 17
+        },
+        {
+          "path": "app/api/agent.py",
+          "line": 31,
+          "end_line": 39
+        }
+      ],
+      "tag": "One retrieval"
+    },
+    {
+      "id": "evaluation",
+      "type": "backend",
+      "label": "Quality evaluation",
+      "sublabel": "RAGAS + structured judge",
+      "pos": [
+        695,
+        540
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "app/services/evaluation.py",
+          "line": 27,
+          "end_line": 128
+        },
+        {
+          "path": "app/evaluation/live.py",
+          "line": 17,
+          "end_line": 84
+        },
+        {
+          "path": "app/evaluation/run.py",
+          "line": 82,
+          "end_line": 163
+        }
+      ]
+    },
+    {
+      "id": "mock",
+      "type": "backend",
+      "label": "Banking mock API",
+      "sublabel": "Standalone training fixture",
+      "pos": [
+        1020,
+        540
+      ],
+      "size": [
+        190,
+        78
+      ],
+      "sources": [
+        {
+          "path": "nexa_synthetic_data/api/mock_server/server.py",
+          "line": 1,
+          "end_line": 280
+        }
+      ],
+      "tag": "Not wired to agent"
+    }
+  ],
+  "connections": [
+    {
+      "id": "ui-http",
+      "from": "ui",
+      "to": "rag-api",
+      "label": "HTTP JSON",
+      "variant": "emphasis"
+    },
+    {
+      "id": "route-services",
+      "from": "rag-api",
+      "to": "rag-core",
+      "label": "async calls",
+      "variant": "emphasis"
+    },
+    {
+      "id": "mongo-io",
+      "from": "rag-core",
+      "to": "atlas",
+      "label": "scoped Mongo",
+      "variant": "emphasis"
+    },
+    {
+      "id": "direct-agent",
+      "from": "clients",
+      "to": "agent",
+      "label": "POST /agent",
+      "variant": "emphasis"
+    },
+    {
+      "id": "agent-provider",
+      "from": "agent",
+      "to": "provider",
+      "label": "classify + draft",
+      "variant": "default"
+    },
+    {
+      "id": "rag-provider",
+      "from": "rag-core",
+      "to": "provider",
+      "label": "chat / embed",
+      "variant": "default"
+    },
+    {
+      "id": "agent-retrieve",
+      "from": "agent",
+      "to": "http-adapter",
+      "label": "policy only",
+      "variant": "emphasis"
+    },
+    {
+      "id": "adapter-rag",
+      "from": "http-adapter",
+      "to": "rag-api",
+      "label": "HTTP /retrieve",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ingest-store",
+      "from": "ingestion",
+      "to": "atlas",
+      "label": "upsert / retire",
+      "variant": "default"
+    },
+    {
+      "id": "ingest-provider",
+      "from": "ingestion",
+      "to": "provider",
+      "label": "embed changes",
+      "variant": "default"
+    },
+    {
+      "id": "live-quality",
+      "from": "rag-core",
+      "to": "evaluation",
+      "label": "if evaluated",
+      "variant": "default"
+    },
+    {
+      "id": "quality-provider",
+      "from": "evaluation",
+      "to": "provider",
+      "label": "judge / embed",
+      "variant": "default"
+    },
+    {
+      "id": "trace-core",
+      "from": "rag-core",
+      "to": "telemetry",
+      "label": "if enabled",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Read this map",
+      "items": [
+        "Current working-tree architecture, including modified and untracked agent files. Source links refer to a clean local documentation snapshot, not to the remote HEAD.",
+        "Application code and original Git history are unchanged. Original HEAD: 2bc16cc634cca62e6153db65833235420ae66305. Snapshot: f60cdc91dff45b8aca880f19db71e2834b8ecc58.",
+        "The diagram groups cooperating modules. The companion repo-reference.md inventories every Python module, each registered application endpoint, model contracts, config and operational limits.",
+        "Logical call and dependency map, not a measured deployment topology. No inference that configured cloud services are currently reachable."
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "RAG API: policy and operations",
+      "items": [
+        "POST /retrieve: RetrieveRequest \u2192 RetrieveResponse. Scoped search, full parent sections, linked amendments, citations and retrieval timings.",
+        "POST /answer: RetrieveRequest \u2192 AnswerResponse. One retrieval followed by grounded generation and exact quote validation.",
+        "POST /answer/evaluated: EvaluatedAnswerRequest \u2192 EvaluatedAnswerResponse. Reuses one answer and its exact evidence; returns four quality metric statuses.",
+        "GET /health: process liveness only. GET /metrics: process-local retrieval counters. GET /metrics/latency: nearest-rank p50/p95/p99 of the last 1000 successful retrievals.",
+        "FastAPI also exposes /docs, /redoc and /openapi.json. Application endpoints return JSON; token streaming is not implemented."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Feedback API and review gate",
+      "items": [
+        "POST /feedback \u2192 201 FeedbackRecord; conflicting idempotent submission \u2192 409; unavailable storage \u2192 503.",
+        "GET /feedback?limit=20, bounded to 1\u2013100 \u2192 list[FeedbackRecord]. Requires FeedbackReviewer bearer credentials.",
+        "POST /feedback/{feedback_id}/review: FeedbackReview \u2192 status. Requires reviewer credentials and a pending record; absent/already reviewed \u2192 409.",
+        "Review uses constant-time token comparison. Missing review configuration \u2192 503; absent/incorrect credentials \u2192 401. Review does not rewrite policy documents or prompts.",
+        "Feedback is scoped by institution and stored in MongoDB before optional Datadog thumbs feedback. Submission identity is deterministic from institution, submitter_id and submission_id."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Agent API and exact execution order",
+      "items": [
+        "POST /agent: AgentRequest \u2192 AgentResponse. Agent Service has its own GET /health and GET /metrics; the RAG application does not register /agent.",
+        "Orchestrator \u2192 retriever \u2192 grounded_answer \u2192 END. AgentState retains request, IntentDecision, RetrieveRequest, RetrieveResponse and AgentResponse.",
+        "Missing/conflicting scope \u2192 needs_clarification. Forbidden takes priority and ends immediately. These routes call neither retrieval nor answer generation.",
+        "Customer-context and supported-action routes return unavailable after required-scope checks. No customer read, banking write, Validator or Action stage is connected.",
+        "The HTTP adapter calls existing POST /retrieve once. It validates status, strict RetrieveResponse JSON and identical as_of; the answer chain receives retained evidence through RunnableLambda.",
+        "HTTP timeout defaults to 60s (maximum 300s), total graph deadline to 180s (maximum 600s), and recursion limit to 8. Redirects are disabled. Upstream failures return a safe generic 503."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Retrieval and amendment behavior",
+      "items": [
+        "app/services/retrieval.py wires embeddings, Mongo stores, optional hybrid search, optional reranker and mandatory linked-amendment loading into build_retrieval_chain.",
+        "Filters enforce institution, inclusive effective-date range, jurisdiction and confidentiality, plus product when supplied. Jurisdiction falls back to Settings.jurisdiction.",
+        "Dense is the default. Hybrid uses Atlas BM25 plus vectors with RRF. Optional reranking broadens candidates before reducing ordinary results to top_k.",
+        "Parent sections are validated against child scope; mismatches or missing parents fall back to the matched child. Linked circulars follow supersedes until no new IDs remain.",
+        "Full amendments are returned separately from top_k results. Inconsistent amendment scope fails closed. RetrieveResponse.evidence prioritizes complete amendments and removes result duplicates by document/version.",
+        "Atlas vector and text indexes are created manually; app/database/indexes.md contains exact definitions. The application does not auto-create search indexes."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Grounded answer and model contracts",
+      "items": [
+        "RetrieveRequest: query (1\u20132000 chars), required as_of, optional product_id/jurisdiction, top_k 1\u201320 (default 5). All request/response models forbid extra fields.",
+        "RetrieveHit: rank, score, matched child text, parent_text and Citation. Citation preserves doc_id, title, policy_version, clause and effective_date.",
+        "build_answer_chain packs complete parents or complete children into a token budget. If a full mandatory amendment cannot fit, it returns insufficient_evidence before generation.",
+        "AnswerDraft statuses: answered, insufficient_evidence, needs_clarification. Exact nonblank quotes must occur in the supplied context, and inline markers must match evidence IDs.",
+        "Quote validation allows at most two drafts with citation feedback. Invalid final evidence returns insufficient_evidence. Source identity is resolved in code into AnswerCitation.matched_child.",
+        "AnswerResponse also preserves lookup date, retrieval timings, generation_ms and optional Datadog span ID. AgentResponse wraps it without changing answer statuses."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Ingestion and persistence",
+      "items": [
+        "Run python -m app.services.ingestion <document_register.json>. Only authoritative register entries become IngestRequests; ingestion is a CLI, not an HTTP endpoint.",
+        "PDF parsing uses pdfplumber; other document formats use unstructured. Clause-aware chunking preserves whole tables and creates stable child and parent IDs.",
+        "Text plus metadata, embedding model and dimensions feed checksums. Only changed children are embedded; parents are upserted and stale children/parents removed.",
+        "Chunks and embeddings use MONGODB_COLLECTION; unembedded whole parent sections use MONGODB_PARENT_COLLECTION (default policy_sections); feedback uses MONGODB_FEEDBACK_COLLECTION (default policy_feedback).",
+        "--retire-doc requires a document no longer authoritative and removes scoped chunks and parents. Cross-collection ingestion has no transaction; the code flags concurrent ingestion as requiring an upgrade."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Evaluation, golden data and diagnostics",
+      "items": [
+        "Live scoring: faithfulness, answer_relevancy, context_precision and context_recall. Scores are bounded 0\u20131, with scored/unavailable/error status per metric.",
+        "Context precision/recall require a provided reference or an exact golden match. Faithfulness/relevancy are unavailable for abstentions. Each external metric has a 120s timeout.",
+        "python -m app.evaluation.run --dataset evaluation/datasets/answer.jsonl --output <report.json> [--limit N] [--min-score X] runs RAGAS and a structured correctness/groundedness judge.",
+        "Offline evaluations capture one retrieval and answer per case plus their exact evidence, traces, timings and model settings. An explicit min-score can fail the quality gate; no default target is invented.",
+        "Other evaluation modules provide mechanical quote checks, reranker checks and teaching diagnostics for retrieval, context, parent links, staleness and embedding mismatches.",
+        "Golden JSONL stays local. When enabled, scored results join Datadog workflow spans; optional evaluation or telemetry failures preserve the generated answer."
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Optional reranking dependency",
+      "items": [
+        "RERANK_ENABLED defaults false. app/chains/rerank.py scores query/document pairs through an httpx.AsyncClient with a 60s timeout.",
+        "RERANK_API selects native Ollama api/generate or OpenAI-compatible completions. Ranking normalizes finite exact yes/no alternative token log probabilities.",
+        "RERANK_BASE_URL defaults http://127.0.0.1:11434 and RERANK_MODEL defaults nexaassist-reranker:0.6b-mlx. These are configured defaults, not proof of a running MLX engine.",
+        "Omitted as a separate box because it runs only inside the optional retrieval branch; no new index or alternate vector database is used."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Configuration and runtime entry points",
+      "items": [
+        "Python >=3.14, uv, Pydantic v2/pydantic-settings, LangChain LCEL, langchain-mongodb, LangGraph, FastAPI, httpx, Streamlit and ddtrace.",
+        "RAG: uv run uvicorn app.main:app --port 8000. Agent: uv run uvicorn app.agent_main:app --port 8001. Port 8001 is an example; AgentSettings only configures the upstream RAG URL.",
+        "UI: uv run streamlit run app/streamlit_app.py. UI api_base_url defaults http://127.0.0.1:8000. The UI has no /agent integration.",
+        "Settings reads .env; required corpus configuration includes Mongo URI/database/chunk collection, OpenAI API key, institution, jurisdiction and confidentiality. Values of local credentials are not inspected or embedded.",
+        "Chat defaults gpt-6-luna; embeddings default text-embedding-3-small/1536 dimensions. These are code defaults, not a statement about environment overrides or provider availability."
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Observability and deployment",
+      "items": [
+        "app/main.py lifespan initializes optional ddtrace.patch_all, JSON structlog and the token encoder. The Agent Service reuses this lifespan.",
+        "LLMObs workflows cover policy answers, agent orchestration and live/offline evaluation; prompt annotations identify prompt version and variables; TokenUsageLogger records provider token usage.",
+        "Use ddtrace-run before application creation for APM instrumentation. DD_* process environment configures SDK export; JSON logs being emitted does not itself establish log collection.",
+        "app/Dockerfile builds a Python 3.14 RAG API image with the evaluation extra, runs app.main:app and exposes 8000. It does not launch Agent Service or Streamlit.",
+        "app/compose.datadog.yaml starts only the Datadog Agent, forwarding host 18126\u21928126 TCP and 18125\u21928125 UDP. MongoDB Atlas, OpenAI and the app processes are outside that compose file."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Standalone banking mock and future work",
+      "items": [
+        "nexa_synthetic_data/api/mock_server/server.py supplies synthetic customer profile/accounts/transactions/KYC/bureau/income/application reads plus case and service-request writes.",
+        "Writes use a bearer caller identity and Idempotency-Key, ETags/If-Match where implemented, and fault injection. The mock accepts any nonempty bearer token; this is not production authentication.",
+        "Customers/transactions are loaded from local fixtures; cases, service requests and idempotency records are process-local. There is no durable banking integration.",
+        "The mock is deliberately disconnected from the agent in the current code. Validator, Action stage and FastMCP are not implemented. No customer data is copied into this artifact."
+      ]
+    }
+  ]
+}

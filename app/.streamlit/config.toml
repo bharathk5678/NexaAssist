@@ -1,11 +1,11 @@
 [theme]
-base = "light"
+base = "dark"
 primaryColor = "#2459A6"
-backgroundColor = "#FBFCFD"
-secondaryBackgroundColor = "#F0F4F8"
-textColor = "#203547"
-borderColor = "#DBE3ED"
-linkColor = "#2459A6"
+backgroundColor = "#0B0E14"
+secondaryBackgroundColor = "#151C26"
+textColor = "#E6EDF3"
+borderColor = "#354357"
+linkColor = "#7CC8FF"
 font = "sans-serif"
 headingFont = "sans-serif"
 headingFontWeights = [600, 600, 600, 600, 600, 600]
@@ -17,6 +17,6 @@ paddingTop = "1.5rem"
 paddingBottom = "2rem"
 
 [theme.sidebar]
-backgroundColor = "#F0F4F8"
-secondaryBackgroundColor = "#FBFCFD"
+backgroundColor = "#11151C"
+secondaryBackgroundColor = "#1B2431"
 paddingTop = "1.5rem"

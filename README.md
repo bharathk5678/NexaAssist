@@ -2,12 +2,44 @@
 
 A policy, product and lending advisor for the staff of NexaBank (a fictional bank), built as the hands-on codebase for the **Enterprise Agentic RAG** training program. Everything is synthetic.
 
-This repository contains the Week 1 ingestion and retrieval paths, plus the first Week 2 answer-generation slice. Ingestion turns policy PDFs into versioned clause chunks and parent sections in MongoDB Atlas; `/retrieve` returns filtered, cited evidence using vector search. `/answer` uses the same retrieval service and `gpt-6-luna` to generate a response with quoted evidence. Seven selected synthetic golden cases have completed live retrieval, generation and evaluation; Datadog score visibility is verified. Two answerable cases incorrectly abstained, so full-dataset quality is not established.
+NexaAssist turns policy PDFs into versioned clause chunks and parent sections in
+MongoDB Atlas. Staff use the Streamlit chat UI to ask dated policy questions,
+inspect quoted sources, and submit feedback. FastAPI serves retrieval, answers,
+live RAGAS evaluation and feedback review. LangChain runs the underlying logic;
+the default answer model is `gpt-6-luna`.
+
+### Current status — 21 October 2026
+
+| Area | Available now |
+|---|---|
+| Retrieval | Dense search, optional Atlas hybrid search, institution/date/product scope, validated parent expansion and complete linked circulars |
+| Answers | Quoted citations, a token budget, one citation-repair attempt, scope clarification and safe abstention |
+| Streamlit | Chat history within the current session, Answer/Evidence modes, references, feedback and a protected review workspace |
+| Evaluation | Live and batch RAGAS/judge workflows; **RAGAS scores appear in Datadog only**, with a link from the chat |
+| Feedback | MongoDB persistence, retry protection, reviewer-token access and optional Datadog `thumbs` feedback |
+| Operations | Docker Datadog Agent setup, APM/LLM tracing, JSON logs, health, retrieval counters and latency percentiles |
+| Validation | **121 application tests and 22 mock API tests passed**; Ruff and mypy passed in the saved verification run |
+
+The latest targeted live checks covered twelve policy scenarios, including the
+fee change across 1 July 2026, earlier sanctions, opt-in conditions and conflicting
+scope. The final fee evaluation returned a correct answer and four scored RAGAS
+metrics queued for Datadog. Earlier cloud visibility was confirmed separately;
+cloud receipt was not rechecked in this run. These observations do not establish
+full-dataset quality or production readiness.
+
+See the [fix and validation report](app/evaluation/results/fixes_20261021/FIX_REPORT.md)
+and [saved summary](app/evaluation/results/fixes_20261021/SUMMARY.json) for evidence,
+including failed intermediate samples. Known gaps include a layout shift when
+reloading a previously open sidebar, occasional date-intent abstention, and
+unverified sustained load/cloud deployment. Hybrid quality comparisons and a
+compatible local reranker remain open. LangGraph agents and an application MCP
+server are future layers.
 
 | | |
 |---|---|
 | Language | Python 3.14+ |
 | Orchestration | LangChain (LCEL runnables) |
+| API and UI | FastAPI/Pydantic v2 and Streamlit |
 | Vector store | MongoDB Atlas Vector Search via `langchain-mongodb` |
 | Embeddings | OpenAI `text-embedding-3-small`, 1536 dimensions |
 | Observability | **Arize Phoenix** (local UI on `http://localhost:6006`), OpenTelemetry, optional Datadog |
@@ -15,7 +47,8 @@ This repository contains the Week 1 ingestion and retrieval paths, plus the firs
 | Web UI & API | Streamlit (`localhost:8501`) & FastAPI (`localhost:8000`) |
 | PDF parsing | `pdfplumber` (tables and headings), `unstructured` (element types) |
 | Chunking | Clause-aware rules in `app/chains/chunking.py`, `langchain-text-splitters` for oversized clauses |
-| Config and logging | `pydantic-settings`, `structlog` (JSON) |
+| Config and logging | `pydantic-settings`, `structlog` (JSON), optional `ddtrace` |
+| Quality and telemetry | Arize Phoenix, RAGAS, IR Metrics (P@k, R@k, MRR, nDCG), structured LLM judge, Datadog |
 | Package manager | `uv` |
 
 ## Table of contents
@@ -31,11 +64,34 @@ This repository contains the Week 1 ingestion and retrieval paths, plus the firs
 9. [Design decisions](#9-design-decisions)
 10. [Roadmap](#10-roadmap)
 
+For a file-by-file walkthrough, use [APP_COMPONENT_GUIDE.md](APP_COMPONENT_GUIDE.md).
+Start the chat with [Streamlit and endpoint coverage](#streamlit-and-endpoint-coverage);
+use [DATADOG_README.md](DATADOG_README.md) for tracing and scores.
+
+Open the [Datadog Field Guide](DATADOG_FIELD_GUIDE.html) locally for diagrams,
+flashcards and a code-backed walkthrough of this repo's tracing, prompt versions,
+evaluations and feedback. The HTML works offline; Datadog links require your account.
+
 ---
 
 ## 1. Architecture
 
-The system has two paths that share a store, not a service. Ingestion is bursty and throughput-bound; retrieval is latency-bound. Keeping them separate means a slow re-index cannot slow a loan officer.
+Open the latest [Archify architecture](.archify/architecture-nexaassist-20261021-214925/nexaassist.html)
+for the current answer, RAGAS, feedback, ingestion and Datadog paths. Choose
+**Live** for animation and select a component for its verified code references.
+The [source notes](.archify/architecture-nexaassist-20261021-214925/SOURCE_NOTES.md)
+explain the local snapshot and the limits of this illustrated topology.
+
+Open the [interactive architecture explorer](C4-Documentation/nexaassist-architecture.html)
+for animated C4 views, the document pipeline and clickable code mappings.
+The [reading guide](C4-Documentation/architecture-explorer.md) explains the flows
+and current boundaries. Download/open the HTML in a browser; GitHub shows its source.
+Use the [static preview](C4-Documentation/nexaassist-architecture-preview.png)
+for a quick view without opening the interactive file.
+
+Ingestion and retrieval share data stores but run as separate processes. The API
+does not wait for an ingestion job to finish before serving a question. They
+still share Atlas capacity, so heavy indexing can affect request latency.
 
 ```mermaid
 flowchart LR
@@ -54,14 +110,15 @@ flowchart LR
 
     subgraph READ["Read path: Session 4"]
         direction LR
-        CALLER["API caller"] --> RET["FastAPI /retrieve"]
+        CALLER["Streamlit or API caller"] --> RET["FastAPI retrieval / answer services"]
         RET --> QEMB["Embed query<br/>same model"]
         QEMB --> SEARCH["Vector search + filters"]
-        SEARCH --> CITED["Cited chunks"]
+        SEARCH --> EXPAND["Validate parents and load linked circulars"]
+        EXPAND --> CITED["Cited evidence or validated answer"]
     end
 
     ATLAS -.-> SEARCH
-    PARENTS -.-> CITED
+    PARENTS -.-> EXPAND
 ```
 
 Why version metadata matters: a circular can supersede a single clause of a manual. If the write path does not stamp `policy_version` and `effective_date` on every chunk, the read path cannot tell a current clause from a superseded one, and similarity search alone will happily return the old one.
@@ -81,15 +138,20 @@ flowchart TB
 
     classDef built fill:#d1fae5,stroke:#047857,color:#064e3b
     classDef todo fill:#f3f4f6,stroke:#9ca3af,color:#374151
-    class L1,L2 built
-    class L3,L4,L5,L6 todo
+    class L1,L2,L3,L6 built
+    class L4,L5 todo
 ```
 
-Green is implemented in code; live Atlas verification is still required.
+Green means implemented. Selected Atlas, model and browser paths have been
+verified live; the validation report records their limits. Future layers are grey.
 
 ### C4 model views
 
-The architecture is also documented with the [C4 model](https://c4model.com/): a system landscape, then context, container and component diagrams, and a dynamic diagram for one request. Everything drawn is implemented in code, except the elements marked as planned or not integrated. Live Atlas and OpenAI verification is still pending (see [Design decisions](#9-design-decisions)).
+The architecture is also documented with the [C4 model](https://c4model.com/): a
+system landscape, then context, container and component diagrams, and a dynamic
+diagram for one request. Elements marked planned or not integrated remain future
+work. These views describe the local application, rather than a verified cloud
+deployment (see [Known limitations](#known-limitations)).
 
 The diagrams use Mermaid flowcharts and sequence diagrams rather than Mermaid's experimental `C4Context` syntax, because that syntax hard-codes line and label colors that are hard to read on a dark background. Every node here sets its own fill, border and text color, so the diagrams read in both GitHub light and dark themes.
 
@@ -133,18 +195,18 @@ flowchart TB
 
     subgraph BANK["NexaBank (fictional) - enterprise boundary"]
         nexa["NexaAssist<br/>[Software System]<br/>Retrieves date-correct policy evidence<br/>and generates cited answers"]:::system
-        planned["Planned layers<br/>[Software System: not built]<br/>Streamlit UI, LangGraph agents,<br/>FastMCP server"]:::planned
+        planned["Planned layers<br/>[Software System: not built]<br/>LangGraph agents,<br/>FastMCP server"]:::planned
         core["Case and Core API<br/>[Software System: mock only]<br/>OpenAPI spec and mock server<br/>in nexa_synthetic_data/api"]:::planned
     end
 
     atlas["MongoDB Atlas<br/>[External System]<br/>Vector Search and document storage"]:::external
     openai["OpenAI API<br/>[External System]<br/>Embeddings and chat model"]:::external
-    obs["Datadog and LangSmith<br/>[External Systems, optional]<br/>APM, LLM traces, evaluations"]:::external
+    obs["Datadog<br/>[External Systems, optional]<br/>APM, LLM traces, evaluations"]:::external
 
     staff -->|"Asks policy questions [HTTPS/JSON]"| nexa
     nexa -->|"Stores and searches policy chunks [pymongo]"| atlas
     nexa -->|"Embeds text, generates answers [HTTPS]"| openai
-    nexa -.->|"Sends traces and metrics [ddtrace, LangSmith SDK]"| obs
+    nexa -.->|"Sends traces and metrics [ddtrace]"| obs
     planned -.->|"Will call the NexaAssist API [HTTPS/JSON]"| nexa
     nexa -.->|"Not integrated yet"| core
 
@@ -173,14 +235,14 @@ flowchart TB
     files["Policy corpus<br/>[External System: files]<br/>document_register.json,<br/>policy and circular PDFs"]:::external
     atlas["MongoDB Atlas<br/>[External System]<br/>Hosts the vector index and collections"]:::external
     openai["OpenAI API<br/>[External System]<br/>text-embedding-3-small and chat model"]:::external
-    obs["Datadog and LangSmith<br/>[External Systems, optional]<br/>APM, LLM traces, evaluations"]:::external
+    obs["Datadog<br/>[External Systems, optional]<br/>APM, LLM traces, evaluations"]:::external
 
-    staff -->|"Calls /retrieve and /answer [HTTPS/JSON]"| nexa
+    staff -->|"Uses Streamlit or the REST API [HTTP/JSON locally]"| nexa
     ops -->|"Runs the ingestion command [shell]"| nexa
     nexa -->|"Reads register and PDFs [filesystem]"| files
     nexa -->|"Writes chunks, searches with filters [pymongo]"| atlas
     nexa -->|"Embeds text, generates answers [HTTPS]"| openai
-    nexa -.->|"Sends traces and metrics [ddtrace, LangSmith SDK]"| obs
+    nexa -.->|"Sends traces and metrics [ddtrace]"| obs
 
     classDef person fill:#08427b,stroke:#93c5fd,color:#ffffff,stroke-width:2px
     classDef system fill:#1e40af,stroke:#bfdbfe,color:#ffffff,stroke-width:2px
@@ -201,27 +263,39 @@ flowchart TB
     ops(["Ingestion operator<br/>[Person]"]):::person
     files["Policy corpus<br/>[External System: files]<br/>register and PDFs"]:::external
     openai["OpenAI API<br/>[External System]<br/>Embeddings and chat model"]:::external
-    obs["Datadog<br/>[External System, optional]<br/>APM"]:::external
+    obs["Datadog<br/>[External System, optional]<br/>Operational and LLM observability"]:::external
 
     subgraph NEXA["NexaAssist [Software System boundary]"]
         direction TB
+        ui["Streamlit UI<br/>[Container: Python]<br/>Chat, evidence and feedback review"]:::container
         cli["Ingestion CLI<br/>[Container: Python, asyncio]<br/>python -m app.services.ingestion.<br/>Parses, chunks by clause, embeds only<br/>new or changed chunks, retires stale chunks."]:::container
-        api["NexaAssist API<br/>[Container: FastAPI, uvicorn]<br/>Serves /retrieve, /answer,<br/>/health and /metrics."]:::container
+        api["NexaAssist API<br/>[Container: FastAPI, uvicorn]<br/>Retrieval, answers, live evaluation,<br/>feedback and operational endpoints"]:::container
+        evaluation["Evaluation CLI<br/>[Container: Python]<br/>Golden cases, judge and RAGAS"]:::container
+        agent["Docker Datadog Agent<br/>[Container: Agent 7]<br/>APM TCP 18126; DogStatsD UDP 18125<br/>published on host loopback"]:::container
         chunks[("Chunks collection and vector index<br/>[Data store: MongoDB Atlas]<br/>One document per clause chunk,<br/>with version and date metadata")]:::store
         parents[("Parent sections collection<br/>[Data store: MongoDB Atlas]<br/>Whole sections keyed by parent_id,<br/>not embedded")]:::store
+        feedback[("Feedback collection<br/>[Data store: MongoDB Atlas]<br/>Submissions and reviewer decisions")]:::store
     end
 
     ops -->|"Runs [shell]"| cli
-    staff -->|"POST /retrieve, POST /answer [HTTPS/JSON]"| api
+    staff -->|"Chat and review [HTTP locally]"| ui
+    ui -->|"Six API operations [HTTP/JSON]"| api
+    staff -->|"Direct REST access [HTTP/JSON locally]"| api
     cli -->|"Reads register and PDFs [filesystem]"| files
     cli -->|"Embeds changed chunks [HTTPS]"| openai
     cli -->|"Upserts and deletes chunks [pymongo]"| chunks
-    cli -->|"Replaces sections [pymongo]"| parents
+    cli -->|"Upserts sections after changed chunks [pymongo]"| parents
     api -->|"Embeds query, generates answer [HTTPS]"| openai
-    api -->|"Vector search with pre-filters [pymongo]"| chunks
+    api -->|"Scoped search and linked circular reads [pymongo]"| chunks
     api -->|"Reads parent sections [pymongo]"| parents
-    api -.->|"Traces [ddtrace]"| obs
-    cli -.->|"Traces [ddtrace]"| obs
+    api -->|"Save, list and review [pymongo]"| feedback
+    evaluation -->|"Read policy and reference text [pymongo]"| chunks
+    evaluation -->|"Generate, judge and score [HTTPS]"| openai
+    api -.->|"APM and LLM telemetry [ddtrace]"| agent
+    ui -.->|"Traces and runtime metrics [ddtrace]"| agent
+    cli -.->|"Optional telemetry [ddtrace]"| agent
+    evaluation -.->|"Evaluation submissions [ddtrace]"| agent
+    agent -.->|"Datadog intake [HTTPS]"| obs
 
     classDef person fill:#08427b,stroke:#93c5fd,color:#ffffff,stroke-width:2px
     classDef container fill:#2563eb,stroke:#bfdbfe,color:#ffffff,stroke-width:2px
@@ -247,31 +321,43 @@ flowchart TB
 
     subgraph API["NexaAssist API [Container: FastAPI]"]
         direction TB
-        rops["Operations router<br/>[Component: APIRouter]<br/>GET /health, GET /metrics"]:::component
+        rops["Operations router<br/>[Component: APIRouter]<br/>Health, counters and latency percentiles"]:::component
         rret["Retrieval router<br/>[Component: APIRouter]<br/>POST /retrieve"]:::component
-        rans["Answer router<br/>[Component: APIRouter]<br/>POST /answer"]:::component
+        rans["Answer router<br/>[Component: APIRouter]<br/>POST /answer and /answer/evaluated"]:::component
+        rfeedback["Feedback router and reviewer dependency<br/>[Component: api/feedback.py, auth.py]<br/>Bearer token on listing/review"]:::component
         sret["Retrieval service<br/>[Component: services/retrieval.py]<br/>retrieve_policy and counters"]:::component
         sans["Answer service<br/>[Component: services/answer.py]<br/>answer_policy"]:::component
-        cret["Retrieval chain<br/>[Component: LCEL runnable]<br/>As-of and product filters,<br/>parent expansion, citations"]:::component
-        cans["Answer chain<br/>[Component: LCEL runnable]<br/>Dedupes context, calls the model,<br/>validates citations and quotes"]:::component
+        seval["Live evaluation service<br/>[Component: services/evaluation.py]<br/>RAGAS on the final answer and exact context"]:::component
+        sfeedback["Feedback service<br/>[Component: services/feedback.py]<br/>Retry-safe save and optional Datadog feedback"]:::component
+        cret["Retrieval chain<br/>[Component: LCEL runnable]<br/>Institution, date and product scope,<br/>validated parents and circulars"]:::component
+        amendments["Linked circular lookup<br/>[Component: database/retrieval.py]<br/>Complete indexed instruments;<br/>reject inconsistent metadata"]:::component
+        cans["Answer chain<br/>[Component: LCEL runnable]<br/>Context budget, citation checks,<br/>one repair draft, clarification or abstention"]:::component
         prompt["Answer prompt<br/>[Component: ChatPromptTemplate]"]:::component
         factory["Model and embedding factories<br/>[Component: chains/llm.py, embeddings.py]"]:::component
         mongo["Store factories<br/>[Component: database/mongo.py]<br/>get_vector_store, get_parent_store"]:::component
         core["Settings, logging, telemetry<br/>[Component: core/]<br/>pydantic-settings, structlog, ddtrace"]:::component
     end
 
-    staff -->|"HTTPS/JSON"| rret
-    staff -->|"HTTPS/JSON"| rans
-    staff -->|"HTTPS/JSON"| rops
+    staff -->|"HTTP/JSON locally"| rret
+    staff -->|"HTTP/JSON locally"| rans
+    staff -->|"HTTP/JSON locally"| rops
     rret -->|"Calls"| sret
     rans -->|"Calls"| sans
+    rans -->|"Evaluated requests"| seval
+    staff -->|"Feedback; bearer token for review [HTTP/JSON]"| rfeedback
+    rfeedback -->|"Calls"| sfeedback
+    sfeedback -->|"Atomic save and review [pymongo]"| feedbackstore["Feedback collection"]:::store
+    seval -->|"Retrieve once"| sret
+    seval -->|"Replay stored evidence for generation"| cans
     rops -->|"Reads counters"| sret
     sans -->|"Passes retrieval as a runnable"| cans
-    cans -->|"Retrieves evidence through"| sret
+    cans -->|"Plain /answer retrieval"| sret
     cans -->|"Formats messages with"| prompt
     sret -->|"Builds and invokes"| cret
     sret -->|"Gets clients from"| factory
     sret -->|"Gets stores from"| mongo
+    cret -->|"Load linked circulars"| amendments
+    amendments -->|"Scoped reads and source validation [pymongo]"| chunks
     sans -->|"Gets chat model from"| factory
     factory -->|"Embeds query, generates answer [HTTPS]"| openai
     mongo -->|"Vector search [pymongo]"| chunks
@@ -318,12 +404,13 @@ flowchart LR
     parse -->|"Reads PDF [pdfplumber]"| files
     parse -->|"Elements"| chunk
     chunk -->|"Clause chunks"| enrich
-    enrich -->|"Parent sections [pymongo]"| parents
+    enrich -->|"Prepare parent sections in memory"| upsert
     enrich -->|"Child documents"| compare
     compare -->|"Reads stored checksums [pymongo]"| chunks
     compare -->|"Changed chunks"| upsert
     upsert -->|"Embeds text [HTTPS]"| openai
     upsert -->|"Upserts chunks [pymongo]"| chunks
+    upsert -->|"Then upserts parents and removes obsolete sections [pymongo]"| parents
     entry -->|"After each document"| stale
     stale -->|"Deletes chunks the source no longer has [pymongo]"| chunks
 
@@ -352,27 +439,40 @@ sequenceDiagram
     participant OAI as OpenAI API
     participant AC as Answer chain
 
-    Staff->>API: POST /answer (query, as_of, optional product_id) [HTTPS/JSON]
+    Staff->>API: POST /answer (query, as_of, optional product_id) [HTTP/JSON locally]
     API->>AC: answer_policy builds the chain
     AC->>RS: retrieve_policy(request)
     RS->>OAI: embed the query [HTTPS]
     OAI-->>RS: query vector
-    RS->>AT: vector search with date, jurisdiction, confidentiality and product pre-filters [pymongo]
+    RS->>AT: scoped dense or configured hybrid search [pymongo]
     AT-->>RS: top_k child chunks
     RS->>AT: read parent sections by parent_id [pymongo]
     AT-->>RS: parent sections
-    RS-->>AC: ranked hits with citations and timings
-    alt no hits
+    RS->>RS: reject parents with mismatched source scope
+    RS->>AT: load linked effective circulars and check complete indexed metadata
+    AT-->>RS: complete indexed circulars, including applicability
+    RS-->>AC: ranked results, amendments, citations and timings
+    alt no usable evidence or complete amendment cannot fit the budget
         AC-->>API: insufficient_evidence, no citations
     else hits found
-        AC->>AC: dedupe parent sections and number them as evidence_id
+        AC->>AC: budget amendments first, dedupe context and assign evidence IDs
         AC->>OAI: structured-output request with as_of, question and numbered context [HTTPS]
         OAI-->>AC: AnswerDraft (status, answer, evidence quotes)
         AC->>AC: check [n] markers equal evidence ids and every quote appears in its parent text
-        AC-->>API: answered with citations, or insufficient_evidence if a check fails
+        opt citation validation fails on the first draft
+            AC->>OAI: one repair draft using the same evidence
+            OAI-->>AC: replacement draft
+            AC->>AC: repeat the same citation checks
+        end
+        AC-->>API: answered, fixed needs_clarification question, or insufficient_evidence
     end
-    API-->>Staff: AnswerResponse (status, answer, citations, timings) [HTTPS/JSON]
+    API-->>Staff: AnswerResponse (status, answer, citations, timings) [HTTP/JSON locally]
 ```
+
+With `/answer/evaluated`, the service retrieves once, generates from that stored
+evidence, and scores only the final response. The ordinary `/answer` path does
+not run RAGAS. The model interprets policy precedence from the supplied sources;
+the application does not hardcode fee values or act as a general rule engine.
 
 #### C4 checklist applied
 
@@ -392,63 +492,43 @@ sequenceDiagram
 
 ```text
 .
-├── README.md
-├── APP_COMPONENT_GUIDE.md          Component guide and architecture
-├── CLAUDE.md                       Development rules and CLI commands
-├── AGENTS.md                       Agent rules
-├── pyproject.toml                  Dependencies and tool config
-├── .env.example                    Template for required environment variables
-├── run_phoenix.py                  Standalone runner for Arize Phoenix server (port 6006)
-├── test_phoenix_ragas.py           Verification runner for Phoenix tracing and RAGAS metrics
-├── verify_retrieval_metrics.py     Precision@k, Recall@k, MRR, and nDCG calculation and evaluation
-│
-├── notebooks/
-│   ├── phase1_session1_ingestion.ipynb Standalone teaching notebook for Session 1
-│   └── phase1_session2_chunking.ipynb  Standalone teaching notebook for Session 2
-│
+├── README.md                      Setup, contracts and current status
+├── APP_COMPONENT_GUIDE.md         File-by-file implementation walkthrough
+├── DATADOG_README.md              Docker Agent, traces, RAGAS and feedback
+├── DEVELOPMENT_TOOLING_GUIDE.md   Development skills, hooks and MCP usage
+├── CLAUDE.md                      Project layer rules
+├── AGENTS.md                      Agent rules
+├── pyproject.toml / uv.lock        Dependencies and tool configuration
+├── .env.example                   Safe configuration template
+├── run_phoenix.py                 Standalone runner for Arize Phoenix server (port 6006)
+├── test_phoenix_ragas.py          Verification runner for Phoenix tracing and RAGAS metrics
+├── test_datadog.py                Datadog APM & LLMObs diagnostic probe
+├── verify_retrieval_metrics.py    Precision@k, Recall@k, MRR, and nDCG calculation and evaluation
+├── notebooks/                     Standalone lessons and ingestion walkthrough
+├── evaluation/datasets/           Ten retrieval, ten answer and ten agent teaching cases
 ├── app/
-│   ├── core/                       Cross-cutting infrastructure
-│   │   ├── config.py               Settings: every env var, typed
-│   │   ├── logging.py              JSON logging setup
-│   │   ├── phoenix.py              Arize Phoenix & OpenTelemetry LangChain instrumentor
-│   │   └── telemetry.py            Datadog APM switch
-│   ├── models/
-│   │   ├── answer.py               AnswerRequest, AnswerResponse
-│   │   ├── evaluation.py           QualityScore, RAGAS definitions
-│   │   ├── ingestion.py            IngestRequest, IngestResponse
-│   │   └── retrieval.py            RetrieveRequest, RetrieveResponse, citations
-│   ├── chains/                     Pure LangChain: no web or UI imports
-│   │   ├── answer.py               Structured answer generation & citations
-│   │   ├── parsing.py              PDF to structured elements
-│   │   ├── chunking.py             Clause-aware chunking (structure first, size second)
-│   │   ├── embeddings.py           OpenAI embeddings client
-│   │   ├── ingestion.py            The write-path chain: enrich, checksum, compare, upsert
-│   │   └── retrieval.py            Atlas filters, ranked chunks, parent expansion
-│   ├── database/
-│   │   ├── mongo.py                Vector store, parent store, stale-chunk removal
-│   │   └── indexes.md              The Atlas Vector Search index JSON (created by hand), parent collection
-│   ├── services/
-│   │   ├── answer.py               Answer orchestration service
-│   │   ├── ingestion.py            Entry point: register to requests, run the chain
-│   │   └── retrieval.py            Retrieval wiring and operational counters
-│   ├── api/                        FastAPI retrieval, health, answer and metrics routes
-│   ├── ui/                         Streamlit interactive policy chat interface
-│   ├── main.py                     FastAPI application entrypoint
-│   └── streamlit_app.py            Streamlit web client entrypoint
-│
-├── tests/
-│   ├── test_ingestion.py           Ingestion checks
-│   ├── test_retrieval.py           Retrieval and API checks
-│   ├── test_retrieval_metrics.py   IR metrics (P@k, R@k, MRR, nDCG) unit checks
-│   ├── test_phoenix_ragas.py       Arize Phoenix and tracing unit checks
-│   ├── test_answer.py              Answer generation tests
-│   └── test_ui.py                  Streamlit UI interaction tests
-│
-└── nexa_synthetic_data/            The corpus
-    ├── document_register.json      Controlled library: versions, windows, supersession
-    ├── policies/                   8 PDFs
-    ├── golden_qa/                  97 Q&As for evaluation
-    └── README.md
+│   ├── agent_main.py              Phase 2 Agent Service FastAPI entrypoint
+│   ├── agents/                    LangGraph state graphs and orchestrators
+│   ├── core/                      Settings, JSON logging, telemetry, Phoenix and tokens
+│   ├── models/                    Ingestion, retrieval, answer, agent, evaluation and feedback
+│   ├── chains/                    Parsing, chunking, ingestion, retrieval, context and generation
+│   ├── database/                  MongoDB stores, hybrid/circular reads, feedback and index JSON
+│   ├── services/                  Ingestion, retrieval, answers, agent, live evaluation and feedback
+│   ├── api/                       Thin routers, agent, reviewer auth and operational endpoints
+│   ├── evaluation/                Diagnosis, batch/live scoring and saved result artifacts
+│   ├── ui/app.py                  Streamlit chat and reviewer workspace
+│   ├── .streamlit/config.toml     UI theme
+│   ├── main.py                    FastAPI entry point (RAG service)
+│   ├── streamlit_app.py           Streamlit entry point
+│   ├── Dockerfile                 API image with evaluation dependencies
+│   └── compose.datadog.yaml       Docker Datadog Agent for the local applications
+├── tests/                         Controlled application, agent and UI regression tests
+└── nexa_synthetic_data/
+    ├── document_register.json     Authoritative sources, versions and effective windows
+    ├── policies/                  Policy/circular PDFs and training companions
+    ├── golden_qa/                 97 source QAs; some require future application layers
+    ├── catalog/ customers/ uploads/ api/
+    └── README.md                  Supplied dataset assets and regeneration limits
 ```
 
 ### Layer rules
@@ -509,7 +589,6 @@ sequenceDiagram
         CH->>CH: enrich: header line, metadata, chunk_id, parent_id, checksum
         CH->>DB: compare: read stored checksums by chunk_id
         DB-->>CH: checksums
-        CH->>PSEC: clear old sections and write current sections
         alt changed chunks exist
             CH->>OAI: embed changed chunks
             OAI-->>CH: vectors
@@ -517,6 +596,7 @@ sequenceDiagram
         else all chunks are unchanged
             CH->>CH: skip embedding and vector upsert
         end
+        CH->>PSEC: upsert current parents, then remove obsolete section keys
         CH-->>CLI: IngestResponse
         CLI->>DB: delete_stale_chunks: retire chunks the source no longer has
         CLI->>CLI: log document_ingested
@@ -532,7 +612,7 @@ sequenceDiagram
 | 3 | Chunk | `chunk_by_clause` | One chunk per numbered clause. A table or footnote stays with the clause that introduces it, and a table is never split. Only a clause over `CHUNK_MAX_CHARACTERS` is split, at sentence boundaries, with `CHUNK_OVERLAP_CHARACTERS` of overlap. |
 | 4 | Enrich + hash | `enrich` (inside the chain) | A LangChain `Document` per child chunk: identity header line, deterministic `chunk_id`, `parent_id`, clause fields, metadata and a `checksum`. Also one parent `Document` per section. |
 | 5 | Compare | `compare` (inside the chain) | The children whose checksum differs from the one stored under the same `chunk_id`. |
-| 6 | Embed + upsert | `embed_and_upsert` (inside the chain) | Parent sections rewritten; vectors from OpenAI for the changed children only, written to Atlas by `chunk_id`. |
+| 6 | Embed + upsert | `embed_and_upsert` (inside the chain) | Changed child vectors are written first, then parents are upserted and obsolete sections removed. Embedding failure preserves previous parents. |
 | 7 | Retire | `delete_stale_chunks` (called by the service) | Chunks of this document that the latest ingest no longer produced are deleted. |
 
 ---
@@ -540,6 +620,9 @@ sequenceDiagram
 ## 4. Classes and functions
 
 ### Class diagram
+
+This view focuses on ingestion contracts. Answer, evaluation and feedback
+contracts are covered in the request/response sections and the component guide.
 
 ```mermaid
 classDiagram
@@ -610,7 +693,7 @@ Both models use `extra="forbid"`, so an unknown or misspelled field raises a val
 
 | Item | Signature | Purpose |
 |---|---|---|
-| `Settings` | class, extends `BaseSettings` | Typed view of every environment variable. Reads `.env`. Secrets are `SecretStr`, so they never print in logs. |
+| `Settings` | class, extends `BaseSettings` | Validated backend configuration from `.env`. `SecretStr` redacts normal representations; extracted secret values must still be kept out of logs. SDK tracing variables are read separately by the SDKs. |
 | `get_settings` | `() -> Settings` | Cached accessor; the app builds `Settings` once. |
 | `configure_logging` | `(level: str) -> None` | Configures `structlog` to write JSON lines to stdout, ready for Datadog. |
 | `init_telemetry` | `(enabled: bool) -> None` | Calls `ddtrace.patch_all()` when enabled so PyMongo is traced. Does nothing when disabled. |
@@ -634,7 +717,7 @@ Both models use `extra="forbid"`, so an unknown or misspelled field raises a val
 | `chunk_by_clause` | `(elements, max_characters, overlap) -> list[Chunk]` | Hybrid chunking. Structure first: one chunk per numbered clause, tables kept with their clause. Size second: an oversized clause is split with `RecursiveCharacterTextSplitter`, tables staying whole. |
 | `chunk_checksum` | `(text, metadata) -> str` | SHA-256 over the chunk text and metadata. The metadata includes `embedding_model`, so a model change forces a re-embed. |
 | `parent_key_prefix` | `(doc_id) -> str` | Key prefix of a document's parent sections (`POL-HL-V3_s`). |
-| `build_ingestion_chain` | `(vector_store, parent_store, settings) -> Runnable` | Composes the write path as one LCEL chain: `parse`, `chunk`, `enrich`, `compare`, `embed_and_upsert`. Input is `{"request": IngestRequest}`; run it with `ainvoke`. Each stage has a `run_name`, so a LangSmith trace shows the time spent per stage. It depends only on the `VectorStore` and `BaseStore` interfaces, so tests pass in-memory stores. |
+| `build_ingestion_chain` | `(vector_store, parent_store, settings) -> Runnable` | Composes the write path as one LCEL chain: `parse`, `chunk`, `enrich`, `compare`, `embed_and_upsert`. Input is `{"request": IngestRequest}`; run it with `ainvoke`. Each stage has a `run_name` to identify it during chain inspection. It depends only on the `VectorStore` and `BaseStore` interfaces, so tests pass in-memory stores. |
 
 ### `app/database/mongo.py`
 
@@ -741,8 +824,7 @@ flowchart LR
 ### Step 1: install
 
 ```bash
-uv lock  # refresh the checked-in lock for Python 3.14+ and FastAPI
-uv sync --python 3.14 --locked
+uv sync --python 3.14 --locked --extra ui --extra evaluation
 source .venv/bin/activate  # macOS
 .venv\Scripts\activate     # Windows
 ```
@@ -763,8 +845,8 @@ Edit `.env`. These are required:
 | `MONGODB_URI` | `mongodb+srv://user:pass@cluster.mongodb.net` | Atlas connection string |
 | `MONGODB_DB` | `nexaassist` | Database name |
 | `MONGODB_COLLECTION` | `policy_chunks` | Collection that holds chunks |
-| `OPENAI_API_KEY` | `sk-...` | Used for embeddings only |
-| `INSTITUTION` | `NexaBank` | Stamped on every chunk |
+| `OPENAI_API_KEY` | `sk-...` | Embeddings, answer generation and model-based evaluation |
+| `INSTITUTION` | `NexaBank` | Stamped on every chunk and enforced on retrieval/feedback |
 | `JURISDICTION` | `IN` | Stamped on every chunk |
 | `CONFIDENTIALITY_LEVEL` | `internal` | Stamped on every chunk |
 
@@ -774,19 +856,56 @@ These have defaults and are optional:
 |---|---|---|
 | `VECTOR_INDEX_NAME` | `policy_chunks_v1` | Must match the index you create in Atlas |
 | `MONGODB_PARENT_COLLECTION` | `policy_sections` | Collection that holds whole sections (parent documents) |
+| `MONGODB_FEEDBACK_COLLECTION` | `policy_feedback` | Feedback and reviewer decisions |
+| `FEEDBACK_REVIEWER_TOKEN` | unset | At least 32 characters; required to enable feedback listing/review |
 | `EMBEDDING_MODEL` | `text-embedding-3-small` | Pinned; never mix models in one index |
 | `EMBEDDING_DIMENSIONS` | `1536` | Must match the Atlas index |
 | `EMBEDDING_BATCH_SIZE` | `100` | Chunks per embedding request |
+| `CHAT_MODEL` | `gpt-6-luna` | Answer-generation model |
+| `EVAL_JUDGE_MODEL` | unset; falls back to `CHAT_MODEL` | Judge/RAGAS model; `.env.example` explicitly selects `gpt-6-sol` |
+| `RETRIEVAL_MODE` / `TEXT_INDEX_NAME` | `dense` / `policy_text_v1` | Hybrid mode needs its separate manual text index |
+| `RETRIEVAL_CANDIDATES` / `RERANK_ENABLED` | `20` / `false` | Candidate pool when reranking is enabled; score compatibility must pass first |
+| `CONTEXT_MAX_TOKENS` / `TOKEN_ENCODING` | `6000` / `o200k_base` | Serialized evidence budget, excluding the rest of the prompt and output |
+| `API_BASE_URL` / `UI_TIMEZONE` | `http://127.0.0.1:8000` / `Asia/Kolkata` | Streamlit connection and policy-date default |
 | `CHUNK_MAX_CHARACTERS` | `1200` | Target size. Only a clause above it is split; a table can exceed it |
 | `CHUNK_OVERLAP_CHARACTERS` | `150` | Text repeated between the pieces of a split clause |
 | `LOG_LEVEL` | `INFO` | `structlog` level |
 | `DD_TRACE_ENABLED` | `false` | Turn on only with a Datadog Agent running |
 
-`.env.example` also lists `LANGCHAIN_TRACING_V2`, `LANGCHAIN_API_KEY` and `LANGCHAIN_PROJECT`. LangChain reads these itself; set `LANGCHAIN_TRACING_V2=true` to see per-stage traces in LangSmith.
+Datadog is the application's telemetry destination. LangSmith imports, decorators
+and connection settings have been removed. The `langsmith` package remains an
+indirect dependency required by LangChain; it is not configured as an application
+telemetry destination.
 
 ### Step 3: create the Atlas Vector Search index (once, by hand)
 
-In the Atlas UI go to **Atlas Search, Create Search Index, Atlas Vector Search, JSON editor**. Choose your database and collection, name the index `policy_chunks_v1`, and paste the exact JSON from [app/database/indexes.md](app/database/indexes.md). Existing collections need that index rebuilt and the document register re-ingested before `/retrieve` can filter on `effective_to_search`. If you change the model or dimension, create a new index version (`policy_chunks_v2`) and re-embed everything.
+Create the index named `policy_chunks_v1` using the exact JSON in
+[app/database/indexes.md](app/database/indexes.md), then wait until it is queryable.
+The definition includes `institution` as well as both sides of the effective-date
+window. An existing index must include every filter field used by the API.
+Adding a filter mapping alone does not require re-embedding when the stored
+metadata is already present. Older chunks missing `effective_to_search` need
+re-ingestion. Changing the embedding model or dimensions requires a new index
+version and a full re-embedding.
+
+### Step 4: start the Docker Datadog Agent for tracing
+
+Set `DD_API_KEY` and the correct `DD_SITE` in `.env`. On this Mac, start Docker
+Desktop and wait for `docker info` to succeed, then run:
+
+```bash
+docker compose --env-file .env -f app/compose.datadog.yaml up -d
+docker compose --env-file .env -f app/compose.datadog.yaml ps
+```
+
+The API and UI run on the Mac and send traces to
+`DD_TRACE_AGENT_URL=http://127.0.0.1:18126`; runtime metrics use
+`DD_DOGSTATSD_URL=udp://127.0.0.1:18125`. This setup uses the Docker Agent.
+Start the applications with the commands in
+[Streamlit and endpoint coverage](#streamlit-and-endpoint-coverage), which load
+`.env` before `ddtrace-run`. See [the Datadog guide](DATADOG_README.md) for Agent
+diagnostics, log collection and cloud setup. The reviewer token is a separate
+application credential, not the Datadog API key.
 
 ---
 
@@ -816,8 +935,7 @@ flowchart TD
 Complete [Section 6](#6-getting-started) first, then:
 
 ```bash
-uv sync                                 
-python -m app.services.ingestion nexa_synthetic_data/document_register.json
+uv run --locked --no-sync --env-file .env ddtrace-run python -m app.services.ingestion nexa_synthetic_data/document_register.json
 ```
 
 What happens, in order: settings load from `.env`, logging is configured, the register is read, and each of the eight documents is parsed, chunked, embedded and upserted. It finishes after eight `document_ingested` log lines (see below). To ingest a different register or a copy of it, pass its path as the argument.
@@ -842,12 +960,30 @@ uv run streamlit run app/streamlit_app.py
 #### Retrieval API (needs `.env`, re-ingested chunks, and the rebuilt index)
 
 ```bash
-uv run uvicorn app.main:app --host 127.0.0.1
+uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 curl -X POST http://127.0.0.1:8000/retrieve -H 'Content-Type: application/json' \
   -d '{"query":"What is the NexaHome processing fee?","as_of":"2026-10-01","top_k":5,"product_id":"NEXA-HL","jurisdiction":"IN"}'
 ```
 
-`/retrieve` returns ranked child passages, citations (`doc_id`, title, version, clause, effective date), parent-section text, and search/parent/total timings in milliseconds. `as_of` is required; `top_k` defaults to 5 and is limited to 1–20. Invalid bodies return 422, and retrieval failures return a generic 503. `GET /health` reports process liveness; `GET /metrics` reports per-process retrieval requests, errors, empty results, and accumulated latency.
+`/retrieve` returns ranked child passages in `results`, complete linked circulars
+in `amendments`, citations, parent text and timings in milliseconds. `as_of` is
+required; `top_k` defaults to 5 and limits only `results` to 1–20 similarity hits.
+Amendments are supplemental evidence, with score 0 rather than a similarity
+score. Their null clause identifies a complete indexed instrument. The chain
+uses institution/date/jurisdiction/confidentiality and optional product scope;
+an invalid or missing parent falls back to its child. `parent_ms` includes
+parent expansion and amendment lookup.
+
+Invalid bodies return 422; retrieval failures or inconsistent amendment metadata
+return a generic 503. `GET /health` reports process liveness, `/metrics` returns
+process-local counters, and `/metrics/latency` returns sampled retrieval percentiles.
+
+Answer/retrieval and feedback submission remain available without user login in
+this localhost training app. Feedback listing/review require a reviewer bearer
+token. These controls do not provide individual identities or tenant roles.
+The lookup date selects effective documents; the model interprets clause-level
+amendments and sanction/opt-in conditions from their text. It is not a general
+policy-precedence engine.
 
 #### Evaluation & Metrics
 
@@ -1022,14 +1158,19 @@ Running it again is safe and cheap. A second run logs `"embedded_count": 0` for 
 | `command not found: uv` | `uv` is not installed | Install it from https://docs.astral.sh/uv/ |
 | `AuthenticationError` from OpenAI | Wrong or placeholder `OPENAI_API_KEY` | Set a real key (`sk-...`) |
 | `ServerSelectionTimeoutError` from PyMongo | Bad `MONGODB_URI`, or your IP is not on the Atlas network access list | Check the URI and add your IP in Atlas |
-| Ingestion succeeds but the collection holds fewer or more documents than 128 | A different `MONGODB_COLLECTION` than you are inspecting, or older data in it | Check the collection name; clear old documents if you changed the chunking |
+| Corpus count differs from the expected 177 chunks | Wrong collection/scope, changed source/chunk settings, or older data | Compare the register and configured institution; rerun ingestion for changed documents and use explicit retirement for withdrawn ones. Do not clear unrelated corpus data. |
 | Vector search later returns nothing | The Atlas index does not exist, is still building, or has a different name or dimension | Check index status; `VECTOR_INDEX_NAME` and `EMBEDDING_DIMENSIONS` must match |
 | `libmagic is unavailable` warning | Optional file-type helper not installed | Safe to ignore |
 | Tests or commands cannot find `app` | Not run from the project root | `cd` to the folder containing `pyproject.toml` |
 
 ### Check the result in Atlas
 
-In the Atlas data explorer, the collection should hold 128 documents, each with an `embedding` array of 1536 numbers and the metadata fields from [Section 5](#5-data-model-the-chunk-record).
+For the eight registered PDFs and documented chunk settings, expect 177 child
+chunks and 80 parent sections in the configured corpus. Each child has a
+1536-number embedding with the default model/dimensions and the metadata from
+[Section 5](#5-data-model-the-chunk-record). Different source/configuration choices
+can change those counts; inspect the configured institution rather than treating
+an entire shared collection as one corpus.
 
 ### Use the pieces from your own code
 
@@ -1095,7 +1236,7 @@ LangChain tracing also records chain inputs and outputs when enabled.
 Start the API from the repository root:
 
 ```bash
-uv run uvicorn app.main:app --host 127.0.0.1
+uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
 In another terminal, start with a straightforward fact:
@@ -1114,10 +1255,11 @@ curl -sS -X POST http://127.0.0.1:8000/answer \
   -d '{"query":"What processing fee does Circular CIR-2026-07 prescribe in revised clause 6.2, and which loans sanctioned from 1 July 2026 does it cover?","as_of":"2026-10-01","product_id":"NEXA-HL","top_k":20}'
 ```
 
-Compare it with the generic current-fee question at top 5. Do not assume adding
-generation fixes the known retrieval miss: a model cannot reliably discover a
-missing amendment from evidence it never receives. Exact generated wording and
-the quality of applicability reasoning require live evaluation.
+Compare it with the generic current-fee question at top 5. Retrieval now loads
+complete, effective circulars linked to retrieved policy IDs, including their
+sanction-date conditions. These appear separately in `amendments`; `top_k` still
+limits the similarity hits in `results`. Exact generated wording and the quality
+of applicability reasoning still require live evaluation.
 
 Finish with an unsupported question such as "What is the current NRLR?". Its
 current value comes from the catalog, which the PDF ingestion path does not
@@ -1128,14 +1270,19 @@ are evaluation inputs and expectations, not a claim that generation has passed.
 
 #### Reading the answer response
 
-- `status`: `answered` or `insufficient_evidence`.
+- `status`: `answered`, `needs_clarification`, or `insufficient_evidence`.
 - `answer`: generated text with `[1]`-style evidence markers, or a fixed
-  insufficient-evidence message.
+  insufficient-evidence message. Product/date conflicts and ambiguous rate
+  questions can instead return a fixed, uncited scope question; model-written
+  policy claims are not forwarded as clarifications. Clients with
+  a fixed status enum must accept the new `needs_clarification` value.
 - `citations`: each has `evidence_id`, an exact supporting `quote`, and the
   `matched_child` citation from retrieval. The quote can come from another
   clause in the child's parent section; `matched_child.clause` is not a claim
-  that the quote belongs to that clause.
-- `retrieval_timings`: the existing search and parent-fetch timings.
+  that the quote belongs to that clause. A complete linked circular has
+  `matched_child.clause: null` and is cited at document level.
+- `retrieval_timings`: search, context-fetch (`parent_ms`, including linked
+  amendments), and total timings.
 - `generation_ms`: prompt/model duration, excluding retrieval; zero for an
   empty retrieval where no generation call is made.
 
@@ -1144,15 +1291,28 @@ The first matching child's citation is retained for that context. Source IDs
 are local to each response and are not MongoDB document IDs.
 
 The application rejects answered drafts with missing/unknown citation IDs,
-unmatched inline markers, or quotes absent from the referenced context. Such
-drafts become `insufficient_evidence`. Empty retrieval also skips generation;
+unmatched inline markers, or quotes absent from the referenced context. It allows
+one repair attempt against the same evidence; another invalid draft becomes
+`insufficient_evidence`. The reported generation time includes both attempts.
+Empty retrieval also skips generation;
 upstream provider/database/parser failures return a generic HTTP 503.
 
 These are mechanical citation checks, not a semantic correctness guarantee.
-Applicability and amendment handling are prompt instructions, not a deterministic
-policy-precedence engine. The generation slice does not expand retrieval scope
-or repair missing/stale records. Inspect the evidence and compare against the
-golden answers before relying on an answer.
+Linked amendment retrieval is deterministic and uses the same institution,
+date, product, jurisdiction and confidentiality filters as the initial search.
+It follows circular-to-circular links until no new instrument remains and
+rejects inconsistent source metadata instead of returning a partial or mixed
+instrument. This checks the stored chunks, not whether ingestion omitted a
+source section entirely.
+The model interprets applicability and precedence from that evidence; there is
+no hardcoded fee or general policy-precedence engine. If a complete linked
+amendment cannot fit the context budget, generation fails closed rather than
+answering from the older clause alone. Missing links or stale source records
+still need correction. Inspect the evidence before relying on an answer.
+
+The NexaFlex foreclosure reference uses the source wording **plus GST**.
+Its foreclosure clause does not specify a percentage; the processing-fee
+clause's 18% must not be assumed to apply to foreclosure.
 
 Official integration references: [GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna)
 and [LangChain structured output](https://docs.langchain.com/oss/python/integrations/chat/openai#structured-output).
@@ -1215,15 +1375,38 @@ Reports contain synthetic policy text and model responses.
 For controlled offline checks without provider calls, run
 `uv run --no-sync pytest tests/test_answer.py tests/test_evaluation.py`.
 Constructed fixtures test wiring and citation behavior; they do not measure
-semantic model quality. Existing LangSmith tracing settings apply independently.
+semantic model quality. RAGAS scores and user feedback are submitted to Datadog LLM Observability when enabled.
 
 ## 8. Testing and quality checks
 
+The saved 21 October verification passed **121 application tests**, **22 separate
+mock API tests**, Ruff and mypy (56 application source files). It also records
+twelve targeted live policy cases, browser feedback/input checks, and desktop
+and mobile Lighthouse accessibility snapshots scoring 100. The snapshots are
+not full accessibility certification. See the
+[fix report](app/evaluation/results/fixes_20261021/FIX_REPORT.md) for outcomes and limits.
+
 ```bash
-uv run pytest -q              # offline application tests
-uv run ruff check app tests   # lint
-uv run mypy app tests         # type check
+RAGAS_DO_NOT_TRACK=true \
+uv run --locked --no-sync pytest -q tests/
+uv run --locked --no-sync ruff check app tests
+uv run --locked --no-sync ruff format --check app tests
+uv run --locked --no-sync mypy app
 ```
+
+The mock banking API suite is separate from the application's default test
+discovery. Use the dependencies and command in
+[the synthetic kit guide](nexa_synthetic_data/README.md); its 22 tests do not
+establish that banking customer tools are integrated with the policy UI.
+
+| Regression area | Code covered |
+|---|---|
+| Scoped retrieval and complete circulars | `tests/test_retrieval.py`, `tests/test_amendments.py`, `tests/test_hybrid_rerank.py` |
+| Context budgets, exact citations and one repair attempt | `tests/test_answer.py` |
+| Live/batch scoring, reference handling and unavailable metrics | `tests/test_evaluation.py`, `tests/test_live_evaluation.py` |
+| Reviewer authorization, retry IDs and review conflicts | `tests/test_feedback.py` |
+| Chat state, hidden score cards, references and immediate feedback submission | `tests/test_ui.py` |
+| Ingestion, failure diagnosis and instrumentation | `tests/test_ingestion.py`, `tests/test_rag_failure_modes.py`, `tests/test_telemetry.py` |
 
 Install the Git commit hook once per clone after syncing dependencies:
 
@@ -1242,7 +1425,8 @@ requires network access initially; pytest and mypy remain separate checks.
 Private-key detection does not detect every API token: keep `.env` untracked.
 See the [pre-commit documentation](https://pre-commit.com/).
 
-The tests run the real parser and chain over your synthetic PDFs, with an in-memory vector store and fake embeddings in place of Atlas and OpenAI.
+Controlled tests use the real parser/chains with local stores, fake embeddings
+or model responses. The following table focuses on the ingestion teaching cases:
 
 | Test | What it proves |
 |---|---|
@@ -1262,7 +1446,9 @@ The tests run the real parser and chain over your synthetic PDFs, with an in-mem
 | `test_changing_the_embedding_model_re_embeds_everything` | A different `embedding_model` changes every checksum |
 | `test_stale_chunks_are_deleted_and_current_ones_kept` | `delete_stale_chunks` removes only the named document's leftover IDs |
 
-What the tests do **not** cover: real embedding quality, Atlas index behaviour, search results, or the write to a live Atlas collection (the stores are in-memory; only `delete_stale_chunks` runs against a mock MongoDB collection). Those need credentials and are verified by running the ingestion command and checking Atlas.
+Controlled tests do not establish real embedding quality, Atlas ranking or
+live ingestion correctness. They use local/mocked stores; selected live API
+and browser observations are recorded separately in the validation report.
 
 ---
 
@@ -1288,10 +1474,16 @@ What the tests do **not** cover: real embedding quality, Atlas index behaviour, 
 - The header line is added on top of the size limit, so a chunk can exceed `CHUNK_MAX_CHARACTERS` by the header length.
 - Parent sections are rewritten on every run. They are not embedded, so this costs no model calls.
 - The write is not transactional: a crash between the chunk upsert, parent upsert and stale-data cleanup can leave a mixed state until a successful rerun. Embedding failures leave the previous parent evidence intact. Run one ingestion job at a time.
-- `/retrieve` falls back to the child passage and logs a warning if a parent section is missing.
+- `/retrieve` falls back to the child passage and logs a warning if a parent is missing or its source scope does not match.
 - `section_type` is only `text` or `table`.
-- The Atlas filter fields cover product, jurisdiction, confidentiality and both sides of the effective-date window. The index must be rebuilt and the register re-ingested after this change.
-- Offline tests cover ingestion, retrieval, answers, feedback and telemetry. Seven selected synthetic cases have separately exercised Atlas, OpenAI and Datadog evaluation export on Python 3.14. These checks do not verify every case, ingestion writes or cloud deployment.
+- The Atlas index must include institution, product, jurisdiction, confidentiality and both effective-date filter fields. Missing metadata needs re-ingestion; adding a mapping to already stored metadata does not require new embeddings.
+- Linked circular lookup depends on consistent stored metadata and `supersedes` links. It follows effective links and checks all indexed parts, but cannot detect a source section that ingestion omitted entirely without an ingestion manifest.
+- Citation checks verify exact quote/marker membership, not semantic entailment. One repair draft is allowed; two invalid drafts still abstain. Date-intent classification can return abstention rather than the desired clarification.
+- Reviewer access uses a shared secret. There are no individual user accounts or tenant roles, and multi-institution write isolation is not established.
+- Feedback retry protection needs stable submitter/submission IDs. Datadog feedback has no durable delivery queue; SDK `queued` is not proof of cloud receipt.
+- Reloading a previously open sidebar can still produce CLS 0.24. Automated accessibility snapshots passed, but framework label/ID issues and full accessibility testing remain open.
+- The installed ddtrace integration can log a non-LLM prompt-template warning. Complete cloud prompt capture and sustained load were not verified in the latest run.
+- The saved live checks cover selected synthetic cases, not every golden case or a cloud deployment. Recruited-user usability, disaster recovery and production capacity remain unverified.
 - Scaling beyond a loop (queue, worker pool, sharded index) is covered as design in Session 2, not as code.
 
 ---
@@ -1301,27 +1493,26 @@ What the tests do **not** cover: real embedding quality, Atlas index behaviour, 
 ```mermaid
 flowchart LR
     S1["S1: Architecture +<br/>ingestion"]:::done --> S2["S2: Clause-aware chunking,<br/>parent docs, checksums"]:::done
-    S2 --> S3["S3: Embeddings and<br/>vector index"]:::offline
-    S3 --> S4["S4: Retrieval API<br/>/retrieve"]:::offline
-    S4 --> S5["S5: Failure modes,<br/>Week 1 checkpoint"]:::offline
-    S5 --> W2["Week 2: /answer slice done;<br/>evaluation, observability"]:::partial
+    S2 --> S3["S3: Embeddings and<br/>vector index"]:::done
+    S3 --> S4["S4: Retrieval API<br/>and scoped amendments"]:::done
+    S4 --> S5["S5: Failure diagnosis;<br/>alerting still open"]:::partial
+    S5 --> W2["Week 2: answers, UI,<br/>evaluation and feedback built"]:::partial
     W2 --> P2["Phases 2 to 4: agents,<br/>MCP, production"]:::planned
 
     classDef done fill:#d1fae5,stroke:#047857,color:#064e3b
-    classDef offline fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
     classDef partial fill:#fef3c7,stroke:#b45309,color:#78350f
     classDef planned fill:#f3f4f6,stroke:#6b7280,color:#374151
 ```
 
-**Legend:** 🟩 done · 🟦 implemented offline, live verification pending · 🟨 first slice implemented, rest pending · ⬜ planned
+**Legend:** 🟩 implemented with selected live evidence · 🟨 implemented with remaining quality/operational checks · ⬜ planned
 
 | Session | Adds |
 |---|---|
 | 2 (done) | Clause-aware chunking with a `clause` field, parent documents, checksum-based incremental re-ingest |
-| 3 (implemented offline) | Embedding model and dimension decisions, the Atlas index in depth; Python 3.14 dependency install pending |
-| 4 (implemented offline) | `/retrieve` endpoint (FastAPI) with filters including `as_of`, parent-document expansion, citations and timings |
-| 5 (implemented offline) | Empty/failure logging, `/health`, `/metrics`, and a runnable miss/staleness/embedding-compatibility lab; live alert thresholds and statistical drift detection pending |
-| Week 2 (partial live verification) | `/answer`, parent context, quoted citations and ten golden QAs; the evaluation runner publishes per-case judge/RAGAS scores to Datadog. Seven selected cases have run live, with two incorrect abstentions; web-visible scores are verified and full-dataset quality remains unproven. |
+| 3 (implemented; selected live checks) | Python 3.14 environment, shared embeddings and a queryable Atlas index including institution filtering |
+| 4 (implemented; selected live checks) | Scoped `/retrieve`, parent validation, complete linked circulars, citations and timings |
+| 5 (implemented; operations work remains) | Failure diagnosis, health, counters and latency percentiles; alert thresholds and statistical drift monitoring remain open |
+| Week 2 (implemented; quality work remains) | Cited answers, Streamlit, live/batch RAGAS and judge workflows, feedback and reviewer-token access. Full-dataset quality, hybrid/reranker comparisons and the instructor walkthrough remain open. |
 
 Phases 2 to 4 (agents, MCP, production) wrap this service without rewriting it, so the ingestion contract and the chunk record shape should stay stable.
 
@@ -1334,7 +1525,7 @@ from the project root. Load `.env` before `ddtrace-run` so the tracer receives t
 Datadog settings before application imports:
 
 ```bash
-uv sync --extra ui --extra evaluation
+uv sync --locked --extra ui --extra evaluation
 uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 uv run --no-sync --env-file .env env DD_SERVICE=nexaassist-ui ddtrace-run python -m streamlit run app/streamlit_app.py --server.address 127.0.0.1 --server.port 8501
 ```
@@ -1349,7 +1540,7 @@ Clear those filters and refresh any saved absolute time window before diagnosing
 missing traces. See [DATADOG_README.md](DATADOG_README.md) for Agent diagnostics.
 
 The UI uses `API_BASE_URL` (default `http://127.0.0.1:8000`) and `UI_TIMEZONE`
-(default `Asia/Kolkata`). Streamlit 1.66+ loads the app's blue and slate theme from
+(default `Asia/Kolkata`). Streamlit 1.66+ loads the app's dark theme from
 `app/.streamlit/config.toml`. The chat interface includes a bottom message composer,
 suggested policy questions, a **New chat** action, and recent chats in the sidebar.
 Chats are stored only in the current Streamlit session, without database persistence.
@@ -1359,13 +1550,34 @@ for reference and are not sent as model context. Include relevant details in eac
 Use **Policy scope** in the sidebar to set the policy date, an optional product ID,
 the source limit, and **Answer** or **Evidence** mode. Each message retains its submitted
 scope even if the sidebar changes. Failed requests offer **Try again** with that original scope.
-Source clauses and per-answer feedback appear below each response. Select **Review feedback**
-in the sidebar to load and review saved feedback.
+Source clauses and per-answer feedback appear below each response. Linked
+amendments can add evidence beyond the selected similarity-source limit.
+Select **Review feedback** in the sidebar and enter the reviewer token before
+loading or reviewing saved feedback. Set `FEEDBACK_REVIEWER_TOKEN` in `.env` to
+a random secret of at least 32 characters, then restart FastAPI:
+
+```bash
+uv run python -c 'import secrets; print(secrets.token_urlsafe(32))'
+```
+
+Keep that generated value in `.env`, outside version control. Review routes
+return 503 when the token is not configured, or 401 for missing/incorrect
+credentials. API reviewers send `Authorization: Bearer <reviewer token>`.
+This is a shared reviewer credential for the local training app; it does not
+provide individual user accounts or roles. Use TLS and proper identity/role
+management before opening this application to shared remote access.
 With Datadog LLM Observability enabled, **Send feedback** also queues a `thumbs`
 rating and optional correction on the matching API answer span. An anonymous
 browser-session UUID identifies the submitter. MongoDB saving remains available
 if Datadog fails or an older answer has no span reference; see the
 [Datadog feedback guide](DATADOG_README.md#end-user-feedback-from-streamlit).
+The UI sends a stable `submission_id` for each answer and retains the anonymous
+`submitter_id` within its browser session. Retrying an identical
+submission returns its saved record without another Datadog submission; reusing
+the same IDs with changed contents returns 409. Direct API clients must retain
+**both** UUIDs on retries; omitting either creates a fresh identity for that
+request. Datadog delivery remains best effort rather than a durable
+delivery queue.
 
 **Answer quality → Evaluate with RAGAS** is enabled for new questions by default.
 RAGAS metrics appear in **Datadog only**; Streamlit shows the answer, citations
@@ -1387,8 +1599,8 @@ The UI covers six of nine application operations:
 | `POST /answer` | Answer mode with Evaluate with RAGAS disabled |
 | `POST /retrieve` | Policy chat → Evidence → send a message |
 | `POST /feedback` | Send feedback below an answer |
-| `GET /feedback` | Review feedback → Load feedback for review |
-| `POST /feedback/{feedback_id}/review` | Save review with a reviewer, decision and note |
+| `GET /feedback` | Review feedback → reviewer token → Load feedback for review |
+| `POST /feedback/{feedback_id}/review` | Reviewer token, reviewer name, decision and note → Save review |
 | `GET /health` | No existing UI control; tested directly |
 | `GET /metrics` | No existing UI control; tested directly |
 | `GET /metrics/latency` | No existing UI control; tested directly |
@@ -1407,7 +1619,7 @@ request retries, and feedback isolation between answers. Feedback inputs no long
 over from one answer to the next.
 
 ```bash
-LANGCHAIN_TRACING_V2=false LANGSMITH_TRACING=false RAGAS_DO_NOT_TRACK=true uv run --extra ui --extra evaluation pytest tests/
+RAGAS_DO_NOT_TRACK=true uv run --extra ui --extra evaluation pytest tests/
 ```
 
 ## Local Datadog tracing
@@ -1421,6 +1633,140 @@ constraint.
 
 ## Further reading
 
+- [PROMPT_HISTORY_AND_GUIDE.md](PROMPT_HISTORY_AND_GUIDE.md): an empty-folder starting guide, your prompts in corrected English, improved prompts, issue resolutions and reusable templates
+- [DEVELOPMENT_TOOLING_GUIDE.md](DEVELOPMENT_TOOLING_GUIDE.md): development skills, Git and assistant hooks, MCP status, and usage examples
 - [CLAUDE.md](CLAUDE.md): coding rules and layer boundaries
 - [nexa_synthetic_data/README.md](nexa_synthetic_data/README.md): the corpus, golden Q&A, customer data and mock API
 - [app/database/indexes.md](app/database/indexes.md): the Atlas index definition
+
+## Phase 2: Orchestrator and HTTP Retriever — 23 October 2026
+
+This extension implements the Orchestrator/Retriever stage from syllabus pages
+4–5. Earlier dated Phase 1 status and diagrams above remain historical snapshots.
+One **Agent Service** hosts the graph roles; Validator and Action execution are
+later stages. The Phase 1 application and its routes are unchanged, including
+`POST /retrieve`, `/answer` and `/answer/evaluated` (the existing evaluated path).
+
+```mermaid
+flowchart LR
+    S[START] --> O[Orchestrator: structured intent]
+    O -->|policy question| R[Retriever: HTTP POST /retrieve]
+    R --> A[Existing grounded answer chain]
+    A --> E[END]
+    O -->|missing or conflicting information| C[Clarification]
+    O -->|forbidden| F[Stop]
+    O -->|customer context| U[Tools unavailable in this stage]
+    O -->|supported action| V[Validator and Action unavailable]
+    C --> E
+    F --> E
+    U --> E
+    V --> E
+```
+
+The classifier and answer generator both use `get_chat_model(settings)` and the
+existing `CHAT_MODEL`. No routing model, policy fee, rate or eligibility rule is
+introduced. Routing scope is sourced from `POL-OPS-001` clauses 2, 4–6, the product
+catalog's names/IDs, and the supplied mock banking OpenAPI operations. The graph
+never calls those customer/action APIs in this stage.
+
+Start the two services from the repository root in separate terminals:
+
+```bash
+uv sync --locked --all-extras
+# Terminal 1: existing Phase 1 RAG
+uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+# Terminal 2: one Agent Service
+uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.agent_main:app --host 127.0.0.1 --port 8001
+```
+
+`RAG_BASE_URL` defaults to `http://127.0.0.1:8000/` and must identify the Phase 1
+service, not the Agent Service. An optional path prefix is preserved. HTTP calls
+have a 60-second timeout; a graph run has a 180-second deadline and an eight-step
+recursion bound. Configure these timeouts in `.env.example`'s agent settings.
+Model timeout/retry behavior stays in the existing chat-model factory. No banking
+write retries or action execution are added.
+
+Compare the two consumers of the same retrieval endpoint:
+
+```bash
+curl -sS http://127.0.0.1:8000/retrieve \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"What is the maximum loan amount for a NexaHome Loan?","as_of":"2026-10-01","product_id":"NEXA-HL"}'
+curl -sS http://127.0.0.1:8001/agent \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"What is the maximum loan amount for a NexaHome Loan?","as_of":"2026-10-01","product_id":"NEXA-HL"}'
+```
+
+`POST /agent` accepts `query`, optional `as_of`, `product_id`, `customer_id`,
+`action`, `jurisdiction`, and `top_k` (1–20; default 5). Missing scope is accepted
+at this boundary so the graph can return clarification. Malformed dates, customer
+IDs, action names and unknown fields return HTTP 422. Explicit, unambiguous scope
+in the query can be extracted; conflicts with supplied fields require clarification.
+A sanction date is not silently substituted for the policy lookup date.
+
+The response has `intent`, `status`, `message`, `missing_fields`, and `answer`.
+`answer` contains the existing complete `AnswerResponse` for the policy route,
+including verified quotes, matched sources and timings. The HTTP retriever returns
+results **and complete amendments** to the existing answer chain; it retrieves once
+and replays that evidence, retaining budgeting, abstention and one citation-repair
+attempt. Upstream HTTP/model/schema failures return a generic HTTP 503.
+
+| Route | Response behavior |
+| --- | --- |
+| `policy_question` | `answered`, `needs_clarification` or `insufficient_evidence` from the existing answer chain |
+| `missing_information` | `needs_clarification` with fixed, uncited text and missing/conflicting field labels |
+| `forbidden` | `forbidden`; stops without retrieval, generation or action execution |
+| `customer_context` | Missing customer identity clarifies; otherwise `unavailable` until customer tools are integrated |
+| `supported_action` | Missing customer/action/details clarifies; otherwise `unavailable` until Validator/Action integration |
+
+All these domain outcomes use HTTP 200. Requests are independent: resubmit the
+original query and clarified fields together. There is no checkpoint, implicit
+conversation memory, customer access, banking write, approval gate or claim of
+completed Phase 2 exit requirements. Classification uses an LLM; the offline
+route tests do not prove semantic classification accuracy or injection resistance.
+
+`GET /health` is liveness only. `GET /metrics` exposes process-local agent request
+and completed-run counters; completed includes clarification, refusal and unavailable
+outcomes. It does not report Phase 1 retrieval counters or in-flight failures.
+The shared startup initializes logging/Datadog; orchestration has a Datadog workflow
+span and versioned prompt annotation. No raw customer data is loaded by this stage.
+
+```bash
+RAGAS_DO_NOT_TRACK=true DD_TRACE_ENABLED=false DD_LLMOBS_ENABLED=false \
+  uv run --locked --no-sync pytest tests/ -q
+uv run --locked --no-sync ruff check app tests
+uv run --locked --no-sync ruff format --check app tests
+uv run --locked --no-sync mypy app
+```
+
+`tests/test_agent.py` covers all graph routes, required/conflicting scope, ordered
+execution, the actual Phase 1 route through HTTPX's ASGI transport, amendment/citation
+preservation, failed quote validation, downstream errors, deadlines and API separation.
+Ten routing golden cases are in `evaluation/datasets/agent.jsonl`; they include
+source/contract notes and expected outcomes, not measured quality scores.
+
+Official references verified for this implementation:
+[LangGraph structured routing](https://docs.langchain.com/oss/python/langgraph/workflows-agents#routing),
+[Graph API](https://docs.langchain.com/oss/python/langgraph/graph-api),
+[ChatOpenAI structured output](https://docs.langchain.com/oss/python/integrations/chat/openai#structured-output),
+and [HTTPX async clients](https://www.python-httpx.org/async/).
+
+The requested history analysis is saved in [codebase-recon-report.md](codebase-recon-report.md).
+
+Verification for this extension: **159 application tests passed**, including 34
+new agent cases; Ruff checks, formatting (85 files), mypy (64 source files),
+`uv lock --check --offline` and `git diff --check` passed. A separate Agent uvicorn
+process and the already-running Phase 1 service passed six synthetic cases over
+real loopback TCP using the configured `gpt-6-luna`: cited policy answer, missing
+date, forbidden credit decision, unavailable customer context, unavailable callback
+action, and missing service-request details. The temporary Agent process was stopped.
+See [the live smoke report](app/evaluation/results/agent_stage_20261023.json).
+Datadog export was disabled for this smoke run; these six cases are not a
+full-dataset quality or production-load claim.
+
+A before/after preservation audit found 425 of 430 existing modified/untracked
+files byte-identical. The other five were intentional integration edits: README,
+component guide and `.env.example` retained their prior content verbatim with
+appended sections; config gained AgentSettings and an import; compatibility
+requirements gained LangGraph. Historical prompts and synthetic source data
+were untouched. No commit, stash, reset or existing-service restart was performed.

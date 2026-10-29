@@ -21,7 +21,7 @@ def api_client(base_url: str) -> httpx.Client:
 
 
 def show_answer(result: AnswerResponse) -> None:
-    if result.status == "insufficient_evidence":
+    if result.status != "answered":
         st.warning(result.answer)
     else:
         st.write(result.answer)
@@ -29,7 +29,9 @@ def show_answer(result: AnswerResponse) -> None:
         source = item.matched_child
         with st.expander(f"[{item.evidence_id}] {source.title} · v{source.policy_version}"):
             st.text(item.quote)
-            st.caption(f"{source.doc_id} · matched clause {source.clause or 'front matter'}")
+            st.caption(
+                f"{source.doc_id} · {f'matched clause {source.clause}' if source.clause else 'complete instrument'}"
+            )
 
 
 def feedback_form(client: httpx.Client, turn: dict[str, Any]) -> None:
@@ -49,6 +51,7 @@ def feedback_form(client: httpx.Client, turn: dict[str, Any]) -> None:
                     "response": turn["response"],
                     "helpful": helpful == "Yes",
                     "submitter_id": st.session_state["feedback_submitter_id"],
+                    "submission_id": turn["id"],
                     "correction": correction,
                 },
             )
@@ -60,9 +63,20 @@ def feedback_form(client: httpx.Client, turn: dict[str, Any]) -> None:
 
 
 def review_feedback(client: httpx.Client) -> None:
+    token = st.text_input(
+        "Reviewer token",
+        type="password",
+        key="reviewer_token",
+        on_change=lambda: st.session_state.pop("feedback_records", None),
+    )
+    if not token:
+        st.info("Enter your reviewer token to load feedback.")
+        return
+    headers = {"Authorization": f"Bearer {token}"}
     if st.button("Load feedback for review"):
+        st.session_state.pop("feedback_records", None)
         try:
-            response = client.get("/feedback")
+            response = client.get("/feedback", headers=headers)
             response.raise_for_status()
             st.session_state["feedback_records"] = response.json()
         except httpx.HTTPError:
@@ -88,6 +102,7 @@ def review_feedback(client: httpx.Client) -> None:
                 try:
                     response = client.post(
                         f"/feedback/{identifier}/review",
+                        headers=headers,
                         json={
                             "status": decision,
                             "reviewer": reviewer,
@@ -149,7 +164,7 @@ def show_turn(client: httpx.Client, turn: dict[str, Any]) -> bool:
         st.markdown(request["query"])
         st.caption(
             f"Policy date: {request['as_of']} · {request['product_id'] or 'All products'}"
-            f" · {turn['mode']} · Up to {request['top_k']} sources"
+            f" · {turn['mode']} · Up to {request['top_k']} sources + linked amendments"
         )
     with st.chat_message("assistant", avatar=":material/account_balance:"):
         if turn.get("error"):
@@ -179,16 +194,31 @@ def show_turn(client: httpx.Client, turn: dict[str, Any]) -> bool:
                         f"Clause {hit.citation.clause or 'front matter'} · "
                         f"Effective {hit.citation.effective_date}"
                     )
+            for amendment in evidence.amendments:
+                with st.expander(f"Linked amendment: {amendment.citation.title}"):
+                    st.text(amendment.parent_text)
+                    st.caption(
+                        f"{amendment.citation.doc_id} · Complete instrument, including applicability"
+                    )
     return False
 
 
 def main() -> None:
+    # shortcut: restored open sidebars can shift at bootstrap; revisit after Streamlit layout fixes.
     st.set_page_config(
         page_title="NexaAssist · Policy chat",
         page_icon=":material/account_balance:",
         layout="centered",
-        initial_sidebar_state="auto",
+        initial_sidebar_state="collapsed",
     )
+    # Native date segments and dimmed captions failed the browser accessibility audit.
+    st.html("""<style>
+    [data-testid="stCaptionContainer"] { opacity: 0.85; }
+    [data-testid="stDateInput"] [role="spinbutton"] {
+        min-width: 24px; min-height: 24px; line-height: 24px;
+        display: inline-block; text-align: center;
+    }
+    </style>""")
     settings = get_ui_settings()
     client = api_client(settings.api_base_url)
     st.session_state.setdefault("conversations", {})
@@ -240,6 +270,7 @@ def main() -> None:
             product_id = st.text_input(
                 "Product ID (optional)",
                 key="product_id",
+                autocomplete="off",
                 placeholder="All products",
                 help="Examples: NEXA-HL, NEXA-PL, NEXA-LAP, NEXA-AL.",
             )

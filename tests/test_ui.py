@@ -10,6 +10,7 @@ import httpx
 import mongomock
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 from starlette.routing import compile_path
 
 pytest.importorskip("streamlit")
@@ -28,6 +29,9 @@ from app.ui import app as ui
 
 @pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch, settings: Settings) -> Iterator[httpx.Client]:
+    settings = settings.model_copy(
+        update={"feedback_reviewer_token": SecretStr("reviewer-test-token-000000000000000000")}
+    )
     retrieved = RetrieveResponse.model_validate(
         {
             "as_of": "2026-10-19",
@@ -138,6 +142,7 @@ def test_existing_ui_endpoint_coverage(client: httpx.Client, decision: str) -> N
     assert saved["correction"] == ""
 
     app.radio(key="workspace").set_value("Review feedback").run()
+    app.text_input(key="reviewer_token").input("reviewer-test-token-000000000000000000").run()
     next(
         button for button in app.button if button.label == "Load feedback for review"
     ).click().run()
@@ -325,3 +330,36 @@ def test_suggestion_and_blank_input(client: httpx.Client) -> None:
     assert len(app.chat_message) == 2
     assert len(responses) == 1
     assert not any(button.label == "Home loan limits" for button in app.button)
+
+
+def test_reference_and_correction_survive_immediate_submission(client: httpx.Client) -> None:
+    import json
+
+    responses: list[httpx.Response] = []
+    client.event_hooks["response"].append(responses.append)
+    app = AppTest.from_file(Path("app/streamlit_app.py").resolve()).run()
+    reference = "Expected answer pasted immediately before sending."
+    app.date_input[0].set_value(date(2026, 10, 19))
+    app.text_area(key="quality_reference").input(reference)
+    app.chat_input[0].set_value("Check this policy").run()
+    evaluated = next(r for r in responses if r.request.url.path == "/answer/evaluated")
+    assert json.loads(evaluated.request.content)["reference_answer"] == reference
+    assert app.text_area(key="quality_reference").value == ""
+    correction = "Correction pasted immediately before submitting feedback."
+    next(w for w in app.text_area if w.label == "Correction or missing evidence").input(correction)
+    next(b for b in app.button if b.label == "Send feedback").click().run()
+    submitted = next(r for r in responses if r.request.url.path == "/feedback")
+    assert submitted.json()["correction"] == correction
+    assert json.loads(submitted.request.content)["submission_id"]
+    assert not app.exception
+
+
+def test_changing_reviewer_credentials_clears_loaded_records(client: httpx.Client) -> None:
+    app = AppTest.from_file(Path("app/streamlit_app.py").resolve()).run()
+    app.radio(key="workspace").set_value("Review feedback").run()
+    app.text_input(key="reviewer_token").input("reviewer-test-token-000000000000000000").run()
+    app.session_state["feedback_records"] = [{"private_test_record": True}]
+    app.text_input(key="reviewer_token").input("wrong token").run()
+    assert not app.exception
+    with pytest.raises(KeyError):
+        app.session_state["feedback_records"]

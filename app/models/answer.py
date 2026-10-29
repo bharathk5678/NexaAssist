@@ -20,7 +20,7 @@ class AnswerDraft(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    status: Literal["answered", "insufficient_evidence"]
+    status: Literal["answered", "insufficient_evidence", "needs_clarification"]
     answer: str = Field(min_length=1)
     evidence: list[EvidenceQuote]
 
@@ -34,7 +34,7 @@ class AnswerResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     as_of: date
-    status: Literal["answered", "insufficient_evidence"]
+    status: Literal["answered", "insufficient_evidence", "needs_clarification"]
     answer: str
     citations: list[AnswerCitation]
     retrieval_timings: RetrieveTimings

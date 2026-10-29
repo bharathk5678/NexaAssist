@@ -19,7 +19,6 @@ import structlog
 from langchain_core.documents import Document
 from langchain_core.stores import InMemoryStore
 from langchain_core.vectorstores import VectorStore
-from langsmith import traceable
 from openai import OpenAIError
 from pymongo.errors import PyMongoError
 
@@ -85,7 +84,6 @@ async def _source_manifests(settings: Settings) -> tuple[list[ChunkSnapshot], li
     return child_manifest, parent_manifest
 
 
-@traceable
 async def example_report(selected: str | None = None) -> dict[str, Any]:
     settings = get_settings()
     storage = await asyncio.to_thread(read_rag_snapshot, settings)

@@ -2,9 +2,46 @@
 
 ## What this application does today
 
-This guide covers ingestion, dense/hybrid retrieval, local reranker integration, bounded answer generation, failure diagnosis, RAGAS/judge evaluation, and the thin Streamlit/feedback workflow. Ingestion takes approved bank-policy documents, breaks them into clause chunks, embeds new or changed chunks, and stores both chunks and parent sections in MongoDB Atlas. See [README.md](README.md) for API contracts and run instructions.
+Updated **21 October 2026** against the current code and saved validation results.
+This guide explains where ingestion, retrieval, answer generation, evaluation,
+feedback and observability live. Ingestion turns approved policy documents into
+clause chunks and parent sections in MongoDB Atlas. Streamlit calls FastAPI to
+retrieve that evidence, generate cited answers and collect feedback. See
+[README.md](README.md) for setup and public contracts.
 
-`POST /retrieve` returns cited evidence with parent-section text. `POST /answer` reuses that retrieval service, deduplicates parent context, generates a structured answer, and checks quoted citations. Streamlit, Atlas BM25/vector fusion, local reranker integration, and RAGAS/judge evaluation are implemented. Hybrid search requires its manual Atlas text index. The installed Ollama endpoint failed the local score-compatibility check, so reranking remains disabled by default. **The syllabus Phase 1 exit checkpoint is not complete.** The session mapping and remaining work below were reviewed on 18 October 2026 against pages 2–3 of the syllabus PDF.
+For a visual walkthrough, open the [animated architecture explorer](C4-Documentation/nexaassist-architecture.html)
+in a browser. Its C4 views and ingestion flow map each component to these source
+files; the [reading guide](C4-Documentation/architecture-explorer.md) explains
+the notation and boundaries.
+
+`POST /retrieve` returns ranked hits plus complete linked circulars. `/answer`
+validates citations and permits one repair draft. `/answer/evaluated` scores the
+final answer using the same retrieved evidence. **RAGAS scores are shown in
+Datadog only**; the chat shows the answer, citations and a Datadog link. Feedback
+is stored in MongoDB, with retry protection and a reviewer token for list/review.
+
+Dense and optional Atlas hybrid retrieval, a local reranker adapter, and
+live/batch evaluations are implemented. Hybrid mode requires its manual text
+index. The recorded local reranker compatibility check failed, so reranking
+remains off by default. **The syllabus Phase 1 exit checkpoint is not complete**:
+the full hybrid/reranker comparison, representative quality targets and the
+instructor walkthrough remain open. The syllabus mapping below retains its
+original pages 2–3 reference; dated reviews at the end are historical snapshots.
+
+### Latest verification
+
+The saved 21 October run passed **121 application tests and 22 separate mock API
+tests**, plus Ruff and mypy. Twelve targeted live policy scenarios are recorded;
+the final fee evaluation was answered with four scored metrics queued for
+Datadog. Desktop/mobile accessibility snapshots scored 100. None of these
+counts is a coverage percentage or a production-readiness verdict.
+
+Use the [fix report](app/evaluation/results/fixes_20261021/FIX_REPORT.md) and
+[summary](app/evaluation/results/fixes_20261021/SUMMARY.json) for the evidence,
+including intermediate failures and independent-review follow-ups. A restored
+open sidebar still shifts on reload; date-intent classification can abstain;
+cloud receipt and sustained load were not rechecked. No individual user/role
+system or multi-institution write isolation is claimed.
 
 ### Which session built what
 
@@ -21,8 +58,10 @@ This guide covers ingestion, dense/hybrid retrieval, local reranker integration,
 | 6 | Atlas hybrid/RRF and local Qwen reranker adapter | `database/retrieval.py`, `chains/rerank.py`, `chains/prompts/rerank.py` |
 | 7 | Token-budgeted context, configured chat model, answer generation and citation checks | `chains/answer.py`, `chains/llm.py`, `chains/prompts/answer.py`, `services/answer.py`, `models/answer.py`, `api/answer.py` |
 | 8 | **Arize Phoenix Observability** | `app/core/phoenix.py`, `run_phoenix.py`, `tests/test_phoenix_ragas.py`, OpenTelemetry LangChain instrumentor (`http://localhost:6006`) |
-| 8 | **RAGAS Evaluation & Testing** | `app/evaluation/ragas_metrics.py`, `test_phoenix_ragas.py`, Faithfulness, Answer Relevancy, Context Precision/Recall |
 | 8 | **Information Retrieval Metrics** | `verify_retrieval_metrics.py`, `tests/test_retrieval_metrics.py`, Precision@k, Recall@k, MRR, nDCG@k |
+| 8 | Live and batch RAGAS/judge evaluation | `services/evaluation.py`, `evaluation/live.py`, `evaluation/run.py`, `evaluation/ragas_metrics.py` |
+| 9 | Feedback submission, retry protection and reviewer access | `models/feedback.py`, `services/feedback.py`, `database/feedback.py`, `api/auth.py`, `api/feedback.py`, `ui/app.py` |
+| 10 | Datadog tracing and operational checks | `core/telemetry.py`, `core/observability.py`, `api/operations.py`, `compose.datadog.yaml` |
 
 Sessions 1 and 2 also have standalone teaching notebooks under `notebooks/` (`phase1_session1_ingestion.ipynb`, `phase1_session2_chunking.ipynb`). These two notebooks do not import `app/`; they repeat the stages cell by cell. The separate `direct_ingestion_with_metadata.ipynb` notebook calls the application service.
 
@@ -46,7 +85,7 @@ flowchart LR
     G --> Q
     G --> L
     L --> M[Chunk collection\ntext, embedding, metadata]
-    K --> P[Parent collection\nwhole sections]
+    L --> P[Parent collection\nwhole sections, after changed chunks succeed]
     L --> N[IngestResponse\nIDs, embedded and unchanged counts]
     N --> R[delete_stale_chunks\nretire leftovers]
 ```
@@ -58,14 +97,15 @@ In ordinary language: the service reads the document register, turns each listed
 | Location | Responsibility | Simple explanation |
 | --- | --- | --- |
 | `app/core/` | Shared runtime setup | Loads settings, configures structured logs, and optionally enables monitoring. |
-| `app/models/` | Data contracts | Defines ingestion, retrieval, citation, and answer schemas. |
+| `app/models/` | Data contracts | Defines ingestion, retrieval, citation, answer, evaluation and feedback schemas. |
 | `app/chains/` | Pure LangChain processing | Parsing, chunking, embeddings, ingestion, retrieval, context assembly, and generation. It has no web/UI imports. |
-| `app/database/` | MongoDB-only setup | Connects to the chunk and parent collections, removes stale chunks, and describes the required Atlas index. |
-| `app/services/` | Application orchestration | Wires ingestion, retrieval, and answer chains; records retrieval counters and completion logs. |
-| `app/api/`, `app/main.py` | HTTP serving | Thin routes for retrieval, answers, feedback submission/listing/review, liveness, retrieval counters and latency percentiles; startup logging and optional Datadog setup. |
+| `app/database/` | MongoDB adapters | Chunk/parent stores, hybrid and linked-circular lookup, feedback persistence and index definitions. |
+| `app/services/` | Application orchestration | Wires ingestion, retrieval, answer, live evaluation and feedback flows; records completion logs and retrieval counters. |
+| `app/api/`, `app/main.py` | HTTP serving | Nine operations for retrieval, answers/evaluation, feedback and diagnostics; bearer-token dependency for feedback listing/review. |
 | `app/evaluation/` | Diagnosis and quality checks | Failure demonstrations, local reranker checks, RAGAS/judge runner, compact local stage traces, and scored result artifacts. |
 | `evaluation/datasets/` | Golden expectations | Ten retrieval and ten answer cases reused by the retrieval, reranker, generation, and judge workflows. Source references resolve to actual indexed text before evaluation. |
-| `app/ui/`, `app/streamlit_app.py` | Thin UI | Dated answers/evidence and feedback submission/review cover five API operations. `/health`, `/metrics`, and `/metrics/latency` have no existing UI controls. No chain definitions or direct MongoDB access. |
+| `app/ui/`, `app/streamlit_app.py` | Thin UI | Chat, evaluated/plain answers, evidence and feedback/review cover six of nine API operations. Operational endpoints have no UI controls. No chain definitions or direct MongoDB access. |
+| `app/compose.datadog.yaml` | Local Agent | Docker Agent publishes host-loopback trace TCP 18126 and DogStatsD UDP 18125 for the Mac applications. |
 | `app/**/__init__.py` | Python package markers | Empty files that let Python import these directories as packages. |
 
 ## Starting the ingestion job
@@ -79,8 +119,8 @@ uv run --env-file .env python -m app.services.ingestion nexa_synthetic_data/docu
 `main()` accepts the document register path. Its normal mode ingests that register; `--retire-doc DOC_ID` explicitly deletes a withdrawn document from the current corpus in both MongoDB stores and refuses a document still authoritative in the register. It then performs these steps:
 
 1. `get_settings()` loads settings from `.env`.
-2. `configure_logging()` makes logs JSON-shaped for a log platform such as Datadog.
-3. `init_telemetry()` enables Datadog instrumentation only when `DD_TRACE_ENABLED=true`.
+2. `init_telemetry()` enables Datadog instrumentation only when `DD_TRACE_ENABLED=true`.
+3. `configure_logging()` makes logs JSON-shaped for a log platform such as Datadog.
 4. `requests_from_register()` makes one `IngestRequest` for each authoritative document.
 5. `asyncio.run(ingest(...))` runs the asynchronous ingestion workflow.
 
@@ -122,9 +162,9 @@ sequenceDiagram
     C->>C: add header, metadata, parent_id, checksum
     C->>M: read stored checksums (aget_by_ids)
     M-->>C: checksums of existing chunks
-    C->>PS: delete this document's sections, insert the new ones
     C->>O: create embeddings for changed chunks only
     O-->>M: vector_store.aadd_documents(...)
+    C->>PS: upsert current parents, then delete only obsolete sections
     C-->>S: IngestResponse
     S->>M: delete_stale_chunks(doc_id, keep_ids)
     S->>S: write document_ingested JSON log
@@ -156,6 +196,7 @@ Important groups of fields:
 - Chunking: `chunk_max_characters` is the size above which a clause is split, and `chunk_overlap_characters` is how much text is repeated between the pieces.
 - Metadata: `institution`, `jurisdiction`, and `confidentiality_level` are stamped onto every chunk.
 - Operations: `log_level` and `dd_trace_enabled` control logging and tracing.
+- Feedback: `mongodb_feedback_collection` selects storage; the secret `feedback_reviewer_token` enables privileged listing/review.
 
 The environment variables behind those fields (see `.env.example`):
 
@@ -164,10 +205,15 @@ The environment variables behind those fields (see `.env.example`):
 | `MONGODB_URI`, `MONGODB_DB`, `MONGODB_COLLECTION` | none (required) | Where chunks are written |
 | `VECTOR_INDEX_NAME` | `policy_chunks_v1` | The Atlas Vector Search index, created by hand |
 | `MONGODB_PARENT_COLLECTION` | `policy_sections` | Where whole sections are written |
+| `MONGODB_FEEDBACK_COLLECTION` | `policy_feedback` | Feedback and reviewer decisions |
+| `FEEDBACK_REVIEWER_TOKEN` | unset | Secret of at least 32 characters; listing/review are disabled until configured |
 | `OPENAI_API_KEY` | none (required) | Embedding and answer-generation calls |
 | `EMBEDDING_MODEL`, `EMBEDDING_DIMENSIONS`, `EMBEDDING_BATCH_SIZE` | `text-embedding-3-small`, `1536`, `100` | Which vectors are made and how many texts go in one request |
 | `CHAT_MODEL` | `gpt-6-luna` | Configured answer-generation model |
 | `EVAL_JUDGE_MODEL` | unset; falls back to `CHAT_MODEL` | Judge and RAGAS model for batch and live evaluation |
+| `RETRIEVAL_MODE`, `TEXT_INDEX_NAME` | `dense`, `policy_text_v1` | Optional Atlas hybrid search |
+| `RETRIEVAL_CANDIDATES`, `RERANK_ENABLED` | `20`, `false` | Reranker candidate pool and enable flag |
+| `CONTEXT_MAX_TOKENS`, `TOKEN_ENCODING` | `6000`, `o200k_base` | Budget for the serialized evidence payload |
 | `CHUNK_MAX_CHARACTERS` | `1200` | Size above which a clause is split |
 | `CHUNK_OVERLAP_CHARACTERS` | `150` | Text repeated between the pieces of a split clause |
 | `INSTITUTION`, `JURISDICTION`, `CONFIDENTIALITY_LEVEL` | none (required) | Corpus-wide metadata the register does not carry |
@@ -176,6 +222,11 @@ The environment variables behind those fields (see `.env.example`):
 **Function: `get_settings()`**
 
 Creates and returns the `Settings` object. `@lru_cache` means repeated calls in the same process reuse the same validated settings object instead of re-reading `.env`.
+
+`UISettings` is deliberately smaller: `API_BASE_URL` defaults to
+`http://127.0.0.1:8000`, and `UI_TIMEZONE` to `Asia/Kolkata`. The UI does not need
+MongoDB or model credentials. Defaults above describe the Python settings;
+`.env.example` explicitly selects `gpt-6-sol` as the judge.
 
 ### `app/core/logging.py` — machine-readable logs
 
@@ -191,13 +242,39 @@ Does nothing unless telemetry is enabled. When enabled, it calls `ddtrace.patch_
 
 The local configuration enables APM, LLM Observability, correlated JSON logs and runtime metrics for a local Agent on `datadoghq.com`. Log collection additionally requires the Agent's file-source configuration. `tests/test_telemetry.py` verifies a request span and trace IDs in logs without exporting data. Collector installation, credentials and actual Datadog delivery are separate from passing this test. See [Datadog setup and usage](DATADOG_README.md) for exact start commands and Agent paths.
 
-The 19 October 2026 live check separately verified the local Agent's key, receivers
-and log forwarding. `app/evaluation/run.py` now creates a workflow for each
-evaluated answer and exports its existing judge/RAGAS scores using that span's
-IDs. The user confirmed the trace and span-level scores are visible in Datadog. Seven selected golden cases have now run, including two incorrect abstentions; the six-case follow-up submitted 38 evaluations.
-This adds no second scoring pipeline and does not automatically evaluate ordinary
-UI requests without golden references. See the Datadog guide for the measured
-case and evaluation-run command.
+`core/observability.py` also provides `prompt_annotation_context()`. The shared
+answer chain uses it for each generation attempt, and the batch evaluator uses it
+for its judge. It derives the tracked template from the existing LangChain prompt
+and records a stable ID, explicit version and per-call variables on the OpenAI LLM
+span. Prompt text and version constants live together in `chains/prompts/answer.py`
+and `chains/prompts/judge.py`; increment the version when changing its template.
+The telemetry regression test captures SDK events from the real OpenAI Responses
+client with a mocked HTTP transport, including concurrent questions and context
+cleanup after failure. It does not send data to Datadog or a model provider.
+
+The local setup now uses the Docker Agent from `app/compose.datadog.yaml`.
+The Mac API/UI send traces to `http://127.0.0.1:18126` and runtime metrics to
+`udp://127.0.0.1:18125`. Start Docker Desktop and the Agent before launching
+the traced applications; load `.env` into the process before `ddtrace-run`.
+`DD_*` flags are read by the Datadog SDK, not exported by
+constructing `Settings`.
+
+`services/evaluation.py` uses `policy_answer_live_evaluation`; ordinary answers
+use `policy_answer`. Scored metrics are submitted as `ragas_*` evaluations on
+the exported workflow span. Feedback targets that answer's exported span under
+the API service. Streamlit does not display metric cards. Its RAGAS toggle is
+on for new Answer-mode questions by default; a reference is needed for context
+precision/recall, while faithfulness/relevancy can run without one.
+
+Both workflows explicitly use `agent_service=settings.dd_service`. This keeps
+API answers in the `nexaassist-api` LLM application when the traced Streamlit
+client propagates `nexaassist-ui`, while preserving the distributed APM trace.
+`tests/test_telemetry.py` covers this incoming-client context for both services.
+
+Earlier cloud trace/score visibility was confirmed by the user. The 21 October
+checks observed a healthy Docker Agent and SDK `queued` status; they did not
+recheck authenticated cloud receipt. A non-LLM prompt-template warning remains
+recorded. See [DATADOG_README.md](DATADOG_README.md) for investigation steps.
 
 ### `app/models/ingestion.py` — the input and output contracts
 
@@ -317,7 +394,13 @@ Deletes the chunks of one document whose IDs were not produced by the latest ing
 
 ### `app/database/indexes.md` — required database index
 
-This file is an operations instruction, not executable Python. It contains the exact Atlas Vector Search index JSON to create manually. Its vector dimension must equal `EMBEDDING_DIMENSIONS`. It also makes selected metadata filterable: product, jurisdiction, effective date, and confidentiality level.
+This file is an operations instruction, not executable Python. It contains the
+manual vector/text index definitions. Vector dimensions must equal
+`EMBEDDING_DIMENSIONS`; filters include institution, product, jurisdiction,
+confidentiality and both sides of the effective-date window. The 21 October
+update added the institution mapping to the configured vector index and observed
+READY/queryable status. Adding a mapping does not require re-embedding if its
+source metadata already exists.
 
 It also records that the parent collection needs no search index, and suggests a regular index on `doc_id` for stale-chunk removal at scale.
 
@@ -347,7 +430,7 @@ The thin command-line adapter described earlier. It does startup setup and start
 | --- | --- | --- |
 | `pydantic` / `pydantic-settings` | config and models | Validates configuration and request/response data. |
 | `langchain-core` | ingestion chain | Supplies `Document`, `Runnable`, and vector-store interfaces. |
-| `langchain-openai` | embeddings | Calls OpenAI to make semantic vectors. |
+| `langchain-openai` | embeddings and chat | Configured embedding, answer and judge model clients. |
 | `langchain-mongodb` | database | Provides the official LangChain MongoDB Atlas Vector Search adapter and the `MongoDBDocStore` used for parent sections. |
 | `pymongo` | database | Creates the low-level MongoDB collection connection. |
 | `pdfplumber` | PDF parser | Reads PDF text layout and detects tables. |
@@ -355,11 +438,14 @@ The thin command-line adapter described earlier. It does startup setup and start
 | `langchain-text-splitters` | chunker | Splits the narrative of an oversized clause at sentence boundaries, with overlap. |
 | `structlog` | service/logging | Produces structured JSON events. |
 | `ddtrace` | telemetry | Sends supported library traces to Datadog when enabled. |
-| `pytest`, `mongomock` | tests only | Verify ingestion behavior without OpenAI or MongoDB; `mongomock` stands in for a collection in the stale-chunk test. |
+| `fastapi`, `uvicorn`, `httpx` | serving and UI requests | Typed HTTP routes, the API server and the cached UI HTTP client. |
+| `streamlit` | UI extra | Chat, scoped requests, references and reviewer controls. |
+| `ragas` | evaluation | Quality metrics; a structured judge is defined in the application and scored results can be submitted to Datadog. |
+| `pytest`, `mongomock` | tests only | Controlled chain/API/UI regressions and MongoDB-like storage for ingestion, retrieval and feedback checks. |
 
 ## Metadata stored on every chunk
 
-`enrich()` builds each LangChain `Document` with the original text/table plus metadata. The retrieval chain uses these fields to search within a product, jurisdiction, effective-date window, and confidentiality level.
+`enrich()` builds each LangChain `Document` with the original text/table plus metadata. Retrieval uses these fields for institution, product, jurisdiction, effective-date and confidentiality scope.
 
 | Metadata | Source | Meaning |
 | --- | --- | --- |
@@ -410,6 +496,12 @@ A parent record in the parent collection has `_id` and `parent_id` (`POL-HL-V3_s
 
 The suite now includes ingestion, retrieval/API, hybrid-filter, local reranker protocol, answer/context, evaluation, feedback and Streamlit interaction tests. `tests/test_ingestion.py` uses LangChain's in-memory vector store, an in-memory parent store and deterministic fake embeddings. These tests validate parsing, chunking, metadata, IDs and checksums without contacting OpenAI or MongoDB. `delete_stale_chunks` is tested against a mock MongoDB collection (`mongomock`). Retrieval tests inspect filter construction and mock search results; they do not exercise Atlas ranking. Dedicated answer tests now cover valid/invalid quotes, unsupported IDs, empty evidence, context budgeting, API validation and safe failures.
 
+New regressions cover scoped parent fallback, complete/chained circulars,
+inconsistent amendment metadata, one citation-repair attempt and its exhaustion,
+safe clarification text, reviewer authorization, concurrent feedback retries,
+and immediate reference/correction submission. The latest saved totals are 121
+application cases plus 22 mock API cases; they are separate suites.
+
 They confirm that:
 
 - The register becomes the expected ingestion requests.
@@ -429,24 +521,98 @@ They confirm that:
 Run them, and the lint and type checks, with:
 
 ```bash
-uv run pytest -q
-uv run ruff check app tests
-uv run mypy app tests
+RAGAS_DO_NOT_TRACK=true \
+uv run --locked --no-sync pytest -q tests/
+uv run --locked --no-sync ruff check app tests
+uv run --locked --no-sync ruff format --check app tests
+uv run --locked --no-sync mypy app
 ```
 
 Verification uses the Python 3.14.8 environment with UI/evaluation extras installed. Tests use controlled scores and local stores; they do not claim improved retrieval quality. The earlier GGUF compatibility failure is recorded in `app/evaluation/results/reranker_check.json`. The official Qwen Safetensors weights were subsequently imported into Ollama as `nexaassist-reranker:0.6b-mlx`; Ollama confirms `runner=mlx`, and the model returns meaningful responses. Exact scoring still fails because a required lowercase token is missing from the top-20 alternatives, and larger requests return HTTP 400. The model details, fictional inputs and returned probabilities are in `app/evaluation/results/reranker_mlx_check.json`. At that review checkpoint, a live Atlas/OpenAI evaluation had been rejected by automatic approval review. Subsequent live evaluation and Datadog verification are documented in the telemetry section; the 20 October validation below records the local Docker build status.
 
-What they do not prove: real embedding quality, Atlas index behavior, live writes, or generated-answer correctness. Saved Atlas observations from 15 October provide separate historical evidence; see the syllabus mapping below.
+Controlled tests do not prove live Atlas behavior or generated-answer correctness.
+The 21 October live/browser checks are separate evidence, linked at the start of
+this guide. Full-dataset quality, cloud deployment and sustained load remain open.
 
 ## Retrieval and answer components
 
-The read path is `api/retrieval.py` → `services/retrieval.py` → `build_retrieval_chain()` in `chains/retrieval.py`. The service wires the same embedding configuration and MongoDB stores used by ingestion. The chain applies effective-window, jurisdiction, confidentiality, and optional product filters before dense vector ranking, fetches parent sections, and returns child citations plus timings. A missing parent falls back to child text and emits a warning. Dense mode preserves the baseline. Hybrid mode uses `database/retrieval.py` and the official Atlas hybrid retriever for BM25/vector RRF. Optional local Qwen reranking through native Ollama runs before top-k truncation and parent expansion. Both branches share the same metadata filter. Parent IDs are deduplicated before the database read.
+The read path is `api/retrieval.py` → `services/retrieval.py` →
+`build_retrieval_chain()` in `chains/retrieval.py`. It shares ingestion's embedding
+configuration and stores. Dense and hybrid searches enforce institution,
+inclusive effective dates, jurisdiction, confidentiality and optional product
+scope. Optional reranking runs before top-k truncation and parent expansion.
+Parent IDs are fetched once each. A parent must match the scoped child's source
+identity, product and validity metadata; a missing/mismatched parent logs a
+warning and falls back to the child.
+
+`database/retrieval.py` also supplies `build_amendment_search()`. It discovers
+effective circulars linked to retrieved document IDs through `supersedes`,
+follows new circular IDs with a visited set, and reads every stored part of each
+discovered instrument under its institution/document/version identity. Mixed
+dates, products or other source metadata raise an error rather than returning a
+partial instrument. This checks indexed parts; it cannot prove that ingestion
+did not omit an entire section.
+
+`RetrieveResponse.results` remains limited by `top_k`. Complete circulars are
+separate `amendments`, with a null clause and score 0, which is not a similarity
+score. The `evidence` property places amendments first and removes redundant
+partial hits for their document/version. `parent_ms` includes parent expansion
+and amendment lookup; `total_ms` covers the whole retrieval.
 
 `chains/prompts/rerank.py` contains one prompt for the selected Qwen3-Reranker model. The adapter calls `rerank_prompt()` once per query/passage pair and sorts normalized likelihoods of the exact lowercase `yes` and `no` tokens. The former listwise chat prompt is unused and has been removed. The Qwen prompt retains the as-of date, applicability/amendment instructions, and treatment of the question and passage as untrusted data. Pairwise scoring does not itself resolve conflicts across policies; filtering, context assembly and cited answer generation remain responsible for those checks.
 
-The answer path is `api/answer.py` → `services/answer.py` → `build_answer_chain()` in `chains/answer.py`. It calls the existing retrieval service, deduplicates repeated parent sections within each document/version, and uses `ANSWER_PROMPT | llm.with_structured_output(...)`. `chains/llm.py` reads `CHAT_MODEL` from settings. Empty evidence skips generation. Unknown citation IDs, mismatched markers, or quotes absent from the context produce `insufficient_evidence`. Exact quote matching does not establish that the answer follows from the quote. `chains/context.py` packs complete parent passages into `CONTEXT_MAX_TOKENS`, falls back to a complete child if necessary, and puts the two best-ranked selected passages at opposite edges. It never cuts a table or sentence to fit. This budget covers serialized evidence, not the full model window. Batch and live evaluation use `EVAL_JUDGE_MODEL`, falling back to the generator when unset or blank. Reports record the actual judge model and its limitations.
+The answer path is `api/answer.py` → `services/answer.py` →
+`build_answer_chain()` in `chains/answer.py`, using
+`ANSWER_PROMPT | llm.with_structured_output(...)`. `chains/llm.py` supplies the
+configured model. `chains/context.py` packs complete passages into the evidence
+token budget and may fall back to a complete child, without cutting sentences
+or tables. Empty evidence or an unfittable complete amendment skips generation.
 
-`api/operations.py` exposes a static liveness response and process-local retrieval counters. It does not test database/provider readiness. `/metrics/latency` separately reports nearest-rank p50/p95/p99 over the last 1000 successful requests in the process; these are not fleet-wide histograms. Named LCEL runnables support optional LangSmith tracing, and startup calls optional Datadog instrumentation. Neither a reviewed trace nor working Datadog spans is demonstrated by the offline tests.
+The response status is `answered`, `needs_clarification`, or
+`insufficient_evidence`. Clarifications use a fixed scope question rather than
+forwarding model-written policy claims. Model intent classification can still
+miss a date conflict; abstentions therefore include product/date recovery guidance.
+An answered draft needs valid marker IDs and exact supporting quotes. A failed
+citation check permits one repair draft using the same evidence; two invalid
+drafts abstain. `generation_ms` includes both attempts. Quote membership does
+not prove semantic entailment. The model interprets sanction-date/opt-in terms
+from the sources; no fee values are hardcoded.
+
+### Live evaluation and feedback
+
+| Component | Responsibility |
+|---|---|
+| `api/answer.py`, `models/evaluation.py` | `/answer/evaluated` accepts the policy request plus an optional reference and returns the answer with metric statuses/export metadata. |
+| `services/evaluation.py` | Retrieves once, replays that evidence into the answer chain, then scores only the final response. A supplied reference wins; an exactly matching golden question/date/product/jurisdiction can provide one automatically. |
+| `evaluation/live.py` | Runs applicable metrics independently, with per-metric timeouts. Missing references, abstention or scoring failures remain explicit; unavailable values are not published as numeric scores. Context metrics can be scored on an abstention and do not establish an answered question. |
+| `evaluation/run.py`, `evaluation/ragas_metrics.py` | Batch golden-case judging/RAGAS and shared scoring adapters. `EVAL_JUDGE_MODEL` falls back to `CHAT_MODEL`; reports identify the judge. |
+| `models/feedback.py`, `services/feedback.py` | Validate the question/answer dates and carry `helpful`, correction, submitter/submission UUIDs, exported span ID and review state. Save before optional Datadog feedback. |
+| `database/feedback.py` | Atomic `$setOnInsert` persistence and pending-only review updates. The feedback ID is derived from institution plus both UUIDs. Identical retries return the saved record, even after review; changed payloads conflict. |
+| `api/auth.py`, `api/feedback.py` | Require the shared reviewer bearer token for `GET /feedback` and `POST /feedback/{feedback_id}/review`. Missing configuration returns 503; missing/wrong credentials return 401. Submission remains available without login. |
+| `ui/app.py` | Renders chat, references, evidence and feedback through HTTP. Six of nine operations have controls; RAGAS cards are hidden and the Datadog link remains. Reviewer credentials are sent per request, not stored on the shared cached HTTP client. |
+
+API retry protection requires **both** `submitter_id` and `submission_id` to
+remain stable. Omitting either generates a new UUID for that request. Datadog
+feedback targets the exported answer span with boolean `thumbs`, assessment and
+optional correction reasoning. A retry does not repeat that SDK attempt, but
+there is no durable delivery queue or cloud receipt guarantee.
+
+The evaluated API response and batch JSON reports retain metric values and
+statuses for inspection. Strict API clients must accept `amendments` in retrieval
+responses and `needs_clarification` in answer status enums.
+
+Set `FEEDBACK_REVIEWER_TOKEN` to a random secret of at least 32 characters in
+the private environment, restart FastAPI, and enter it in **Review feedback**.
+Changing the token clears cached feedback in that UI session. This is a shared
+local reviewer capability, not an individual login/role system.
+
+Chat history stays in the current Streamlit session and is not model context:
+each new question is independent. A supplied reference applies to one question
+and is cleared after submission. Reopening a chat reuses its stored response
+rather than regenerating or rescoring it. The NexaFlex foreclosure reference
+retains **plus GST**; its clause does not specify a tax percentage.
+
+`api/operations.py` exposes a static liveness response and process-local retrieval counters. It does not test database/provider readiness. `/metrics/latency` separately reports nearest-rank p50/p95/p99 over the last 1000 successful requests in the process; these are not fleet-wide histograms. LCEL runnables retain their names for chain inspection, and startup calls optional Datadog instrumentation. Neither a reviewed trace nor working Datadog spans is demonstrated by the offline tests.
 
 ## Alignment with the training syllabus
 
@@ -454,22 +620,29 @@ Reference: `1. Phase1_Enterprise_RAG_Agentic-AI_MCP_Evaluations_Full_Syllabus-.p
 
 | Phase 1 session | Implementation evidence | Remaining syllabus work |
 | --- | --- | --- |
-| 1 — Architecture and ingestion | Separate ingestion/retrieval services; register-driven parsing; typed ingestion contract; Session 1 notebook; thin Streamlit client. | Validate the full live UI → API → Atlas path in the target environment. |
+| 1 — Architecture and ingestion | Separate services, register-driven ingestion, typed contracts and a thin Streamlit client. Selected UI → API → Atlas/model flows ran live on 21 October. | Repeat environment-specific checks after configuration or source changes; the small sample is not capacity evidence. |
 | 2 — Hybrid chunking, parents, scaling | Clause-first plus recursive size splitting, overlap, whole tables, identity headers, parent sections, checksum comparison; scaling discussion in the Session 2 notebook. | No distributed ingestion or sharding. These are design discussions, not a requirement to build a 100K-document system now. “Hybrid chunking” does not satisfy Session 6 hybrid retrieval. |
 | 3 — Embeddings and vector indexing | Shared OpenAI configuration, batch size 100, explicit Atlas adapter, manual vector/text index JSON; checksum now includes embedding dimensions and has a regression test. | Re-ingest to migrate old checksum metadata; use a new index/collection for an embedding migration. Titan remains a teaching comparison; do not silently change the configured model. |
-| 4 — Retrieval API and deployment | Existing `/retrieve` contract preserved; `app/Dockerfile` provides the API image with Datadog bootstrap. | Local Docker validation is recorded below; cloud deployment and service discovery remain unverified. |
+| 4 — Retrieval API and deployment | `/retrieve` retains its request shape and adds supplemental `amendments`; the API image includes evaluation dependencies and Datadog bootstrap. | Strict response clients must accept the new field; cloud deployment and service discovery remain unverified. |
 | 5 — Failure modes and Week 1 review | Thirteen live/snapshot diagnostic examples, offline demonstrations, source freshness and embedding-compatibility checks, liveness and counters. | No alert configuration, scheduled re-indexing, or statistical drift monitor. A trainee review/walkthrough is not recorded. |
 | 6 — Hybrid retrieval and reranking | Atlas BM25/vector RRF, configurable candidate pool, local Qwen3 score adapter using native Ollama by default, with optional OpenAI-compatible mode; protocol and filter tests. | Create the text index manually and demonstrate improved evidence coverage. Ollama 0.40.6 failed the local score test; keep reranking disabled until a compatible local runtime passes it. |
-| 7 — Context assembly and model selection | Deduplication, whole-passage token budget, edge ordering, configurable generator, structured output, quotes, abstention, answer-chain/API tests. | A real HTTP 200 cited answer was verified on 20 October. A representative reranker/generator quality and latency comparison remains open. |
-| 8 — RAGAS and LLM-as-Judge | `app/evaluation/run.py` uses modern RAGAS metrics, a versioned structured judge, actual indexed reference text, generation evidence replay, optional explicit quality gate, and failed-run reporting. | All four live RAGAS scores were verified in Streamlit and Datadog on 20 October. One question does not validate the full golden dataset. Offline fixture scores are not a model-quality measurement. |
-| 9 — Golden dataset and human feedback | 97 source QAs; two ten-case teaching subsets; MongoDB-backed pending/accepted/rejected feedback with reviewer notes; UI submission/review; scope and conflict tests. | Instructor reviews accepted corrections and explicitly promotes suitable ones into golden cases with checked source references. Some source QAs require later APIs/agents. |
-| 10 — Dev-time observability and wrap-up | Named stages, local compact trace collection in evaluation artifacts, optional LangSmith, token-usage logs, Datadog hook, process-local latency percentiles. | Real HTTP 200 and LLM traces plus four live RAGAS scores were confirmed in Datadog on 20 October. Representative latency/cost and the trainee walkthrough remain open. |
+| 7 — Context assembly and model selection | Whole-passage context budget, complete amendments, structured generation, quote checks, one repair draft, clarification and abstention. Selected live fee/sanction/opt-in cases passed. | Semantic correctness, intent classification and a representative reranker/generator comparison remain quality work. |
+| 8 — RAGAS and LLM-as-Judge | Shared live/batch adapters, indexed references, exact generation evidence, structured judge, explicit optional quality gate and metric failure reporting. Latest fee sample scored all four metrics and queued them for Datadog. | Scores stay in Datadog; Streamlit has a link. Cloud receipt was not rechecked on 21 October, and the full dataset is not certified. |
+| 9 — Golden dataset and human feedback | 97 source QAs, two ten-case subsets, MongoDB review states, retry-safe submissions, reviewer-token access and optional Datadog feedback. | Instructor-approved promotion to golden data remains manual; some source QAs require future APIs/agents. |
+| 10 — Dev-time observability and wrap-up | Named stages, local trace artifacts, JSON token logs, Docker Datadog Agent and process-local latency percentiles. | Earlier cloud visibility is recorded separately; representative latency/cost, cloud receipt, alerts and the trainee walkthrough remain open. |
 
 ### Existing Atlas evidence
 
 `app/evaluation/datasets/session5_atlas_parent_observation.json`, captured on 15 October 2026, records 177 chunks from eight documents, 80 parent sections, a ready/queryable index, matching vector dimensions/model metadata, and passing source/parent integrity diagnostics. Its ten-case top-5 cohort has seven complete expected-evidence sets, including expanded parent context. This measures evidence availability, not RAGAS scores or answer correctness.
 
-The generic current-fee question misses the required circular at top 5. At top 20, expanded parent context supplies applicability clause 5.1 even though it is absent as a direct child citation. This is a concrete Session 6 baseline: compare dense retrieval, hybrid retrieval, and reranking on the same dated cases. See the [saved parent-aware observation](app/evaluation/datasets/session5_atlas_parent_observation.json) and [Session 5 runner](app/evaluation/rag_failure_examples.py) for the measured examples.
+In that saved baseline, the generic fee question missed the circular at top 5;
+top-20 parent context supplied its applicability clause. The current API adds
+complete linked circulars separately, so that historical rank miss is not the
+current answer context. The 21 October five- and twenty-source answers used the
+revised fee and sanction cutoff. Keep the raw-rank baseline for dense/hybrid/
+reranker comparisons; do not mistake it for a fresh service failure. See the
+[saved observation](app/evaluation/datasets/session5_atlas_parent_observation.json)
+and [Session 5 runner](app/evaluation/rag_failure_examples.py).
 
 ### Alignment with AGENTS/CLAUDE
 
@@ -477,18 +650,18 @@ The implementation preserves the main boundaries: pure LangChain chains, MongoDB
 
 - The six layers/build phases in AGENTS/CLAUDE are implementation order. They are not the PDF's four training phases. Syllabus Phase 1 spans foundation, FastAPI, a UI, and evaluation/observability; LangGraph belongs to syllabus Phase 2 and FastMCP to Phase 3. Evaluation begins in Phase 1, alongside development.
 - The Streamlit layer is now implemented after backend checks and only calls FastAPI. Its settings require the API URL and timezone, not backend credentials.
-- The syllabus lists alternative vector databases as comparisons. The local implementation must continue using MongoDB Atlas. Arize is a later Phase 4 requirement; LangSmith supports Phase 1 development and Datadog remains the operational telemetry target.
+- The syllabus lists alternative vector databases as comparisons. The local implementation must continue using MongoDB Atlas. Arize is a later Phase 4 requirement; Datadog is the current operational and LLM telemetry target, with local RAGAS/judge evaluation.
 - The project diagram places evaluations under `app/evaluation/`, while the golden-dataset rule and existing teaching JSONL files use root `evaluation/datasets/`. Keep these roles explicit; there is no `evaluation.run` module behind the example command in AGENTS/CLAUDE.
 - Streaming responses are requested by the project rules but are not implemented. They are not an explicit Phase 1 exit criterion. The current answer endpoint returns one JSON response.
 - `pyproject.toml`, `uv.lock`, and the compatibility `requirements.txt` target Python 3.14+. The `ui` and `evaluation` extras are optional; the API image includes `evaluation` for `/answer/evaluated`. The `.planning/` status files describe an older 11 October milestone; this guide describes the current implementation.
 
 ### Order of remaining work
 
-1. Re-ingest after reviewing the checksum migration: adding embedding dimensions changes fingerprints, so the next run re-embeds existing chunks once. For a withdrawn document use the explicit `--retire-doc` command; ordinary partial ingestion never deletes other documents.
+1. Check source/index metadata before deciding whether to re-ingest. A new embedding configuration or checksum migration may require it; the latest institution-filter mapping update did not rewrite source documents or embeddings. For a withdrawn document use explicit `--retire-doc`; ordinary partial ingestion does not retire other documents.
 2. Create the Atlas text index from `database/indexes.md`, select hybrid mode, and establish a compatible local reranker using `app.evaluation.check_reranker`. Do not enable a runtime that fails its score check.
 3. Run the approved evaluation against the configured Atlas and OpenAI services, compare dense/hybrid/reranked evidence on the existing golden cases, and review the generated traces and metric artifacts. Quality targets must be chosen explicitly; none is assumed.
-4. Run the thin UI against the API, verify feedback persistence/review, and promote reviewed corrections into golden data through an instructor-reviewed change.
-5. Build/run the container in a Docker-capable environment, verify telemetry delivery, inspect latency/cost, and deliver the trainee walkthrough.
+4. Extend the completed local browser/feedback checks to representative users and deployment conditions. Promote corrections only through an instructor-reviewed golden-data change.
+5. Build a fresh release image for the target environment, verify cloud telemetry receipt and operational controls, inspect latency/cost, and deliver the trainee walkthrough. The local API-image and Docker Agent checks do not establish a cloud deployment.
 
 Phase 1 exits only after ingestion with parent retrieval, hybrid retrieval plus working reranking, RAGAS and judge runs, a reviewed trace, and a delivered walkthrough are evidenced. The UI implementation gap is closed; the remaining integration and human checkpoints are still open.
 
@@ -498,7 +671,7 @@ Phase 1 exits only after ingestion with parent retrieval, hybrid retrieval plus 
 | --- | --- | --- |
 | 2 — Agentic RAG | LangGraph Orchestrator, Retriever, Validator and Action agents; Retriever calls unchanged `/retrieve` through HTTP; persistent state, guardrails, HITL, integration tests. | Not implemented. Synthetic customers, uploads and mock API data are supporting fixtures, not working agents. |
 | 3 — MCP | Thin retrieval/validation/action MCP wrappers, discovery by agents, resources/prompts, Inspector and contract tests, second-client demonstration. | Not implemented. Preserve the existing REST services when adding wrappers. |
-| 4 — Production | Docker/ECS Fargate, secrets/discovery, Datadog and Arize, sampled online evaluation, reviewer queue/UI, cost controls, CI/CD quality gates and SLO runbooks. | Not implemented. Local telemetry hooks do not constitute a production deployment. |
+| 4 — Production | Docker/ECS Fargate, secrets/discovery, Datadog and Arize, sampled online evaluation, reviewer queue/UI, cost controls, CI/CD quality gates and SLO runbooks. | Local foundations exist: API image, Agent setup, live evaluation, feedback/review and pre-commit checks. Cloud infrastructure, individual identity/roles, Arize, production CI/CD and SLOs remain future work. |
 
 ## Boundaries to preserve as the project grows
 
@@ -526,7 +699,7 @@ flowchart LR
     system -->|"Read and write policy evidence and feedback"| atlas["MongoDB Atlas"]
     system -->|"Embed text, generate answers and evaluate"| openai["OpenAI"]
     system -.->|"Optional local reranking; disabled"| ollama["Ollama with Qwen3-Reranker-0.6B MLX"]
-    system -.->|"Optional operational and LLM traces"| telemetry["Datadog and LangSmith"]
+    system -.->|"Optional operational and LLM traces"| telemetry["Datadog"]
 ```
 
 ### Containers
@@ -544,8 +717,12 @@ flowchart LR
     api -->|"Embed questions and generate cited answers"| openai
     api -.->|"Optional local HTTP scoring; disabled"| ollama["Ollama MLX process"]
     evaluation["Evaluation CLI"] -->|"Read golden references and retrieve"| atlas
-    evaluation -->|"Generate once, judge and run RAGAS"| openai
+    evaluation -->|"Generate with bounded citation repair, judge and score"| openai
     evaluation -.->|"Optional local reranking; disabled"| ollama
+    api -.->|"APM/LLM traces and evaluations"| agent["Docker Datadog Agent: 18126 TCP, 18125 UDP"]
+    ui -.->|"UI traces and runtime metrics"| agent
+    evaluation -.->|"Evaluation telemetry"| agent
+    agent -.->|"HTTPS intake"| datadog["Datadog"]
 ```
 
 ### API components
@@ -555,22 +732,30 @@ flowchart LR
     routes["HTTP routers: validation and errors"] -->|"Invoke"| retrieval["Retrieval service"]
     routes -->|"Invoke"| answer["Answer service"]
     routes -->|"Invoke"| feedback["Feedback service"]
+    routes -->|"Evaluated answers"| scoring["Live evaluation service"]
+    routes -->|"List/review only"| auth["Reviewer bearer dependency"]
     answer -->|"Reuse"| retrieval
-    retrieval -->|"Run"| search["Policy retrieval chain: filtering, ranking, parent expansion"]
-    search -->|"Query through adapters"| stores["Atlas vector, hybrid and parent adapters"]
+    retrieval -->|"Run"| search["Retrieval chain: institution/date/product scope, ranking and parent validation"]
+    search -->|"Query through adapters"| stores["Atlas vector, hybrid, parent and linked-circular adapters"]
     search -.->|"Optional candidate scoring"| rerank["Qwen pair scorer"]
-    answer -->|"Run"| generation["Answer chain: context budget, structured generation, citation checks"]
+    answer -->|"Run"| generation["Answer chain: amendment budget, structured generation, one citation repair, safe clarification"]
+    scoring -->|"Retrieve once"| retrieval
+    scoring -->|"Replay stored evidence for the final response"| generation
     generation -->|"Call"| model["Configured chat model"]
     feedback -->|"Persist and atomically review"| feedback_store["MongoDB feedback adapter"]
 ```
 
 The routers remain thin, the chains have no FastAPI/Streamlit imports, and the UI
-uses HTTP plus shared schemas. Authentication, shared-service SLOs and a live Atlas
-hybrid comparison remain deployment decisions or checks. Local Docker Agent
+uses HTTP plus shared schemas. Reviewer-token protection is implemented;
+individual user authentication, shared-service SLOs and a live Atlas hybrid
+comparison remain open. Local Docker Agent
 delivery is recorded in [DATADOG_README.md](DATADOG_README.md); the diagrams do not
 establish a production deployment.
 
 ## Review of the 18 October implementation
+
+The dated reviews below preserve earlier evidence and counts. Use **Latest
+verification** above for the 21 October status; these sections are not new test runs.
 
 The review covers this session's application changes and tests. It preserves the
 earlier teaching assets and extends the existing layers without adding a generic
@@ -697,8 +882,8 @@ in the workflow's Evaluations tab. Earlier UI-score verification below describes
 the interface at that checkpoint.
 
 **What this repo does:** NexaAssist ingests synthetic policy PDFs into MongoDB,
-retrieves dated evidence, generates cited answers, and shows answers and RAGAS
-scores in Streamlit and Datadog. A separate mock banking API supports training
+retrieves dated evidence, generates cited answers in Streamlit, and publishes
+RAGAS scores to Datadog. A separate mock banking API supports training
 scenarios. This review assumes one local training user, one ingestion job at a
 time, and one mock API process; it does not assess a public production service.
 
@@ -781,7 +966,7 @@ To reproduce the combined suite after installing the mock test dependencies
 listed in the kit's README:
 
 ```bash
-RAGAS_DO_NOT_TRACK=true LANGSMITH_TRACING=false LANGCHAIN_TRACING_V2=false \
+RAGAS_DO_NOT_TRACK=true \
 DD_TRACE_ENABLED=false DD_LLMOBS_ENABLED=false \
 uv run --no-sync pytest tests/ nexa_synthetic_data/api/mock_server/test_mock_api.py -q
 ```
@@ -800,3 +985,46 @@ manual browser rendering, or dataset regeneration without its missing sources.
 Writes across chunk and parent collections remain non-transactional: run one
 ingestion job at a time and rerun after an interrupted write. The running Mac API
 was not restarted; restart it to load these changes.
+
+## Phase 2 Orchestrator/Retriever extension — 23 October 2026
+
+The dated Phase 1 descriptions above are preserved. The new stage implements
+Orchestrator and Retriever in one Agent Service; it does not complete the full
+Phase 2 exit checkpoint. Run commands, contracts and examples are in
+[README.md](README.md#phase-2-orchestrator-and-http-retriever--23-october-2026).
+
+| File | Responsibility |
+| --- | --- |
+| `app/agent_main.py` | Separate FastAPI Agent Service; reuses the existing logging/Datadog/tokenizer lifespan. Does not mount or change Phase 1 endpoints. |
+| `app/api/agent.py` | Thin `/agent` router, scoped async HTTP client dependency, generic 503 failures, liveness and process-local request/completion counters. |
+| `app/models/agent.py` | Strict request, structured intent decision and response contracts; supported action labels match the supplied OpenAPI operation IDs. |
+| `app/chains/prompts/orchestrator.py` | Versioned classifier prompt; routing scope references approved `POL-OPS-001`, the catalog and mock API. No banking rates/fees are copied into the prompt. |
+| `app/agents/orchestrator.py` | Explicit `StateGraph`: classify, deterministic required/conflicting-scope checks, five branches and terminal edges. |
+| `app/services/agent.py` | Uses the configured model, builds the classifier and graph, supplies the existing answer chain with already-retrieved evidence, bounds execution and records the Datadog workflow. |
+| `app/services/agent_retrieval.py` | Async HTTP POST to the unchanged `/retrieve`; validates the existing response contract and date, retaining complete amendments. No direct MongoDB/retrieval-service calls. |
+| `app/core/config.py` | Adds separate AgentSettings for RAG URL and HTTP/run deadlines; existing Settings/model defaults remain intact. |
+| `tests/test_agent.py` | Route, graph ordering, HTTP contract, citation/amendment, timeout/error and API compatibility tests. |
+| `evaluation/datasets/agent.jsonl` | Ten source-backed routing examples, including missing scope, prohibited requests and unimplemented customer/action branches. |
+
+Policy flow: **Orchestrator → Retriever (HTTP Phase 1 `/retrieve`) → existing
+citation-checked answer chain → END**. Every other route ends without policy
+retrieval or generation. Customer-context and supported-action branches clarify
+missing inputs and otherwise explicitly report unavailable capabilities; no
+customer record is read and no banking write is attempted. The eventual four
+roles belong to this one Agent Service, not four microservices.
+
+The graph is acyclic and stateless for this stage. Clarification requires a new
+request containing the original question and resolved fields. Validator/Action,
+persistent sessions, HITL, customer authentication/tool integration, distributed
+limits and production deployment remain later work. Model classification is not
+a deterministic security boundary; fixed route outcomes and downstream citation
+checks do not establish adversarial or full-dataset quality.
+
+Stage verification: **159 application tests passed**, including 34 new agent tests;
+Ruff, formatting, mypy and lock consistency passed. Six live cases passed through
+a temporary Agent Service and the existing RAG process over real TCP with the
+configured model. The [saved smoke report](app/evaluation/results/agent_stage_20261023.json)
+records inputs, outputs, metrics and limits. Datadog export was disabled in that
+run; customer and action cases explicitly returned unavailable or clarification.
+The temporary Agent process was stopped. Existing source data, historical prompts,
+and unrelated modified/untracked files were preserved.
