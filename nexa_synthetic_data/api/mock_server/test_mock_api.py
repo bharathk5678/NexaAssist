@@ -102,7 +102,7 @@ def test_idempotency_keys_expire_after_the_contracts_24_hours(monkeypatch):
 def test_canonical_body_comparison_ignores_key_order():
     k = key()
     body = case_body()
-    r1 = post("/v1/cases", body, k)
+    post("/v1/cases", body, k)
     r2 = client.post("/v1/cases", content=json.dumps(dict(reversed(list(body.items())))), headers={**AUTH, "Idempotency-Key": k, "Content-Type": "application/json"})
     assert r2.status_code == 201 and r2.headers["Idempotent-Replayed"] == "true" and len(server.CASES) == 1
 
@@ -116,7 +116,6 @@ def test_same_key_different_body_is_422_and_executes_nothing():
 
 def test_in_progress_returns_409_with_retry_after():
     k = key(); body = case_body()
-    from pydantic import TypeAdapter
     h = server._hash(server.CaseCreate(**body))
     server.IDEM[("mock-token-a", "POST", "/v1/cases", k)] = {"hash": h, "state": "in_progress", "expires_at": server.monotonic() + 86400}
     r = post("/v1/cases", body, k)
