@@ -59,7 +59,7 @@
     },
     {
       "file": "app/agents/orchestrator.py",
-      "line": 85,
+      "line": 95,
       "title": "Classify and resolve scope",
       "description": "Input screening precedes the model. Explicit and extracted scope must agree; missing information and forbidden operations produce fixed terminal responses rather than guessed actions."
     },
@@ -83,7 +83,7 @@
     },
     {
       "file": "app/agents/orchestrator.py",
-      "line": 335,
+      "line": 339,
       "title": "Pause for a separate reviewer",
       "description": "The graph interrupts with an exact proposal fingerprint. Switching the UI credential clears the loaded proposal, so the different reviewer must load the same saved ID before deciding."
     },
@@ -95,7 +95,7 @@
     },
     {
       "file": "app/agents/orchestrator.py",
-      "line": 368,
+      "line": 372,
       "title": "Refresh before execution",
       "description": "Evidence and banking facts are read again after approval. Changed proposal evidence blocks execution; rejected proposals never enter the action branch."
     },

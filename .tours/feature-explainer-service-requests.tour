@@ -29,7 +29,7 @@
     },
     {
       "file": "app/agents/orchestrator.py",
-      "line": 168,
+      "line": 178,
       "title": "Retrieve the right policy",
       "description": "General requests including certificates search bank-wide POL-OPS-001 clause5.1. Only opt-in searches CIR-2026-07 clause5.2 with the NEXA-HL product scope."
     },
@@ -41,7 +41,7 @@
     },
     {
       "file": "app/agents/orchestrator.py",
-      "line": 335,
+      "line": 339,
       "title": "Pause for the human handoff",
       "description": "interrupt persists the exact proposal/evidence hash. Copy the run ID, switch to reviewer, reload it, inspect evidence, select decision and confirm. Reject is subject to the same permission gate as approve."
     },
@@ -53,7 +53,7 @@
     },
     {
       "file": "app/agents/orchestrator.py",
-      "line": 368,
+      "line": 372,
       "title": "Recheck before execution",
       "description": "On approval the workflow refreshes evidence and customer facts and compares the approved digest. Changed proposals block execution; rejected proposals never reach this node."
     },

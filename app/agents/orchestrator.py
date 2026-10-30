@@ -47,6 +47,16 @@ class AgentState(TypedDict, total=False):
     approved_hash: str
 
 
+def _validation_response(result: ValidationResult) -> AgentResponse:
+    """Map initial and refreshed validation to the same public workflow response."""
+    return AgentResponse(
+        intent="supported_action",
+        status="validated" if result.decision == "allowed" else result.decision,
+        message=result.reason,
+        validation=result,
+    )
+
+
 def build_agent_graph(
     classifier: Runnable[AgentRequest, IntentDecision],
     retriever: Runnable[RetrieveRequest, RetrieveResponse],
@@ -321,13 +331,7 @@ def build_agent_graph(
         """
         assert validator is not None
         result = await validator(state["request"], state["retrieved"])
-        response = AgentResponse(
-            intent="supported_action",
-            status="validated" if result.decision == "allowed" else result.decision,
-            message=result.reason,
-            validation=result,
-        )
-        updates: AgentState = {"validation": result, "response": response}
+        updates: AgentState = {"validation": result, "response": _validation_response(result)}
         if result.decision == "allowed" and actioner is not None:
             updates["proposal_hash"] = proposal_digest(state["request"], result)
         return updates
@@ -389,12 +393,7 @@ def build_agent_graph(
         return {
             "retrieved": evidence,
             "validation": result,
-            "response": AgentResponse(
-                intent="supported_action",
-                status="validated" if result.decision == "allowed" else result.decision,
-                message=result.reason,
-                validation=result,
-            ),
+            "response": _validation_response(result),
         }
 
     async def action(state: AgentState) -> AgentState:
