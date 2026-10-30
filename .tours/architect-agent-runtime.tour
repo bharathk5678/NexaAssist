@@ -1,0 +1,115 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "NexaAssist agent runtime and durable approval architecture",
+  "description": "An architect tour of startup, agent responsibilities, trust boundaries and exact approved execution. Uses current working-tree source without a historical ref.",
+  "steps": [
+    {
+      "file": "app/main.py",
+      "line": 14,
+      "title": "RAG entry point",
+      "description": "The RAG factory registers retrieval, answer, feedback and operational routes. Its public app.main:app entry point stays stable; shared startup is now imported without defining it here."
+    },
+    {
+      "file": "app/core/lifespan.py",
+      "line": 18,
+      "title": "Shared startup",
+      "description": "Both FastAPI factories initialize telemetry, JSON logging and the tokenizer in the same order. Startup errors remain explicit; health reports process liveness, not dependency readiness."
+    },
+    {
+      "file": "app/agent_main.py",
+      "line": 12,
+      "title": "Agent entry point",
+      "description": "The Agent factory exposes independent validation and durable workflow routes. Importing it no longer constructs the RAG application as an incidental effect."
+    },
+    {
+      "file": "app/api/dependencies.py",
+      "line": 33,
+      "title": "Shared HTTP dependencies",
+      "description": "Both agent routers use the same RAG and banking dependency objects. The legacy app.api.agent exports remain aliases so existing FastAPI overrides still work."
+    },
+    {
+      "file": "app/ui/agent.py",
+      "line": 89,
+      "title": "Prepare as owner",
+      "description": "The current raw credential is attached to every run request. Prepare with the owner identity, save the run ID, then switch credentials; a visible proposal is not proof of permission to decide it."
+    },
+    {
+      "file": "app/api/auth.py",
+      "line": 18,
+      "title": "Resolve trusted access",
+      "description": "Configured principal identity, customer scope and can_approve come from the server. The model and request body cannot grant customer access or review rights."
+    },
+    {
+      "file": "app/api/agent_runs.py",
+      "line": 26,
+      "title": "Enter durable routes",
+      "description": "Unknown and legacy training credentials cannot own or decide durable runs. The router delegates lifecycle operations to the scoped service rather than embedding business rules."
+    },
+    {
+      "file": "app/services/agent_runs.py",
+      "line": 233,
+      "title": "Persist ownership and operation identity",
+      "description": "The service stores the creating principal, expiry and operation key before driving the graph. Creating as the reviewer prevents that same reviewer from deciding its own run."
+    },
+    {
+      "file": "app/services/agent.py",
+      "line": 41,
+      "title": "Wire the four responsibilities",
+      "description": "One structured model classifier, an HTTP retriever, deterministic validation and an optional approved action callback are wired into one graph. These are not four independently running agent classes."
+    },
+    {
+      "file": "app/agents/orchestrator.py",
+      "line": 85,
+      "title": "Classify and resolve scope",
+      "description": "Input screening precedes the model. Explicit and extracted scope must agree; missing information and forbidden operations produce fixed terminal responses rather than guessed actions."
+    },
+    {
+      "file": "app/services/agent_retrieval.py",
+      "line": 10,
+      "title": "Retrieve over the RAG boundary",
+      "description": "The agent posts a policy request to the existing RAG service and checks the response date. Customer/action payload fields do not become retrieval scope."
+    },
+    {
+      "file": "app/chains/retrieval.py",
+      "line": 26,
+      "title": "Retrieve scoped evidence",
+      "description": "The RAG chain applies corpus/date/product filters, expands parents and retains complete amendments. Optional reranking changes ordering, not authorization."
+    },
+    {
+      "file": "app/services/validation.py",
+      "line": 56,
+      "title": "Validate current facts",
+      "description": "General requests require operations evidence; certificates require an owned loan. Opt-in delegates to stricter home-loan policy/version/date/current-flag checks. No LLM grants permission."
+    },
+    {
+      "file": "app/agents/orchestrator.py",
+      "line": 335,
+      "title": "Pause for a separate reviewer",
+      "description": "The graph interrupts with an exact proposal fingerprint. Switching the UI credential clears the loaded proposal, so the different reviewer must load the same saved ID before deciding."
+    },
+    {
+      "file": "app/services/agent_runs.py",
+      "line": 269,
+      "title": "Enforce the reviewer gate",
+      "description": "Review requires can_approve, scoped visibility and a principal different from the creator. Expiry and the exact hash are checked before resuming; reject uses the same authorization gate."
+    },
+    {
+      "file": "app/agents/orchestrator.py",
+      "line": 368,
+      "title": "Refresh before execution",
+      "description": "Evidence and banking facts are read again after approval. Changed proposal evidence blocks execution; rejected proposals never enter the action branch."
+    },
+    {
+      "file": "app/services/service_requests.py",
+      "line": 19,
+      "title": "Submit one exact operation",
+      "description": "The approved payload is posted using its persisted Idempotency-Key, and the receipt must match customer/type/loan. A RECEIVED certificate-request receipt is not a generated PDF."
+    },
+    {
+      "file": "app/database/agent_runs.py",
+      "line": 49,
+      "title": "Preserve durable compatibility",
+      "description": "The store uses institution-scoped records, atomic leases and typed checkpoints. Serialized model module/class paths and graph node names remain unchanged; recover uncertain writes through the same run."
+    }
+  ]
+}

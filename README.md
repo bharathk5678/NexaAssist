@@ -1,5 +1,8 @@
 # NexaAssist
 
+The [agent architecture and structural refactor report](C4-Documentation/AGENT_REFACTOR_REPORT.md)
+includes the worked request flow, code tours, before/after checks and release blockers.
+
 A policy, product and lending advisor for the staff of NexaBank (a fictional bank), built as the hands-on codebase for the **Enterprise Agentic RAG** training program. Everything is synthetic.
 
 NexaAssist turns policy PDFs into versioned clause chunks and parent sections in

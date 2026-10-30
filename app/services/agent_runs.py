@@ -223,6 +223,9 @@ class AgentRunService:
         Raises:
             RunError: The run is not visible or its owner is no longer authorized.
             PyMongoError: Checkpoint or run storage cannot be read.
+
+        Example:
+            run = await service.get(run_id)
         """
         record = await self._record(run_id)
         return await self._view(record, self._graph(record, "read-only"))
@@ -238,6 +241,9 @@ class AgentRunService:
 
         Raises:
             RunError: Remove sensitive identifiers or instruction overrides before starting a run.
+
+        Example:
+            run = await service.start(request)
         """
         if request.customer_id is not None and request.customer_id not in self.access.customer_ids:
             raise RunError(403, "Customer access is not authorized")
@@ -272,6 +278,9 @@ class AgentRunService:
 
         Raises:
             RunError: A different authorized reviewer must decide this proposal.
+
+        Example:
+            run = await service.approve(run_id, decision)
         """
         if not self.access.can_approve:
             raise RunError(403, "Reviewer authorization is required")
@@ -291,6 +300,9 @@ class AgentRunService:
 
         Raises:
             RunError: The run is not visible or the saved operation is not safely retryable.
+
+        Example:
+            run = await service.retry(run_id)
         """
         return await self._drive(await self._record(run_id), "retry")
 

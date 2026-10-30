@@ -1,5 +1,8 @@
 # Phase 2: four-agent service-request workflows
 
+See the [agent refactor report](../../C4-Documentation/AGENT_REFACTOR_REPORT.md)
+for current startup/dependency ownership, the full request trace and verified code tours.
+
 For step-by-step UI approval/rejection instructions, all 27 customers and all five
 request types, see the [Service requests operator guide](../../C4-Documentation/SERVICE_REQUESTS_GUIDE.md).
 
