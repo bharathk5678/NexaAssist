@@ -863,16 +863,120 @@ flowchart LR
 
 ### Prerequisites
 
-- [`uv`](https://docs.astral.sh/uv/) and Python 3.14+ installed.
-- An **OpenAI API key**.
-- A **MongoDB Atlas** cluster on a tier that supports Vector Search.
+- **GNU Make and a POSIX shell** on macOS/Linux (or WSL on Windows). On macOS,
+  install the Xcode Command Line Tools if `make` is missing.
+- [`uv`](https://docs.astral.sh/uv/) installed. `make setup` selects Python 3.14
+  and installs the locked application, UI, evaluation and development dependencies.
+- An **OpenAI API key** with access to the configured embedding/chat/evaluation models.
+- A reachable **MongoDB Atlas** cluster that supports Vector Search, a database
+  user with permissions for the policy and workflow collections/indexes, and your
+  machine's IP allowed by Atlas network access. Create the search indexes in
+  [app/database/indexes.md](app/database/indexes.md) and ingest the corpus before use.
+- **Service requests:** a nonempty `BANKING_API_TOKEN` plus distinct named owner
+  and reviewer credentials in `AGENT_PRINCIPALS`, with the required customer access.
+  The reviewer needs `can_approve=true`. See the
+  [credential guide](C4-Documentation/SERVICE_REQUESTS_GUIDE.md).
+- **Docker with Compose v2** and a running daemon for Datadog or the optional
+  reranker. Datadog needs `DD_API_KEY`/`DD_SITE`; the reranker needs the verified
+  GGUF file specified by `RERANKER_MODEL_FILE`.
+- **curl** for `make health`, and free local ports **8000, 8080, 8001 and 8501**.
+
+### Run the services with Make
+
+Run these commands from the repository root. If the directory is synced by
+Google Drive, set `UV_PROJECT_ENVIRONMENT` to a local virtual-environment
+directory before setup, as described in the installation note below.
+
+```bash
+make help
+make setup
+# Edit .env with your credentials, corpus scope and owner/reviewer configuration.
+# Create the Atlas search indexes using app/database/indexes.md.
+make prereqs
+```
+
+`make setup` creates `.env` from `.env.example` only when it is missing; an
+existing file is preserved. Shell activation of `.venv` is unnecessary.
+
+`make prereqs` checks local runtime imports, Python version and the existing
+Pydantic settings schemas. Credential values are hidden on validation failure.
+It does not contact Atlas or OpenAI, confirm search-index readiness, or grant
+customer/reviewer permissions. Replace template credentials and configure the
+four service URLs shown in [Streamlit and endpoint coverage](#streamlit-and-endpoint-coverage).
+
+For tracing (`DD_TRACE_ENABLED=true`, as in `.env.example`), start Docker and the
+Datadog Agent first:
+
+```bash
+make datadog-up
+```
+
+For a local session without Datadog, set `DD_TRACE_ENABLED=false`,
+`DD_LLMOBS_ENABLED=false` and `DD_RUNTIME_METRICS_ENABLED=false` in your local
+configuration. If reranking is enabled, start its configured runtime before
+retrieval. `make reranker-up` uses the existing llama.cpp compose profile; it
+requires `RERANKER_MODEL_FILE` plus the matching `RERANK_API=llamacpp`,
+`RERANK_BASE_URL=http://127.0.0.1:18516` and `RERANK_MODEL=qwen3-reranker` settings.
+It does not start an Ollama runtime.
+
+After the Atlas indexes are queryable, ingest the registered policies once:
+
+```bash
+make ingest       # Calls OpenAI embeddings and writes to Atlas; run one job at a time.
+make run          # Or: make run-all
+```
+
+`make run` launches the banking mock, RAG API, Agent API and Streamlit together
+in the foreground with interleaved logs. Leave this terminal open while they
+start. In another terminal, check liveness and open the UI:
+
+```bash
+make health
+# Open http://127.0.0.1:8501
+```
+
+Health checks cover the RAG/Agent `/health` endpoints, the bank's OpenAPI endpoint,
+and Streamlit's documented [`/_stcore/health`](https://docs.streamlit.io/deploy/tutorials/docker)
+endpoint. A healthy HTTP process still needs working Atlas/provider connections
+and indexed policy evidence for requests to succeed.
+
+Press **Ctrl+C** in the `make run` terminal to stop its four processes. If any
+required service exits, the launcher stops its siblings and returns failure.
+It signals only the processes started by that invocation, using
+[uv's Unix signal forwarding](https://docs.astral.sh/uv/concepts/projects/run/#signal-handling).
+Datadog and reranker containers stay running until you stop them explicitly.
+The synthetic bank's data and idempotency cache are process-local: stopping or
+restarting it resets them. Reconcile uncertain submissions before restarting
+the bank; MongoDB saved runs alone do not preserve its replay cache.
+
+| Command | Purpose |
+|---|---|
+| `make setup` | Install locked prerequisites and create missing dotenv configuration |
+| `make prereqs` | Check local runtime dependencies and settings schemas |
+| `make run` / `make run-all` | Run all four application services; Ctrl+C stops them |
+| `make run-rag` | RAG FastAPI on port 8000, Datadog service `nexaassist-api` |
+| `make run-bank` | Synthetic bank on port 8080, Datadog service `nexaassist-bank` |
+| `make run-agent` | LangGraph FastAPI on port 8001, Datadog service `nexaassist-agent` |
+| `make run-ui` | Streamlit on port 8501, Datadog service `nexaassist-ui` |
+| `make health` | Check all four HTTP services; nonzero exit if any is unavailable |
+| `make ingest` | Embed/index the authoritative register; explicit Atlas write |
+| `make datadog-up` / `make datadog-down` | Start/stop the existing Datadog compose service |
+| `make reranker-up` / `make reranker-down` | Start/stop the optional verified GGUF reranker |
+| `make check-fast` / `make check-task` / `make check-full` | Existing local quality gates |
+| `make check-ai` | Existing live scored evaluation gate; configured providers/Atlas required |
+
+All new runtime/container targets accept `ENV_FILE`, for example
+`make run ENV_FILE=".env.local"`. Existing quality-gate targets keep their current
+configuration behavior. Bare `make` still runs `check-fast`.
+If a port is occupied, inspect the existing listener or stop its own terminal
+before launching a second stack. For the Datadog sampling-rule JSON error,
+remove empty `DD_TRACE_SAMPLING_RULES`/`DD_SPAN_SAMPLING_RULES` values or set them
+to the valid JSON array `[]`.
 
 ### Step 1: install
 
 ```bash
-uv sync --python 3.14 --locked --extra ui --extra evaluation
-source .venv/bin/activate  # macOS
-.venv\Scripts\activate     # Windows
+make setup
 ```
 
 > **Heads-up:** `uv sync` creates `.venv` inside the project folder. If the folder is synced by Google Drive, point it elsewhere first:
@@ -880,11 +984,8 @@ source .venv/bin/activate  # macOS
 
 ### Step 2: configure
 
-```bash
-cp .env.example .env
-```
-
-Edit `.env`. These are required:
+`make setup` creates the template only when `.env` is missing. Edit `.env`.
+These are required:
 
 | Variable | Example | Meaning |
 |---|---|---|
@@ -940,7 +1041,7 @@ Set `DD_API_KEY` and the correct `DD_SITE` in `.env`. On this Mac, start Docker
 Desktop and wait for `docker info` to succeed, then run:
 
 ```bash
-docker compose --env-file .env -f app/compose.datadog.yaml up -d
+make datadog-up
 docker compose --env-file .env -f app/compose.datadog.yaml ps
 ```
 
@@ -1526,8 +1627,9 @@ For the owner/reviewer handoff, approval errors, and prerequisites for every
 customer and request type, see the [Service requests operator guide](C4-Documentation/SERVICE_REQUESTS_GUIDE.md).
 
 For the **Service requests** workspace, all four services must be up and running
-together. Run each command in a separate terminal from the repository root and
-keep those terminals open. Policy chat uses the RAG API; service requests also
+together. Use `make run` from the repository root and keep its terminal open;
+see [Run the services with Make](#run-the-services-with-make) for prerequisites.
+Policy chat uses the RAG API; service requests also
 need the Agent API and banking API.
 
 | Service | Port | Check or open |
@@ -1556,24 +1658,30 @@ BANKING_BASE_URL=http://127.0.0.1:8080/
 Install dependencies once:
 
 ```bash
-uv sync --locked --extra ui --extra evaluation
+make setup
 ```
 
-Load `.env` before `ddtrace-run` so the tracer receives the Datadog settings
-before application imports. Start the dependencies before the Agent API and UI:
+The Make targets load `.env` before `ddtrace-run` and set a separate Datadog
+service name per process. Start all four together:
+
+```bash
+make run
+```
+
+Alternatively, start each service in its own terminal:
 
 ```bash
 # Terminal 1: RAG FastAPI
-uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+make run-rag
 
 # Terminal 2: synthetic banking API (run from the repository root)
-uv run --no-sync python -m uvicorn server:app --app-dir nexa_synthetic_data/api/mock_server --host 127.0.0.1 --port 8080
+make run-bank
 
 # Terminal 3: Agent FastAPI
-uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.agent_main:app --host 127.0.0.1 --port 8001
+make run-agent
 
 # Terminal 4: Streamlit
-uv run --no-sync --env-file .env env DD_SERVICE=nexaassist-ui ddtrace-run python -m streamlit run app/streamlit_app.py --server.address 127.0.0.1 --server.port 8501
+make run-ui
 ```
 
 Open Streamlit, select **Service requests**, and enter the configured owner
