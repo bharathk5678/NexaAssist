@@ -65,6 +65,9 @@ async def ingest(requests: list[IngestRequest]) -> list[IngestResponse]:
 
     Returns:
         Ordered results produced by the documented operation.
+
+    Raises:
+        ValueError: A request or stored document conflicts with the configured corpus.
     """
     settings = get_settings()
     vector_store = get_vector_store(settings, get_embeddings(settings))
@@ -73,7 +76,11 @@ async def ingest(requests: list[IngestRequest]) -> list[IngestResponse]:
     for request in requests:
         response = await chain.ainvoke({"request": request})
         removed = await asyncio.to_thread(
-            delete_stale_chunks, vector_store.collection, request.doc_id, response.chunk_ids
+            delete_stale_chunks,
+            vector_store.collection,
+            request.doc_id,
+            response.chunk_ids,
+            settings=settings,
         )
         logger.info(
             "document_ingested",

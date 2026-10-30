@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+from copy import deepcopy
 from datetime import date
+from functools import partial
 from itertools import pairwise
 from pathlib import Path
 from typing import Any
@@ -29,8 +31,8 @@ from app.chains.chunking import chunk_by_clause
 from app.chains.ingestion import build_ingestion_chain
 from app.core.config import Settings
 from app.database import mongo
-from app.database.mongo import delete_stale_chunks
 from app.models.ingestion import IngestRequest, IngestResponse
+from app.services import ingestion as ingestion_service
 from app.services.ingestion import requests_from_register
 
 REGISTER = Path("nexa_synthetic_data/document_register.json")
@@ -489,18 +491,34 @@ def test_changing_the_embedding_model_re_embeds_everything(
     assert second.embedded_count == first.chunk_count
 
 
-def test_stale_chunks_are_deleted_and_current_ones_kept() -> None:
-    """Verify stale chunks are deleted and current ones kept."""
+def test_stale_chunks_are_deleted_and_current_ones_kept(settings: Settings) -> None:
+    """Delete only obsolete chunks in the exact configured corpus.
+
+    Args:
+        settings: Configured corpus used by ingestion and cleanup.
+    """
+    delete_stale_chunks = partial(mongo.delete_stale_chunks, settings=settings)
     collection: Any = mongomock.MongoClient().db.chunks
+    scope = {
+        "institution": settings.institution,
+        "jurisdiction": settings.jurisdiction,
+        "confidentiality_level": settings.confidentiality_level,
+    }
     collection.insert_many(
         [
-            {"_id": "POL-X_1.1_c01", "doc_id": "POL-X"},
-            {"_id": "POL-X_c002", "doc_id": "POL-X"},
-            {"_id": "POL-Y_1.1_c01", "doc_id": "POL-Y"},
+            {"_id": "POL-X_1.1_c01", "doc_id": "POL-X", **scope},
+            {"_id": "POL-X_c002", "doc_id": "POL-X", **scope},
+            {"_id": "POL-Y_1.1_c01", "doc_id": "POL-Y", **scope},
         ]
     )
     assert delete_stale_chunks(collection, "POL-X", ["POL-X_1.1_c01"]) == 1
     assert sorted(row["_id"] for row in collection.find()) == ["POL-X_1.1_c01", "POL-Y_1.1_c01"]
+    foreign = [{"_id": field, "doc_id": "POL-X", **scope, field: "other"} for field in scope] + [
+        {"_id": "unscoped", "doc_id": "POL-X"}
+    ]
+    collection.insert_many(foreign)
+    assert delete_stale_chunks(collection, "POL-X", []) == 1
+    assert list(collection.find({"doc_id": "POL-X"})) == foreign
 
 
 def test_dimension_change_reembeds_every_chunk(
@@ -586,9 +604,175 @@ def test_reingest_preserves_documents_sharing_a_parent_key_prefix(
     parents.mset(
         [
             (foreign, Document(page_content="Other policy")),
-            (stale, Document(page_content="Old section")),
+            (
+                stale,
+                Document(
+                    page_content="Old section",
+                    metadata=requests["CIR-2026-07"].model_dump(exclude={"source_path"}),
+                ),
+            ),
         ]
     )
     run_chain(vector, settings, requests["CIR-2026-07"], parents)
     assert parents.mget([foreign])[0] is not None
     assert parents.mget([stale]) == [None]
+
+
+@pytest.mark.parametrize("field", ["institution", "jurisdiction", "confidentiality_level"])
+def test_ingestion_rejects_request_scope_before_parsing(
+    settings: Settings,
+    requests: dict[str, IngestRequest],
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+) -> None:
+    """A request cannot redirect writes to a different corpus.
+
+    Args:
+        settings: Configured corpus used by ingestion.
+        requests: Registered synthetic policy requests.
+        monkeypatch: Fixture isolating the document parser.
+        field: Corpus field that differs from configuration.
+    """
+    parse = Mock()
+    monkeypatch.setattr("app.chains.ingestion.parse_document", parse)
+    store = InMemoryVectorStore(CountingEmbedding(size=8))
+    parents = InMemoryStore()
+    request = requests["CIR-2026-07"].model_copy(update={field: "other"})
+    with pytest.raises(ValueError, match="scope must match"):
+        run_chain(store, settings, request, parents)
+    parse.assert_not_called()
+    assert store.store == parents.store == {}
+
+
+@pytest.mark.parametrize("record", ["chunk", "parent", "stale_parent"])
+@pytest.mark.parametrize(
+    "field", ["doc_id", "institution", "jurisdiction", "confidentiality_level", "missing_scope"]
+)
+def test_ingestion_preserves_conflicting_stored_identities(
+    settings: Settings,
+    requests: dict[str, IngestRequest],
+    record: str,
+    field: str,
+) -> None:
+    """Conflicting or unscoped records stop ingestion before embeddings and writes.
+
+    Args:
+        settings: Configured corpus used by ingestion.
+        requests: Registered synthetic policy requests.
+        record: Existing chunk, parent or obsolete parent to preserve.
+        field: Conflicting identity field, or missing scope.
+    """
+    embedding = CountingEmbedding(size=8)
+    store = InMemoryVectorStore(embedding)
+    parents = InMemoryStore()
+    request = requests["CIR-2026-07"]
+    first = run_chain(store, settings, request, parents)
+    if record == "chunk":
+        metadata = store.store[first.chunk_ids[0]]["metadata"]
+    else:
+        parent = next(iter(parents.store.values())).model_copy(deep=True)
+        key = parent.id if record == "parent" else f"{request.doc_id}_s99"
+        parents.mset([(key, parent)])
+        metadata = parent.metadata
+    if field == "missing_scope":
+        metadata.clear()
+    else:
+        metadata[field] = "other"
+    before_chunks = deepcopy(store.store)
+    before_parents = deepcopy(parents.store)
+    embedded = embedding.embedded
+    with pytest.raises(ValueError, match="conflicting or missing corpus scope"):
+        run_chain(store, settings, request.model_copy(update={"title": "Changed"}), parents)
+    assert store.store == before_chunks
+    assert parents.store == before_parents
+    assert embedding.embedded == embedded
+
+
+def test_ingestion_service_scopes_cleanup_after_success(
+    settings: Settings,
+    requests: dict[str, IngestRequest],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The service passes its corpus scope to cleanup after the chain succeeds.
+
+    Args:
+        settings: Configured corpus used by ingestion and cleanup.
+        requests: Registered synthetic policy requests.
+        monkeypatch: Fixture replacing external services with local test doubles.
+    """
+    request = requests["CIR-2026-07"]
+    collection: Any = mongomock.MongoClient().db.chunks
+    scope = request.model_dump(include={"institution", "jurisdiction", "confidentiality_level"})
+    collection.insert_many(
+        [
+            {"_id": "current", "doc_id": request.doc_id, **scope},
+            {"_id": "stale", "doc_id": request.doc_id, **scope},
+            {"_id": "foreign", "doc_id": request.doc_id, **scope, "institution": "OtherBank"},
+        ]
+    )
+    response = IngestResponse(
+        doc_id=request.doc_id,
+        chunk_count=1,
+        chunk_ids=["current"],
+        embedded_count=1,
+        unchanged_count=0,
+        embedding_model=settings.embedding_model,
+    )
+    chain = Mock(ainvoke=AsyncMock(return_value=response))
+    monkeypatch.setattr(ingestion_service, "get_settings", lambda: settings)
+    monkeypatch.setattr(ingestion_service, "get_embeddings", lambda _: object())
+    monkeypatch.setattr(
+        ingestion_service, "get_vector_store", lambda *_: Mock(collection=collection)
+    )
+    monkeypatch.setattr(ingestion_service, "get_parent_store", lambda _: InMemoryStore())
+    monkeypatch.setattr(ingestion_service, "build_ingestion_chain", lambda *_: chain)
+    assert asyncio.run(ingestion_service.ingest([request])) == [response]
+    assert sorted(row["_id"] for row in collection.find()) == ["current", "foreign"]
+    chain.ainvoke.assert_awaited_once_with({"request": request})
+
+
+@pytest.mark.parametrize("collection_name", ["chunks", "parents"])
+def test_mongodb_adapters_preserve_foreign_records_before_ingestion(
+    settings: Settings,
+    requests: dict[str, IngestRequest],
+    monkeypatch: pytest.MonkeyPatch,
+    collection_name: str,
+) -> None:
+    """Real LangChain MongoDB adapters retain scope metadata for collision checks.
+
+    Args:
+        settings: Configured corpus used by ingestion.
+        requests: Registered synthetic policy requests.
+        monkeypatch: Fixture replacing MongoDB and parsing with isolated test data.
+        collection_name: Adapter containing the colliding identity.
+    """
+    storage: Any = mongomock.MongoClient().db
+    settings = settings.model_copy(
+        update={"mongodb_collection": "chunks", "mongodb_parent_collection": "parents"}
+    )
+    monkeypatch.setattr(mongo, "_database", lambda _: storage)
+    monkeypatch.setattr(
+        "app.chains.ingestion.parse_document",
+        lambda _: [Title("1. Fees"), NarrativeText("1.1 Fee. No fee applies.")],
+    )
+    request = requests["CIR-2026-07"]
+    key = f"{request.doc_id}_1.1_c01" if collection_name == "chunks" else f"{request.doc_id}_s01"
+    foreign = {
+        "_id": key,
+        **request.model_dump(mode="json", exclude={"source_path"}),
+        "institution": "OtherBank",
+        "text": "Foreign chunk",
+        "page_content": "Foreign parent",
+        "embedding": [0.0] * 8,
+    }
+    storage[collection_name].insert_one(foreign)
+    embedding = CountingEmbedding(size=8)
+    chain = build_ingestion_chain(
+        mongo.get_vector_store(settings, embedding), mongo.get_parent_store(settings), settings
+    )
+    with pytest.raises(ValueError, match="conflicting or missing corpus scope"):
+        asyncio.run(chain.ainvoke({"request": request}))
+    assert list(storage[collection_name].find()) == [foreign]
+    other = "parents" if collection_name == "chunks" else "chunks"
+    assert storage[other].count_documents({}) == 0
+    assert embedding.embedded == 0

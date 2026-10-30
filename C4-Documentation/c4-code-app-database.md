@@ -165,12 +165,14 @@ Whole sections keyed by parent_id, in their own collection. Not embedded.
 ### `delete_stale_chunks`
 
 ```python
-def delete_stale_chunks(collection: Collection[Any], doc_id: str, keep_ids: list[str]) -> int
+def delete_stale_chunks(collection: Collection[Any], doc_id: str, keep_ids: list[str], *, settings: Settings) -> int
 ```
 
-**Source:** [app/database/mongo.py:46](../app/database/mongo.py#L46)
+**Source:** [app/database/mongo.py:101](../app/database/mongo.py#L101)
 
-Retire chunks of `doc_id` that the latest ingest no longer produced.
+Retire obsolete chunks of `doc_id` only within the institution, jurisdiction and
+confidentiality scope supplied by `settings`. Ingestion passes the same validated
+configuration used by its chain. Stored IDs are unchanged.
 
 **Imported dependencies referenced:** `pymongo.collection.Collection`, `typing.Any`
 

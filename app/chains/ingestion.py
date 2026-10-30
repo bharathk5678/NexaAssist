@@ -18,6 +18,8 @@ from app.chains.parsing import parse_document
 from app.core.config import Settings
 from app.models.ingestion import IngestRequest, IngestResponse
 
+_CORPUS_FIELDS = ("institution", "jurisdiction", "confidentiality_level")
+
 
 def parent_key_prefix(doc_id: str) -> str:
     """Return the stable document-scoped prefix for parent-section keys.
@@ -57,6 +59,8 @@ def build_ingestion_chain(
     Children are clause chunks (embedded, searched). Parents are whole sections, kept in
     `parent_store` under `parent_id` so the read path can return the section around a match.
     Only children whose checksum differs from the stored one are embedded.
+    Requests must match the configured corpus. Existing chunk and parent identities
+    with different or missing scope are rejected before any embedding or write.
     Input: {"request": IngestRequest}. Run with `ainvoke`.
 
     Args:
@@ -66,6 +70,9 @@ def build_ingestion_chain(
 
     Returns:
         Composable runnable retaining the supplied inputs and configured integration behavior.
+
+    Raises:
+        ValueError: Invocation has conflicting corpus scope or produces no chunks.
     """
 
     def parse(state: dict[str, Any]) -> list[Element]:
@@ -76,8 +83,14 @@ def build_ingestion_chain(
 
         Returns:
             Ordered results produced by the documented operation.
+
+        Raises:
+            ValueError: Request scope differs from the configured corpus.
         """
-        return parse_document(state["request"].source_path)
+        request: IngestRequest = state["request"]
+        if any(getattr(request, field) != getattr(settings, field) for field in _CORPUS_FIELDS):
+            raise ValueError("Ingestion scope must match the configured corpus")
+        return parse_document(request.source_path)
 
     def chunk(state: dict[str, Any]) -> list[Chunk]:
         """Split parsed policy content into clause-aware chunks and complete parent sections.
@@ -161,21 +174,32 @@ def build_ingestion_chain(
         return {"children": children, "parents": parents}
 
     async def compare(state: dict[str, Any]) -> list[Document]:
-        """Select chunks whose content or embedding checksum changed.
+        """Check stored identities before selecting chunks whose checksum changed.
 
         Args:
             state: Current graph values carried between workflow nodes.
 
         Returns:
             Ordered results produced by the documented operation.
+
+        Raises:
+            ValueError: An existing identity belongs to a different or unscoped corpus.
         """
+        request: IngestRequest = state["request"]
         children: list[Document] = state["enriched"]["children"]
-        stored = {
-            document.id: document.metadata.get("checksum")
-            for document in await vector_store.aget_by_ids(
-                [child.id for child in children if child.id]
-            )
-        }
+        documents = await vector_store.aget_by_ids([child.id for child in children if child.id])
+        parent_keys = [
+            key
+            async for key in parent_store.ayield_keys(prefix=parent_key_prefix(request.doc_id))
+            if key.rsplit("_s", 1)[0] == request.doc_id
+        ]
+        for document in [*documents, *await parent_store.amget(parent_keys)]:
+            if document is not None and any(
+                document.metadata.get(field) != getattr(request, field)
+                for field in ("doc_id", *_CORPUS_FIELDS)
+            ):
+                raise ValueError("Stored document identity has conflicting or missing corpus scope")
+        stored = {document.id: document.metadata.get("checksum") for document in documents}
         return [child for child in children if stored.get(child.id) != child.metadata["checksum"]]
 
     async def embed_and_upsert(state: dict[str, Any]) -> IngestResponse:

@@ -783,12 +783,13 @@ Checks changing the embedding model re embeds everything.
 ### `test_stale_chunks_are_deleted_and_current_ones_kept`
 
 ```python
-def test_stale_chunks_are_deleted_and_current_ones_kept() -> None
+def test_stale_chunks_are_deleted_and_current_ones_kept(settings: Settings) -> None
 ```
 
-**Source:** [tests/test_ingestion.py:344](../tests/test_ingestion.py#L344)
+**Source:** [tests/test_ingestion.py:494](../tests/test_ingestion.py#L494)
 
-Checks stale chunks are deleted and current ones kept.
+Checks stale chunks are deleted only in the configured corpus, while current
+chunks, other documents, other corpus scopes and unscoped records are preserved.
 
 **Imported dependencies referenced:** `app.database.mongo.delete_stale_chunks`, `mongomock`, `typing.Any`
 

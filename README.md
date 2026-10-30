@@ -4,6 +4,8 @@ The [agent architecture and structural refactor report](C4-Documentation/AGENT_R
 includes the worked request flow, code tours, before/after checks and release blockers.
 The [release fixes report](C4-Documentation/RELEASE_FIXES_REPORT.md) records the
 subsequent checker/packaging repairs and passing full local quality gate.
+The [core fixes report](C4-Documentation/CORE_FIXES_REPORT.md) covers the subsequent
+LangGraph/FastAPI cleanup, MongoDB ingestion safeguards and their verification.
 
 A policy, product and lending advisor for the staff of NexaBank (a fictional bank), built as the hands-on codebase for the **Enterprise Agentic RAG** training program. Everything is synthetic.
 
@@ -616,13 +618,17 @@ sequenceDiagram
     CLI->>CLI: requests_from_register filters authoritative entries and builds IngestRequests
     loop for each IngestRequest
         CLI->>CH: ainvoke(request)
+        CH->>CH: reject request scope that differs from configuration
         CH->>PDF: parse
         PDF-->>CH: Title, NarrativeText, Table elements
         CH->>UNS: chunk
         UNS-->>CH: one chunk per clause (tables kept with their clause)
         CH->>CH: enrich: header line, metadata, chunk_id, parent_id, checksum
-        CH->>DB: compare: read stored checksums by chunk_id
-        DB-->>CH: checksums
+        CH->>DB: compare: read stored chunks by chunk_id
+        DB-->>CH: chunks with metadata and checksums
+        CH->>PSEC: read existing exact-document parent sections
+        PSEC-->>CH: parents with scope metadata
+        CH->>CH: reject conflicting or missing stored scope before writing
         alt changed chunks exist
             CH->>OAI: embed changed chunks
             OAI-->>CH: vectors
@@ -632,7 +638,7 @@ sequenceDiagram
         end
         CH->>PSEC: upsert current parents, then remove obsolete section keys
         CH-->>CLI: IngestResponse
-        CLI->>DB: delete_stale_chunks: retire chunks the source no longer has
+        CLI->>DB: delete_stale_chunks: retire obsolete chunks in the configured corpus
         CLI->>CLI: log document_ingested
     end
 ```
@@ -645,9 +651,15 @@ sequenceDiagram
 | 2 | Parse | `parse_document` | Ordered `Title`, `NarrativeText` and `Table` elements. Tables are extracted whole as HTML; page headers and footers are dropped. |
 | 3 | Chunk | `chunk_by_clause` | One chunk per numbered clause. A table or footnote stays with the clause that introduces it, and a table is never split. Only a clause over `CHUNK_MAX_CHARACTERS` is split, at sentence boundaries, with `CHUNK_OVERLAP_CHARACTERS` of overlap. |
 | 4 | Enrich + hash | `enrich` (inside the chain) | A LangChain `Document` per child chunk: identity header line, deterministic `chunk_id`, `parent_id`, clause fields, metadata and a `checksum`. Also one parent `Document` per section. |
-| 5 | Compare | `compare` (inside the chain) | The children whose checksum differs from the one stored under the same `chunk_id`. |
+| 5 | Compare | `compare` (inside the chain) | Rejects colliding chunks and existing exact-document parents with conflicting or missing identity/scope metadata, then selects children whose checksum changed. |
 | 6 | Embed + upsert | `embed_and_upsert` (inside the chain) | Changed child vectors are written first, then parents are upserted and obsolete sections removed. Embedding failure preserves previous parents. |
-| 7 | Retire | `delete_stale_chunks` (called by the service) | Chunks of this document that the latest ingest no longer produced are deleted. |
+| 7 | Retire | `delete_stale_chunks` (called by the service) | Deletes obsolete chunks of this document only when institution, jurisdiction and confidentiality match the configured corpus. |
+
+Run one ingestion job at a time: chunk and parent writes span collections without
+a transaction. Stored IDs remain unchanged. An identity collision or missing scope
+stops ingestion before embedding or writing; inspect and back up those records
+before correcting their provenance or choosing a distinct document ID. This guard
+does not turn shared collections into a concurrent multi-tenant write service.
 
 ---
 
@@ -759,7 +771,7 @@ Both models use `extra="forbid"`, so an unknown or misspelled field raises a val
 |---|---|---|
 | `get_vector_store` | `(settings, embedding) -> MongoDBAtlasVectorSearch` | Returns the chunk store with collection, embedding and index name passed explicitly. It never creates the index; that is manual (see [Section 6](#6-getting-started)). |
 | `get_parent_store` | `(settings) -> MongoDBDocStore` | Key-value store of whole sections, keyed by `parent_id`, in the `MONGODB_PARENT_COLLECTION` collection. Not embedded, no search index. |
-| `delete_stale_chunks` | `(collection, doc_id, keep_ids) -> int` | Deletes chunks of a document whose IDs the latest ingest did not produce. Returns how many were removed. |
+| `delete_stale_chunks` | `(collection, doc_id, keep_ids, *, settings) -> int` | Deletes obsolete chunks only within the corpus configured by `settings`. Returns how many were removed. |
 
 ### `app/services/ingestion.py`
 
@@ -1434,7 +1446,7 @@ or model responses. The following table focuses on the ingestion teaching cases:
 | `test_reingesting_replaces_parent_sections` | A second ingest leaves the same parent keys, with no duplicate-key error |
 | `test_only_new_or_changed_chunks_are_embedded` | A re-run sends nothing to the embedding model; one stale checksum re-embeds exactly one chunk |
 | `test_changing_the_embedding_model_re_embeds_everything` | A different `embedding_model` changes every checksum |
-| `test_stale_chunks_are_deleted_and_current_ones_kept` | `delete_stale_chunks` removes only the named document's leftover IDs |
+| `test_stale_chunks_are_deleted_and_current_ones_kept` | Cleanup removes only obsolete IDs in the configured corpus and preserves foreign/unscoped records |
 
 Controlled tests do not establish real embedding quality, Atlas ranking or
 live ingestion correctness. They use local/mocked stores; selected live API

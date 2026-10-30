@@ -242,13 +242,16 @@ Enrichment includes both embedding settings, so either change invalidates chunks
 def build_ingestion_chain(vector_store: VectorStore, parent_store: BaseStore[str, Document], settings: Settings) -> Runnable[dict[str, Any], IngestResponse]
 ```
 
-**Source:** [app/chains/ingestion.py:33](../app/chains/ingestion.py#L33)
+**Source:** [app/chains/ingestion.py:52](../app/chains/ingestion.py#L52)
 
 Write path: parse -> chunk -> enrich + hash -> compare -> embed + upsert.
 
 Children are clause chunks (embedded, searched). Parents are whole sections, kept in
 `parent_store` under `parent_id` so the read path can return the section around a match.
 Only children whose checksum differs from the stored one are embedded.
+Requests must match the configured corpus. Stored chunks with colliding IDs and
+all existing exact-document parents must retain matching document and corpus
+metadata; conflicting or missing identity/scope stops ingestion before writes.
 Input: {"request": IngestRequest}. Run with `ainvoke`.
 
 **Imported dependencies referenced:** `app.chains.chunking.Chunk`, `app.chains.chunking.chunk_by_clause`, `app.chains.parsing.parse_document`, `app.core.config.Settings`, `app.models.ingestion.IngestRequest`, `app.models.ingestion.IngestResponse`, `collections.Counter`, `collections.defaultdict`, `langchain_core.documents.Document`, `langchain_core.runnables.Runnable`, `langchain_core.runnables.RunnableLambda`, `langchain_core.runnables.RunnablePassthrough`, `langchain_core.stores.BaseStore`, `langchain_core.vectorstores.VectorStore`, `typing.Any`, `unstructured.documents.elements.Element`
@@ -313,9 +316,9 @@ Header; behavior is defined by the linked implementation.
 async def compare(state: dict[str, Any]) -> list[Document]
 ```
 
-**Source:** [app/chains/ingestion.py:103](../app/chains/ingestion.py#L103)
+**Source:** [app/chains/ingestion.py:176](../app/chains/ingestion.py#L176)
 
-Compare; behavior is defined by the linked implementation.
+Check stored chunk and parent identity/scope, then select changed checksums.
 
 **Imported dependencies referenced:** `langchain_core.documents.Document`, `typing.Any`
 

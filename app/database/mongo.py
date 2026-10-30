@@ -98,18 +98,32 @@ def get_parent_store(settings: Settings) -> MongoDBDocStore:
     return UpsertingParentStore(_database(settings)[settings.mongodb_parent_collection])
 
 
-def delete_stale_chunks(collection: Collection[Any], doc_id: str, keep_ids: list[str]) -> int:
-    """Retire chunks of `doc_id` that the latest ingest no longer produced.
+def delete_stale_chunks(
+    collection: Collection[Any], doc_id: str, keep_ids: list[str], *, settings: Settings
+) -> int:
+    """Retire obsolete chunks of `doc_id` within the configured corpus only.
 
     Args:
         collection: Collection supplied by the caller.
         doc_id: Doc id identifying the scoped record.
         keep_ids: Keep ids supplied by the caller.
+        settings: Corpus scope shared with ingestion and retrieval.
 
     Returns:
-        int value produced by this operation.
+        Number of obsolete chunks removed from this corpus.
+
+    Raises:
+        PyMongoError: MongoDB cannot complete the scoped deletion.
     """
-    result = collection.delete_many({"doc_id": doc_id, "_id": {"$nin": keep_ids}})
+    result = collection.delete_many(
+        {
+            "doc_id": doc_id,
+            "institution": settings.institution,
+            "jurisdiction": settings.jurisdiction,
+            "confidentiality_level": settings.confidentiality_level,
+            "_id": {"$nin": keep_ids},
+        }
+    )
     return result.deleted_count
 
 
