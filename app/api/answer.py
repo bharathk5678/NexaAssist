@@ -22,6 +22,16 @@ from app.services.evaluation import answer_with_quality
 router = APIRouter()
 logger = structlog.get_logger()
 
+_ANSWER_ERRORS = (
+    OpenAIError,
+    OpenAIRefusalError,
+    PyMongoError,
+    ValueError,
+    TimeoutError,
+    OutputParserException,
+    httpx.HTTPError,
+)
+
 
 @router.post("/answer/evaluated")
 async def evaluated_answer(
@@ -41,15 +51,7 @@ async def evaluated_answer(
     """
     try:
         return await answer_with_quality(request, settings)
-    except (
-        OpenAIError,
-        OpenAIRefusalError,
-        PyMongoError,
-        ValueError,
-        TimeoutError,
-        OutputParserException,
-        httpx.HTTPError,
-    ) as exc:
+    except _ANSWER_ERRORS as exc:
         logger.error("evaluated_answer_failed", error_type=type(exc).__name__)
         raise HTTPException(status_code=503, detail="Answer service unavailable") from None
 
@@ -72,14 +74,6 @@ async def answer(
     """
     try:
         return await answer_policy(request, settings)
-    except (
-        OpenAIError,
-        OpenAIRefusalError,
-        PyMongoError,
-        ValueError,
-        TimeoutError,
-        OutputParserException,
-        httpx.HTTPError,
-    ) as exc:
+    except _ANSWER_ERRORS as exc:
         logger.error("answer_failed", error_type=type(exc).__name__)
         raise HTTPException(status_code=503, detail="Answer service unavailable") from None
