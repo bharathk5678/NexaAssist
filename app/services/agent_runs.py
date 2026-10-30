@@ -1,3 +1,5 @@
+"""Manage scoped durable runs, reviewer approval, leases and banking action recovery."""
+
 from __future__ import annotations
 
 import asyncio
@@ -32,12 +34,30 @@ logger = structlog.get_logger()
 
 
 class RunError(Exception):
+    """Carry a safe HTTP status and detail across the service/router boundary.
+
+    Args:
+        status_code: Status code supplied by the caller.
+        detail: Detail supplied by the caller.
+    """
+
     def __init__(self, status_code: int, detail: str) -> None:
         self.status_code, self.detail = status_code, detail
         super().__init__(detail)
 
 
 class AgentRunService:
+    """Coordinate scoped durable runs and exact reviewer-authorized banking operations.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        config: Workflow settings or graph configuration supplied by the caller.
+        rag: Bounded client for the RAG service.
+        bank: Authenticated banking client, or None when unconfigured.
+        store: Scoped run persistence and checkpoint adapter.
+        access: Server-issued principal identity, customer entitlements and review permission.
+    """
+
     @classmethod
     async def create(
         cls,
@@ -47,6 +67,21 @@ class AgentRunService:
         bank: httpx.AsyncClient | None,
         access: ValidationAccess,
     ) -> AgentRunService:
+        """Construct the scoped service with its durable MongoDB run store.
+
+        Args:
+            settings: Validated application configuration for this operation.
+            config: Workflow settings or graph configuration supplied by the caller.
+            rag: Bounded client for the RAG service.
+            bank: Authenticated banking client, or None when unconfigured.
+            access: Server-issued principal identity, customer entitlements and review permission.
+
+        Returns:
+            Scoped service instance.
+
+        Raises:
+            PyMongoError: Run storage or checkpoint initialization fails.
+        """
         store = await asyncio.to_thread(MongoRunStore, settings)
         return cls(settings, config, rag, bank, store, access)
 
@@ -106,6 +141,19 @@ class AgentRunService:
         async def execute(
             request: AgentRequest, validation: ValidationResult, key: str
         ) -> SubmittedServiceRequest:
+            """Recheck banking identity, execution lease and owner access before the external write.
+
+            Args:
+                request: Validated request retaining the caller's explicit scope and action details.
+                validation: Retained policy and banking validation for the exact proposed action.
+                key: Key supplied by the caller.
+
+            Returns:
+                SubmittedServiceRequest value produced by this operation.
+
+            Raises:
+                RunError: The run lease was lost; no new submission was started.
+            """
             if self.bank is None or self._bank_scope() != record["bank_scope"]:
                 raise RunError(
                     409, "The banking identity or destination changed; reconcile this run"
@@ -164,10 +212,33 @@ class AgentRunService:
         )
 
     async def get(self, run_id: UUID) -> AgentRunResponse:
+        """Read a visible saved run and derive its current graph/expiry status.
+
+        Args:
+            run_id: Identifier of the saved workflow to read or resume.
+
+        Returns:
+            Validated saved-run response reflecting the current workflow state.
+
+        Raises:
+            RunError: The run is not visible or its owner is no longer authorized.
+            PyMongoError: Checkpoint or run storage cannot be read.
+        """
         record = await self._record(run_id)
         return await self._view(record, self._graph(record, "read-only"))
 
     async def start(self, request: AgentRequest) -> AgentRunResponse:
+        """Create an owner-bound run and begin classified proposal preparation.
+
+        Args:
+            request: Validated request retaining the caller's explicit scope and action details.
+
+        Returns:
+            Validated saved-run response reflecting the current workflow state.
+
+        Raises:
+            RunError: Remove sensitive identifiers or instruction overrides before starting a run.
+        """
         if request.customer_id is not None and request.customer_id not in self.access.customer_ids:
             raise RunError(403, "Customer access is not authorized")
         if unsafe_input(request):
@@ -190,6 +261,18 @@ class AgentRunService:
         return await self._drive(record, "start", request=request)
 
     async def approve(self, run_id: UUID, decision: ApprovalDecision) -> AgentRunResponse:
+        """Record a different authorized reviewer's exact decision and resume the run.
+
+        Args:
+            run_id: Identifier of the saved workflow to read or resume.
+            decision: Reviewer decision bound to the exact retained proposal hash.
+
+        Returns:
+            Validated saved-run response reflecting the current workflow state.
+
+        Raises:
+            RunError: A different authorized reviewer must decide this proposal.
+        """
         if not self.access.can_approve:
             raise RunError(403, "Reviewer authorization is required")
         record = await self._record(run_id)
@@ -198,6 +281,17 @@ class AgentRunService:
         return await self._drive(record, "approve", decision=decision)
 
     async def retry(self, run_id: UUID) -> AgentRunResponse:
+        """Resume only the saved approved banking operation eligible for safe recovery.
+
+        Args:
+            run_id: Identifier of the saved workflow to read or resume.
+
+        Returns:
+            Validated saved-run response reflecting the current workflow state.
+
+        Raises:
+            RunError: The run is not visible or the saved operation is not safely retryable.
+        """
         return await self._drive(await self._record(run_id), "retry")
 
     async def _drive(

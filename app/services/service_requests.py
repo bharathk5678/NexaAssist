@@ -1,3 +1,5 @@
+"""Submit exact authorized proposals and verify matching banking receipts."""
+
 from __future__ import annotations
 
 import httpx
@@ -21,6 +23,23 @@ async def submit_service_request(
     access: ValidationAccess,
     idempotency_key: str,
 ) -> SubmittedServiceRequest:
+    """Submit the exact allowed proposal and verify the banking receipt identity.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        validation: Retained policy and banking validation for the exact proposed action.
+        client: HTTP client configured for the required upstream service.
+        access: Server-issued principal identity, customer entitlements and review permission.
+        idempotency_key: Persisted operation key reused for the unchanged banking submission.
+
+    Returns:
+        Validated matching bank receipt together with retained policy evidence.
+
+    Raises:
+        ValueError: Banking receipt differs from the submitted proposal.
+        httpx.HTTPError: Submission fails or its receipt cannot be confirmed.
+        ValidationError: The banking receipt does not satisfy its strict response schema.
+    """
     expected = ServiceRequestProposal(
         customer_id=request.customer_id, **request.action_details.model_dump()
     )

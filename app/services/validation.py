@@ -1,3 +1,5 @@
+"""Validate service proposals against exact policy evidence and current owned accounts."""
+
 from __future__ import annotations
 
 import json
@@ -57,6 +59,20 @@ async def validate_service_request(
     client: httpx.AsyncClient,
     access: ValidationAccess,
 ) -> ValidationResult:
+    """Check authorized service details against operations policy and owned loan facts.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        evidence: Retained retrieval results and complete applicable amendments.
+        client: HTTP client configured for the required upstream service.
+        access: Server-issued principal identity, customer entitlements and review permission.
+
+    Returns:
+        Allowed proposal with evidence, or an explicit blocked/insufficient-evidence result.
+
+    Raises:
+        ValueError: Validation evidence date differs from requested scope.
+    """
     details = request.action_details
     if details is not None and details.request_type == "OPT_IN_CIR_2026_07_PART_PREPAY":
         return await validate_opt_in(request, evidence, client, access)
@@ -116,6 +132,20 @@ async def validate_opt_in(
     client: httpx.AsyncClient,
     access: ValidationAccess,
 ) -> ValidationResult:
+    """Check the circular opt-in rule against current owned home-loan facts.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        evidence: Retained retrieval results and complete applicable amendments.
+        client: HTTP client configured for the required upstream service.
+        access: Server-issued principal identity, customer entitlements and review permission.
+
+    Returns:
+        Allowed opt-in proposal, or an explicit failure of scope, evidence or loan eligibility.
+
+    Raises:
+        ValueError: Banking response is missing opt-in status.
+    """
     if request.customer_id not in access.customer_ids:
         return ValidationResult(decision="blocked", reason="Customer access is not authorized.")
     if (

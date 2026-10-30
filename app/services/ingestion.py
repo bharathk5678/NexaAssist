@@ -1,3 +1,5 @@
+"""Ingest registered policies or retire documents through scoped database operations."""
+
 from __future__ import annotations
 
 import argparse
@@ -26,7 +28,15 @@ DOC_TYPES = {"POL": "policy", "CIR": "circular"}
 
 
 def requests_from_register(register_path: Path, settings: Settings) -> list[IngestRequest]:
-    """One IngestRequest per authoritative document in document_register.json."""
+    """One IngestRequest per authoritative document in document_register.json.
+
+    Args:
+        register_path: Register path supplied by the caller.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        Ordered results produced by the documented operation.
+    """
     return [
         IngestRequest(
             source_path=str(register_path.parent / entry["file"]),
@@ -48,7 +58,14 @@ def requests_from_register(register_path: Path, settings: Settings) -> list[Inge
 
 
 async def ingest(requests: list[IngestRequest]) -> list[IngestResponse]:
-    """Embed only new or changed chunks, then retire chunks the source no longer has."""
+    """Embed only new or changed chunks, then retire chunks the source no longer has.
+
+    Args:
+        requests: Requests supplied by the caller.
+
+    Returns:
+        Ordered results produced by the documented operation.
+    """
     settings = get_settings()
     vector_store = get_vector_store(settings, get_embeddings(settings))
     chain = build_ingestion_chain(vector_store, get_parent_store(settings), settings)

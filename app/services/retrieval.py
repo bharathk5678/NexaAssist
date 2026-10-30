@@ -1,3 +1,5 @@
+"""Compose configured policy search, parent expansion and optional reranking."""
+
 from __future__ import annotations
 
 from collections import Counter
@@ -18,6 +20,15 @@ retrieval_metrics: Counter[str] = Counter()
 
 
 async def retrieve_policy(request: RetrieveRequest, settings: Settings) -> RetrieveResponse:
+    """Retrieve scoped policy evidence using the configured search and reranking pipeline.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        Scoped ranked evidence, complete applicable amendments and retrieval timings.
+    """
     retrieval_metrics["requests"] += 1
     try:
         vector_store = get_vector_store(settings, get_embeddings(settings))

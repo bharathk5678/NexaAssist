@@ -1,3 +1,5 @@
+"""Wire model classification, HTTP retrieval and deterministic validation into the graph."""
+
 from __future__ import annotations
 
 import asyncio
@@ -47,6 +49,23 @@ def build_workflow(
     actioner: Callable[[AgentRequest, ValidationResult, str], Awaitable[SubmittedServiceRequest]]
     | None = None,
 ) -> CompiledStateGraph:
+    """Wire the model, retrieval adapter and optional banking capabilities into the graph.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        client: HTTP client configured for the required upstream service.
+        access: Server-issued principal identity, customer entitlements and review permission.
+        banking_client: Authenticated banking client, or None when the integration is disabled.
+        agent_settings: Validated agent identities, service endpoints and work limits.
+        checkpointer: Durable graph checkpoint store required for human-reviewed actions.
+        actioner: Optional execution callback for an exactly approved service proposal.
+
+    Returns:
+        Compiled classified graph wired to the supplied optional capabilities.
+
+    Example:
+        graph = build_workflow(settings, rag_client, agent_settings=config)
+    """
     model_settings = (
         settings.model_copy(
             update={"chat_max_output_tokens": agent_settings.agent_model_max_output_tokens}
@@ -67,6 +86,14 @@ def build_workflow(
 
     async def classify(value: AgentRequest) -> IntentDecision:
         # Notes belong to the fixed bank payload, not to the routing model.
+        """Classify explicit request scope using the versioned structured intent prompt.
+
+        Args:
+            value: Candidate value supplied by validation or the calling integration.
+
+        Returns:
+            IntentDecision value produced by this operation.
+        """
         routing_request = value.model_dump(mode="json")
         if routing_request["action_details"] is not None:
             routing_request["action_details"].pop("notes", None)
@@ -82,13 +109,39 @@ def build_workflow(
             )
 
     async def retrieve(value: RetrieveRequest) -> RetrieveResponse:
+        """Retrieve scoped policy evidence through the configured retrieval integration.
+
+        Args:
+            value: Candidate value supplied by validation or the calling integration.
+
+        Returns:
+            RetrieveResponse value produced by this operation.
+        """
         return await retrieve_over_http(value, client)
 
     async def answer(value: RetrieveRequest, evidence: RetrieveResponse) -> AnswerResponse:
+        """Generate a grounded answer using evidence retained for the request.
+
+        Args:
+            value: Candidate value supplied by validation or the calling integration.
+            evidence: Retained retrieval results and complete applicable amendments.
+
+        Returns:
+            AnswerResponse value produced by this operation.
+        """
         chain = build_answer_chain(RunnableLambda(lambda _: evidence), llm, settings)
         return await chain.ainvoke(value, config={"callbacks": callbacks})
 
     async def validate(value: AgentRequest, evidence: RetrieveResponse) -> ValidationResult:
+        """Validate the service proposal using policy evidence and current authorized banking facts.
+
+        Args:
+            value: Candidate value supplied by validation or the calling integration.
+            evidence: Retained retrieval results and complete applicable amendments.
+
+        Returns:
+            ValidationResult value produced by this operation.
+        """
         assert banking_client is not None and access is not None
         with (
             LLMObs.workflow(
@@ -127,6 +180,27 @@ async def orchestrate(
     access: ValidationAccess | None = None,
     banking_client: httpx.AsyncClient | None = None,
 ) -> AgentResponse:
+    """Execute one independent validation-only or policy-answer graph request.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        settings: Validated application configuration for this operation.
+        agent_settings: Validated agent identities, service endpoints and work limits.
+        client: HTTP client configured for the required upstream service.
+        access: Server-issued principal identity, customer entitlements and review permission.
+        banking_client: Authenticated banking client, or None when the integration is disabled.
+
+    Returns:
+        Validated response from the selected terminal graph branch.
+
+    Example:
+        response = await orchestrate(request, settings, config, rag_client)
+
+    Raises:
+        TimeoutError: The configured workflow deadline expires.
+        ValueError: The structured model output or reserved model work is invalid.
+        httpx.HTTPError: An upstream HTTP operation fails.
+    """
     agent_metrics["requests"] += 1
     graph = build_workflow(
         settings,

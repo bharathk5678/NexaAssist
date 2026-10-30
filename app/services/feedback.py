@@ -1,3 +1,5 @@
+"""Persist feedback, protect review updates and attach optional scored telemetry."""
+
 from __future__ import annotations
 
 import asyncio
@@ -13,6 +15,18 @@ from app.models.feedback import FeedbackRecord, FeedbackRequest, FeedbackReview
 
 
 async def submit_feedback(request: FeedbackRequest, settings: Settings) -> FeedbackRecord:
+    """Store feedback and submit optional scored telemetry without discarding saved data.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        FeedbackRecord value produced by this operation.
+
+    Raises:
+        ValueError: Submission ID already used for different feedback.
+    """
     record = FeedbackRecord(
         **request.model_dump(),
         feedback_id=uuid5(
@@ -48,8 +62,27 @@ async def submit_feedback(request: FeedbackRequest, settings: Settings) -> Feedb
 
 
 async def list_recent(settings: Settings, limit: int) -> list[FeedbackRecord]:
+    """Return the recent feedback records used by the authorized review workflow.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        limit: Limit supplied by the caller.
+
+    Returns:
+        Ordered results produced by the documented operation.
+    """
     return await asyncio.to_thread(database.list_feedback, settings, limit)
 
 
 async def review(feedback_id: UUID, request: FeedbackReview, settings: Settings) -> bool:
+    """Apply the requested feedback review update through the persistence adapter.
+
+    Args:
+        feedback_id: Feedback id identifying the scoped record.
+        request: Validated request retaining the caller's explicit scope and action details.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        Whether the documented condition or operation succeeded.
+    """
     return await asyncio.to_thread(database.review_feedback, feedback_id, request, settings)
