@@ -9,8 +9,8 @@ import structlog
 from fastapi import APIRouter, Depends, HTTPException
 from pymongo.errors import PyMongoError
 
-from app.api.agent import banking_client, rag_client
 from app.api.auth import get_validation_access
+from app.api.dependencies import banking_client, rag_client
 from app.core.config import AgentSettings, Settings, get_agent_settings, get_settings
 from app.models.agent import AgentRequest
 from app.models.agent_run import AgentRunResponse, ApprovalDecision

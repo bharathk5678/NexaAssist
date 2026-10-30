@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
 from typing import Annotated
 
 import httpx
@@ -11,6 +10,7 @@ from langchain_openai.chat_models.base import OpenAIRefusalError
 from openai import OpenAIError
 
 from app.api.auth import get_validation_access
+from app.api.dependencies import banking_client, rag_client
 from app.api.operations import health
 from app.core.config import AgentSettings, Settings, get_agent_settings, get_settings
 from app.models.agent import AgentRequest, AgentResponse, AgentSubmissionRequest
@@ -29,32 +29,6 @@ async def metrics() -> dict[str, int]:
         "agent_requests_total": agent_metrics["requests"],
         "agent_completed_total": agent_metrics["completed"],
     }
-
-
-async def rag_client(
-    settings: Annotated[AgentSettings, Depends(get_agent_settings)],
-) -> AsyncIterator[httpx.AsyncClient]:
-    async with httpx.AsyncClient(
-        base_url=str(settings.rag_base_url).rstrip("/") + "/",
-        timeout=settings.agent_http_timeout_seconds,
-        follow_redirects=False,
-    ) as client:
-        yield client
-
-
-async def banking_client(
-    settings: Annotated[AgentSettings, Depends(get_agent_settings)],
-) -> AsyncIterator[httpx.AsyncClient | None]:
-    if settings.banking_api_token is None:
-        yield None
-        return
-    async with httpx.AsyncClient(
-        base_url=str(settings.banking_base_url).rstrip("/") + "/",
-        headers={"Authorization": "Bearer " + settings.banking_api_token.get_secret_value()},
-        timeout=settings.agent_http_timeout_seconds,
-        follow_redirects=False,
-    ) as client:
-        yield client
 
 
 @router.post("/agent", response_model=AgentResponse, response_model_exclude={"submission"})
