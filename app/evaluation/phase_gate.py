@@ -27,6 +27,18 @@ PROTOCOL_FIELDS = (
 
 
 def measured_baseline(report: dict[str, Any], dataset: Path) -> dict[str, Any]:
+    """Validate a complete scored report and capture its dataset/model protocol identity.
+
+    Args:
+        report: Measured quality or security report to validate.
+        dataset: Golden dataset file used by this evaluation.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+
+    Raises:
+        ValueError: RAGAS means do not match the measured case scores.
+    """
     cases = load_cases(dataset)
     records, ragas = report["records"], report["ragas"]
     if report["status"] != "completed" or len(records) != len(cases):
@@ -82,6 +94,19 @@ def measured_baseline(report: dict[str, Any], dataset: Path) -> dict[str, Any]:
 
 
 def compare(report: dict[str, Any], baseline: dict[str, Any], dataset: Path) -> dict[str, Any]:
+    """Reject missing, incompatible or regressed release-quality measurements.
+
+    Args:
+        report: Measured quality or security report to validate.
+        baseline: Previously reviewed measured values or finding fingerprints.
+        dataset: Golden dataset file used by this evaluation.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+
+    Raises:
+        ValueError: The evaluation baseline is invalid.
+    """
     candidate = measured_baseline(report, dataset)
     if any(candidate[key] != baseline[key] for key in ("dataset_sha256", "case_count", "protocol")):
         raise ValueError("Dataset or scoring protocol changed; capture and review a new baseline")
@@ -101,6 +126,11 @@ def compare(report: dict[str, Any], baseline: dict[str, Any], dataset: Path) -> 
 
 
 def main() -> None:
+    """Run the phase gate command with validated arguments and explicit outcomes.
+
+    Raises:
+        SystemExit: The operation cannot satisfy its documented validation or execution contract.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("operation", choices=("capture", "check"))
     parser.add_argument("--report", type=Path, required=True)

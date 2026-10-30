@@ -1,3 +1,5 @@
+"""Prepare, load, review and recover saved service-request runs in Streamlit."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -14,6 +16,7 @@ from app.models.validation import ServiceRequestDetails, ServiceRequestType
 
 
 def clear_run() -> None:
+    """Discard the loaded proposal and prior error when the active credential or run changes."""
     st.session_state.pop("agent_run", None)
     st.session_state.pop("agent_run_error", None)
 
@@ -21,6 +24,18 @@ def clear_run() -> None:
 def request_run(
     client: httpx.Client, method: str, path: str, token: str, body: dict | None = None
 ) -> AgentRunResponse | None:
+    """Call a durable-run endpoint and retain either a validated result or a safe UI error.
+
+    Args:
+        client: HTTP client configured for the required upstream service.
+        method: Method supplied by the caller.
+        path: Input file or resource path for this operation.
+        token: Token supplied by the caller.
+        body: Request payload used by this mock operation or test.
+
+    Returns:
+        Validated run view, or None after retaining a safe request error.
+    """
     clear_run()
     try:
         response = client.request(
@@ -72,6 +87,16 @@ def request_run(
 
 
 def agent_workspace(client: httpx.Client, as_of: date, product_id: str | None) -> None:
+    """Render the owner-to-reviewer service-request workflow and safe saved-run recovery.
+
+    Args:
+        client: HTTP client configured for the required upstream service.
+        as_of: As of supplied by the caller.
+        product_id: Product id identifying the scoped record.
+
+    Example:
+        agent_workspace(client, policy_date, selected_product)
+    """
     st.title("Service requests", anchor=False)
     st.caption("A different authorized reviewer must approve each proposal before submission.")
     token = st.text_input(

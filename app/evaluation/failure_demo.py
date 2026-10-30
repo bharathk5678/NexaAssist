@@ -16,6 +16,14 @@ from app.models.retrieval import Citation, RetrieveHit, RetrieveResponse, Retrie
 
 
 def demo_report(dataset: Path) -> dict[str, object]:
+    """Build the controlled answer/citation failure report without claiming live quality measurements.
+
+    Args:
+        dataset: Golden dataset file used by this evaluation.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     cases = load_golden(dataset)
     golden = cases[0]
     quote = "Maximum loan amount: ₹7.5 crore."

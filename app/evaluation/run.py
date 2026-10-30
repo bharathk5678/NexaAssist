@@ -1,3 +1,5 @@
+"""Generate golden-case reports, score exact answer evidence and publish evaluations."""
+
 from __future__ import annotations
 
 import argparse
@@ -33,6 +35,15 @@ logger = structlog.get_logger()
 
 
 class GoldenCase(BaseModel):
+    """Validated golden case contract.
+
+    Attributes:
+        input: Validated scoped policy request for the evaluation case.
+        expected_output: Reference answer for the golden evaluation case.
+        context: Expected policy evidence references for a golden evaluation case.
+        expected_status: Required answer/abstention/clarification outcome for the case.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
     input: RetrieveRequest
@@ -44,6 +55,14 @@ class GoldenCase(BaseModel):
 
 
 class JudgeScore(BaseModel):
+    """Validated judge score contract.
+
+    Attributes:
+        correctness: Finite structured-judge score against the expected answer.
+        groundedness: Finite structured-judge score for support in retained evidence.
+        rationale: Structured explanation accompanying the quality judgment.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
     correctness: float = Field(ge=0, le=1, allow_inf_nan=False)
@@ -52,6 +71,17 @@ class JudgeScore(BaseModel):
 
 
 def load_cases(path: Path) -> list[GoldenCase]:
+    """Load the batch evaluation dataset using its existing golden-case contract.
+
+    Args:
+        path: Input file or resource path for this operation.
+
+    Returns:
+        Nonempty sequence of validated batch golden cases.
+
+    Raises:
+        ValueError: Evaluation dataset is empty.
+    """
     cases = [
         GoldenCase.model_validate_json(line)
         for line in path.read_text().splitlines()
@@ -63,6 +93,14 @@ def load_cases(path: Path) -> list[GoldenCase]:
 
 
 def trace_summary(runs: list[Any]) -> list[dict[str, Any]]:
+    """Flatten retained chain spans into names, durations and failure indicators.
+
+    Args:
+        runs: Runs supplied by the caller.
+
+    Returns:
+        Ordered results produced by the documented operation.
+    """
     spans = []
     for run in runs:
         spans.append(
@@ -80,7 +118,15 @@ def trace_summary(runs: list[Any]) -> list[dict[str, Any]]:
 
 
 async def collect_records(cases: list[GoldenCase], settings: Settings) -> list[dict[str, Any]]:
-    """Generate once per case; evaluate the exact evidence passed to that generation."""
+    """Generate once per case; evaluate the exact evidence passed to that generation.
+
+    Args:
+        cases: Validated golden inputs and expected outcomes.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        Ordered results produced by the documented operation.
+    """
     model = get_chat_model(settings)
     judge_settings = settings.model_copy(
         update={"chat_model": settings.eval_judge_model or settings.chat_model}
@@ -164,6 +210,15 @@ async def collect_records(cases: list[GoldenCase], settings: Settings) -> list[d
 
 
 async def evaluate_ragas(records: list[dict[str, Any]], settings: Settings) -> dict[str, Any]:
+    """Score the answerable batch cases and penalize missing retrieval evidence.
+
+    Args:
+        records: Completed per-case evaluation records.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     from app.evaluation.ragas_metrics import RagasScorer
 
     eligible = [record for record in records if record["expected_status"] == "answered"]
@@ -209,6 +264,15 @@ async def evaluate_ragas(records: list[dict[str, Any]], settings: Settings) -> d
 
 
 def quality_gate(report: dict[str, Any], minimum: float | None) -> bool:
+    """Check the optional score floor and required status/citation conditions.
+
+    Args:
+        report: Measured quality or security report to validate.
+        minimum: Minimum supplied by the caller.
+
+    Returns:
+        Whether the report meets the requested score and status conditions.
+    """
     if minimum is None:
         return True
     values = list(report["ragas"]["means"].values())
@@ -225,7 +289,15 @@ def quality_gate(report: dict[str, Any], minimum: float | None) -> bool:
 
 
 def publish_datadog_evaluations(records: list[dict[str, Any]], ragas: dict[str, Any]) -> int:
-    """Join existing scores to the generation's workflow, including abstention cases."""
+    """Join existing scores to the generation's workflow, including abstention cases.
+
+    Args:
+        records: Completed per-case evaluation records.
+        ragas: Ragas supplied by the caller.
+
+    Returns:
+        int value produced by this operation.
+    """
     scores = iter(ragas["scores"])
     count = 0
     for record in records:
@@ -259,6 +331,15 @@ def publish_datadog_evaluations(records: list[dict[str, Any]], ragas: dict[str, 
 
 
 async def run(cases: list[GoldenCase], settings: Settings) -> dict[str, Any]:
+    """Run the requested evaluation protocol and retain explicit measurement outcomes.
+
+    Args:
+        cases: Validated golden inputs and expected outcomes.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     records = await collect_records(cases, settings)
     ragas = await evaluate_ragas(records, settings)
     datadog: dict[str, Any] = {"status": "disabled"}
@@ -292,6 +373,11 @@ async def run(cases: list[GoldenCase], settings: Settings) -> dict[str, Any]:
 
 
 def main() -> None:
+    """Run the run command with validated arguments and explicit outcomes.
+
+    Raises:
+        SystemExit: The operation cannot satisfy its documented validation or execution contract.
+    """
     parser = argparse.ArgumentParser(description="Run Phase 1 RAGAS and LLM-as-Judge evaluation")
     parser.add_argument("--dataset", type=Path, default=ROOT / "evaluation/datasets/answer.jsonl")
     parser.add_argument("--output", type=Path, default=ROOT / "app/evaluation/results/latest.json")

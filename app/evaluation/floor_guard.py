@@ -1,3 +1,5 @@
+"""Inspect diffs for weakened checks, removed assertions and unfinished work."""
+
 from __future__ import annotations
 
 import argparse
@@ -36,6 +38,18 @@ def _expected_set(node: ast.AST) -> tuple[str, frozenset[str]] | None:
 
 
 def check_diff(diff: str, sources: dict[str, str]) -> list[Finding]:
+    """Report new constraint bypasses, weakened checks and removed assertions in a diff.
+
+    Args:
+        diff: Unified source diff to inspect without weakening existing checks.
+        sources: Numbered policy passages and citation metadata retained for generation.
+
+    Returns:
+        Path, line and rule triples for detected constraint violations.
+
+    Raises:
+        ValueError: Invalid diff hunk.
+    """
     added: dict[str, set[int]] = {}
     additions: list[tuple[str, int, str]] = []
     removals: list[tuple[str, int, str]] = []
@@ -162,12 +176,31 @@ def check_diff(diff: str, sources: dict[str, str]) -> list[Finding]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the floor guard command with validated arguments and explicit outcomes.
+
+    Args:
+        argv: Optional CLI arguments; None uses the process command line.
+
+    Returns:
+        int value produced by this operation.
+
+    Raises:
+        ValueError: Unable to inspect untracked file.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", default="HEAD")
     args = parser.parse_args(argv)
     root = Path(__file__).resolve().parents[2]
 
     def git(*values: str) -> str:
+        """Read the requested repository state and fail explicitly if Git cannot inspect it.
+
+        Args:
+            values: Values supplied by the caller.
+
+        Returns:
+            Text representation produced by the documented operation.
+        """
         return subprocess.run(
             ["git", *values], cwd=root, check=True, capture_output=True, text=True
         ).stdout

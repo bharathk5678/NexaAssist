@@ -14,6 +14,14 @@ from app.models.retrieval import RetrieveHit, RetrieveRequest, RetrieveResponse
 
 
 class ExpectedEvidence(BaseModel):
+    """Validated expected evidence contract.
+
+    Attributes:
+        doc_id: Stable policy instrument identifier across stored records.
+        clause: Published clause identifier, or None for complete instruments/front matter.
+        clause_key: Optional metadata key resolving the expected clause evidence.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
     doc_id: str = Field(min_length=1)
@@ -22,6 +30,15 @@ class ExpectedEvidence(BaseModel):
 
 
 class GoldenAnswer(BaseModel):
+    """Validated golden answer contract.
+
+    Attributes:
+        input: Validated scoped policy request for the evaluation case.
+        expected_output: Reference answer for the golden evaluation case.
+        context: Expected policy evidence references for a golden evaluation case.
+        expected_status: Required answer/abstention/clarification outcome for the case.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
     input: RetrieveRequest
@@ -31,6 +48,13 @@ class GoldenAnswer(BaseModel):
 
 
 class EvidenceContext(BaseModel):
+    """Validated evidence context contract.
+
+    Attributes:
+        evidence_id: Number joining an inline answer marker to its retained source.
+        hit: Retained retrieved passage and its source citation.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
     evidence_id: int = Field(ge=1)
@@ -38,6 +62,15 @@ class EvidenceContext(BaseModel):
 
 
 class EvaluationRecord(BaseModel):
+    """Validated evaluation record contract.
+
+    Attributes:
+        case_id: Identifier linking a diagnostic or request to its retained case.
+        golden: Expected case contract used for the diagnostic.
+        response: Validated answer or workflow result retained for rendering.
+        sources: Numbered policy passages and citation metadata retained for generation.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
     case_id: str
@@ -47,6 +80,17 @@ class EvaluationRecord(BaseModel):
 
 
 def load_golden(path: Path) -> list[GoldenAnswer]:
+    """Load and validate the mechanical-check golden dataset, rejecting an empty file.
+
+    Args:
+        path: Input file or resource path for this operation.
+
+    Returns:
+        Nonempty sequence of validated mechanical-check golden cases.
+
+    Raises:
+        ValueError: Golden dataset is empty.
+    """
     cases = [
         GoldenAnswer.model_validate_json(line)
         for line in path.read_text().splitlines()
@@ -58,7 +102,14 @@ def load_golden(path: Path) -> list[GoldenAnswer]:
 
 
 def capture_sources(retrieved: RetrieveResponse) -> list[EvidenceContext]:
-    """Mirror the answer chain's document/version/parent deduplication, in order."""
+    """Mirror the answer chain's document/version/parent deduplication, in order.
+
+    Args:
+        retrieved: Retrieved supplied by the caller.
+
+    Returns:
+        Ordered unique evidence identities for mechanical fixture checks.
+    """
     # shortcut: keep this key aligned with build_answer_chain until it exposes context.
     unique: dict[tuple[str, str, str], RetrieveHit] = {}
     for hit in retrieved.evidence:
@@ -68,7 +119,14 @@ def capture_sources(retrieved: RetrieveResponse) -> list[EvidenceContext]:
 
 
 def mechanical_checks(record: EvaluationRecord) -> dict[str, bool | float | None]:
-    """Citation identity/quote checks and child-ID coverage, never semantic recall."""
+    """Citation identity/quote checks and child-ID coverage, never semantic recall.
+
+    Args:
+        record: Retained evaluation case, generated answer and supporting source identities.
+
+    Returns:
+        Status, exact-citation and child-reference-coverage results.
+    """
     response, expected = record.response, record.golden
     sources = {source.evidence_id: source.hit for source in record.sources}
     markers = {int(number) for number in re.findall(r"\[(\d+)\]", response.answer)}
