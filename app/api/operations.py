@@ -1,3 +1,5 @@
+"""Expose process liveness, retrieval counters and latency percentiles."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter
@@ -10,11 +12,21 @@ router = APIRouter()
 
 @router.get("/health")
 async def health() -> dict[str, str]:
+    """Return process liveness without asserting external dependency readiness.
+
+    Returns:
+        Process liveness response; external dependencies are not checked.
+    """
     return {"status": "ok"}
 
 
 @router.get("/metrics")
 async def metrics() -> dict[str, int | float]:
+    """Return process-local retrieval counters.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     return {
         "retrieval_requests_total": retrieval_metrics["requests"],
         "retrieval_errors_total": retrieval_metrics["errors"],
@@ -25,5 +37,9 @@ async def metrics() -> dict[str, int | float]:
 
 @router.get("/metrics/latency")
 async def latency_metrics() -> dict[str, int | float]:
-    """Nearest-rank percentiles of the last 1000 successful requests in this process."""
+    """Nearest-rank percentiles of the last 1000 successful requests in this process.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     return latency_summary()

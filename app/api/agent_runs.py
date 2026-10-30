@@ -1,3 +1,5 @@
+"""Expose scoped durable runs, separate reviewer decisions and safe action retries."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
@@ -24,6 +26,17 @@ logger = structlog.get_logger()
 def named_access(
     access: Annotated[ValidationAccess | None, Depends(get_validation_access)],
 ) -> ValidationAccess:
+    """Require a named identity for durable runs instead of a legacy training credential.
+
+    Args:
+        access: Server-issued principal identity, customer entitlements and review permission.
+
+    Returns:
+        Authenticated named access eligible to enter the durable-run service.
+
+    Raises:
+        HTTPException: Named agent credentials are required.
+    """
     if access is None or access.principal_id == "training":
         raise HTTPException(status_code=403, detail="Named agent credentials are required")
     return access
@@ -36,6 +49,21 @@ async def run_service(
     rag: Annotated[httpx.AsyncClient, Depends(rag_client)],
     bank: Annotated[httpx.AsyncClient | None, Depends(banking_client)],
 ) -> AsyncIterator[AgentRunService]:
+    """Provide the scoped run service and translate safe service/storage errors to HTTP.
+
+    Args:
+        access: Server-issued principal identity, customer entitlements and review permission.
+        settings: Validated application configuration for this operation.
+        config: Workflow settings or graph configuration supplied by the caller.
+        rag: Bounded client for the RAG service.
+        bank: Authenticated banking client, or None when unconfigured.
+
+    Yields:
+        Scoped durable-run service for the authenticated named principal.
+
+    Raises:
+        HTTPException: Agent run storage unavailable.
+    """
     try:
         yield await AgentRunService.create(settings, config, rag, bank, access)
     except RunError as exc:
@@ -50,11 +78,29 @@ RunService = Annotated[AgentRunService, Depends(run_service)]
 
 @router.post("", response_model=AgentRunResponse, status_code=201)
 async def start(request: AgentRequest, service: RunService) -> AgentRunResponse:
+    """Start a named-owner durable workflow.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        service: Service supplied by the caller.
+
+    Returns:
+        AgentRunResponse value produced by this operation.
+    """
     return await service.start(request)
 
 
 @router.get("/{run_id}", response_model=AgentRunResponse)
 async def read(run_id: UUID, service: RunService) -> AgentRunResponse:
+    """Read an owner-visible or authorized reviewer-visible saved run.
+
+    Args:
+        run_id: Identifier of the saved workflow to read or resume.
+        service: Service supplied by the caller.
+
+    Returns:
+        AgentRunResponse value produced by this operation.
+    """
     return await service.get(run_id)
 
 
@@ -62,9 +108,28 @@ async def read(run_id: UUID, service: RunService) -> AgentRunResponse:
 async def approve(
     run_id: UUID, decision: ApprovalDecision, service: RunService
 ) -> AgentRunResponse:
+    """Apply the reviewer decision through the scoped durable-run service.
+
+    Args:
+        run_id: Identifier of the saved workflow to read or resume.
+        decision: Reviewer decision bound to the exact retained proposal hash.
+        service: Service supplied by the caller.
+
+    Returns:
+        AgentRunResponse value produced by this operation.
+    """
     return await service.approve(run_id, decision)
 
 
 @router.post("/{run_id}/retry", response_model=AgentRunResponse)
 async def retry(run_id: UUID, service: RunService) -> AgentRunResponse:
+    """Recover an eligible unconfirmed action through its unchanged saved run.
+
+    Args:
+        run_id: Identifier of the saved workflow to read or resume.
+        service: Service supplied by the caller.
+
+    Returns:
+        AgentRunResponse value produced by this operation.
+    """
     return await service.retry(run_id)

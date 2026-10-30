@@ -1,3 +1,5 @@
+"""Expose grounded answers and optional live answer-quality evaluation."""
+
 from __future__ import annotations
 
 from typing import Annotated
@@ -25,6 +27,18 @@ logger = structlog.get_logger()
 async def evaluated_answer(
     request: EvaluatedAnswerRequest, settings: Annotated[Settings, Depends(get_settings)]
 ) -> EvaluatedAnswerResponse:
+    """Serve one generated answer with optional live quality evaluation.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        EvaluatedAnswerResponse value produced by this operation.
+
+    Raises:
+        HTTPException: Answer service unavailable.
+    """
     try:
         return await answer_with_quality(request, settings)
     except (
@@ -44,6 +58,18 @@ async def evaluated_answer(
 async def answer(
     request: RetrieveRequest, settings: Annotated[Settings, Depends(get_settings)]
 ) -> AnswerResponse:
+    """Serve a grounded policy answer through the thin HTTP boundary.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        AnswerResponse value produced by this operation.
+
+    Raises:
+        HTTPException: Answer service unavailable.
+    """
     try:
         return await answer_policy(request, settings)
     except (

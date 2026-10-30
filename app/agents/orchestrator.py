@@ -1,3 +1,7 @@
+"""Build the agent graph: classify, retrieve, validate, review and execute.
+
+Node names, state keys and model import paths are retained for saved-run compatibility."""
+
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
@@ -18,6 +22,20 @@ from app.models.validation import SubmittedServiceRequest, ValidationAccess, Val
 
 
 class AgentState(TypedDict, total=False):
+    """Shared graph state retained between routing, retrieval, review and execution.
+
+    Attributes:
+        request: Validated request retaining the caller's explicit scope and action details.
+        decision: Reviewer decision bound to the exact retained proposal hash.
+        policy_request: Resolved retrieval query and policy-date/product scope.
+        retrieved: Retained policy evidence and timings carried between graph nodes.
+        validation: Retained policy and banking validation for the exact proposed action.
+        response: Validated answer or workflow result retained for rendering.
+        idempotency_key: Persisted operation key reused for the unchanged banking submission.
+        proposal_hash: Canonical fingerprint binding request, proposal and retained evidence.
+        approved_hash: Fingerprint accepted by the distinct authorized reviewer.
+    """
+
     request: AgentRequest
     decision: IntentDecision
     policy_request: RetrieveRequest
@@ -41,11 +59,38 @@ def build_agent_graph(
     | None = None,
     checkpointer: BaseCheckpointSaver | None = None,
 ) -> CompiledStateGraph:
-    """Reuse the policy path; optionally pause and execute an approved service request."""
+    """Reuse the policy path; optionally pause and execute an approved service request.
+
+    Args:
+        classifier: Runnable producing a structured intent decision from request scope.
+        retriever: Runnable returning scoped policy evidence for the request.
+        answerer: Coroutine generating a grounded answer from retained evidence.
+        validator: Optional coroutine checking policy and current customer facts.
+        access: Server-issued principal identity, customer entitlements and review permission.
+        actioner: Optional execution callback for an exactly approved service proposal.
+        checkpointer: Durable graph checkpoint store required for human-reviewed actions.
+
+    Returns:
+        Compiled graph preserving the durable node names and state contract.
+
+    Raises:
+        ValueError: Actions require a validator and durable workflow checkpointing.
+
+    Example:
+        graph = build_agent_graph(classifier, retriever, answerer)
+    """
     if actioner is not None and (checkpointer is None or validator is None):
         raise ValueError("Actions require a validator and durable workflow checkpointing")
 
     async def orchestrator(state: AgentState) -> AgentState:
+        """Classify a screened request and resolve missing or conflicting explicit scope.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+        """
         request = state["request"]
         if unsafe_input(request):
             return {
@@ -121,6 +166,14 @@ def build_agent_graph(
         return {"request": resolved, "decision": decision}
 
     async def retrieve(state: AgentState) -> AgentState:
+        """Retrieve scoped policy evidence through the configured retrieval integration.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+        """
         request = RetrieveRequest.model_validate(
             state["request"].model_dump(exclude={"customer_id", "action", "action_details"})
         )
@@ -142,6 +195,14 @@ def build_agent_graph(
         return {"policy_request": request, "retrieved": await retriever.ainvoke(request)}
 
     async def grounded_answer(state: AgentState) -> AgentState:
+        """Generate the policy-answer branch from evidence already retained in graph state.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+        """
         answer = await answerer(state["policy_request"], state["retrieved"])
         return {
             "response": AgentResponse(
@@ -150,6 +211,14 @@ def build_agent_graph(
         }
 
     def clarify(state: AgentState) -> AgentState:
+        """Return a fixed request for the unresolved scope fields.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+        """
         labels: dict[MissingField, str] = {
             "product_id": "the product",
             "as_of": "the policy lookup date (YYYY-MM-DD)",
@@ -169,6 +238,14 @@ def build_agent_graph(
         }
 
     def forbidden(state: AgentState) -> AgentState:
+        """Return the prohibited-operation response without invoking tools.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+        """
         return {
             "response": AgentResponse(
                 intent="forbidden",
@@ -179,6 +256,14 @@ def build_agent_graph(
         }
 
     def customer_context(state: AgentState) -> AgentState:
+        """Report that general customer-context tools are unavailable in this stage.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+        """
         return {
             "response": AgentResponse(
                 intent="customer_context",
@@ -189,6 +274,14 @@ def build_agent_graph(
         }
 
     def supported_action(state: AgentState) -> AgentState:
+        """Check scoped service-request capability before retrieving policy evidence.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+        """
         request = state["request"]
         if validator is not None and request.action_details is not None:
             if (
@@ -218,6 +311,14 @@ def build_agent_graph(
         }
 
     async def validate(state: AgentState) -> AgentState:
+        """Validate the service proposal using policy evidence and current authorized banking facts.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+        """
         assert validator is not None
         result = await validator(state["request"], state["retrieved"])
         response = AgentResponse(
@@ -232,6 +333,17 @@ def build_agent_graph(
         return updates
 
     def approval(state: AgentState) -> AgentState:
+        """Pause for a decision bound to the exact proposal, then reject or retain its approved hash.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+
+        Raises:
+            ValueError: Approval does not match the pending proposal.
+        """
         decision = ApprovalDecision.model_validate(
             interrupt(
                 {
@@ -254,6 +366,14 @@ def build_agent_graph(
         return {"approved_hash": decision.proposal_hash}
 
     async def revalidate(state: AgentState) -> AgentState:
+        """Refresh policy and banking facts and block a proposal that changed after approval.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+        """
         assert validator is not None
         evidence = await retriever.ainvoke(state["policy_request"])
         result = await validator(state["request"], evidence)
@@ -278,6 +398,17 @@ def build_agent_graph(
         }
 
     async def action(state: AgentState) -> AgentState:
+        """Execute only the currently authorized proposal matching the retained approval hash.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            AgentState value produced by this operation.
+
+        Raises:
+            ValueError: Execution requires authorization and an exact approved proposal.
+        """
         if (
             actioner is None
             or access is None

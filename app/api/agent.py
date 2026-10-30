@@ -1,3 +1,5 @@
+"""Serve validation-only agent calls and the explicitly gated legacy submission path."""
+
 from __future__ import annotations
 
 from typing import Annotated
@@ -25,6 +27,11 @@ router.add_api_route("/health", health, methods=["GET"])
 
 @router.get("/metrics")
 async def metrics() -> dict[str, int]:
+    """Return process-local agent workflow counters.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     return {
         "agent_requests_total": agent_metrics["requests"],
         "agent_completed_total": agent_metrics["completed"],
@@ -40,6 +47,22 @@ async def agent(
     access: Annotated[ValidationAccess | None, Depends(get_validation_access)],
     bank: Annotated[httpx.AsyncClient | None, Depends(banking_client)],
 ) -> AgentResponse:
+    """Execute an independent policy-answer or validation-only agent request.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        settings: Validated application configuration for this operation.
+        agent_settings: Validated agent identities, service endpoints and work limits.
+        client: HTTP client configured for the required upstream service.
+        access: Server-issued principal identity, customer entitlements and review permission.
+        bank: Authenticated banking client, or None when unconfigured.
+
+    Returns:
+        AgentResponse value produced by this operation.
+
+    Raises:
+        HTTPException: Agent service unavailable.
+    """
     try:
         return await orchestrate(
             request, settings, agent_settings, client, access=access, banking_client=bank
@@ -72,6 +95,23 @@ async def submit(
     access: Annotated[ValidationAccess | None, Depends(get_validation_access)],
     bank: Annotated[httpx.AsyncClient | None, Depends(banking_client)],
 ) -> SubmittedServiceRequest | AgentResponse:
+    """Validate and submit only through the explicitly enabled legacy write endpoint.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        idempotency_key: Persisted operation key reused for the unchanged banking submission.
+        settings: Validated application configuration for this operation.
+        agent_settings: Validated agent identities, service endpoints and work limits.
+        client: HTTP client configured for the required upstream service.
+        access: Server-issued principal identity, customer entitlements and review permission.
+        bank: Authenticated banking client, or None when unconfigured.
+
+    Returns:
+        SubmittedServiceRequest | AgentResponse value produced by this operation.
+
+    Raises:
+        HTTPException: Submission could not be confirmed. Retry with the same Idempotency-Key and unchanged request body; the bank may have received it.
+    """
     if access is None or request.customer_id not in access.customer_ids:
         raise HTTPException(status_code=403, detail="Customer access is not authorized")
     if not agent_settings.agent_allow_direct_submit:

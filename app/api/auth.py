@@ -1,3 +1,5 @@
+"""Resolve named agent scopes and protected feedback-review credentials."""
+
 from __future__ import annotations
 
 from secrets import compare_digest
@@ -17,6 +19,15 @@ def get_validation_access(
     settings: Annotated[AgentSettings, Depends(get_agent_settings)],
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(validator_bearer)],
 ) -> ValidationAccess | None:
+    """Resolve a bearer credential into server-owned identity and customer entitlements.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        credentials: Bearer credentials supplied at the authentication boundary.
+
+    Returns:
+        Matched server-owned access, or None when no configured credential matches.
+    """
     if credentials is None:
         return None
     for principal in settings.agent_principals:
@@ -43,6 +54,15 @@ def require_reviewer(
     settings: Annotated[Settings, Depends(get_settings)],
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(reviewer_bearer)],
 ) -> None:
+    """Require the configured feedback-review credential before serving protected routes.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        credentials: Bearer credentials supplied at the authentication boundary.
+
+    Raises:
+        HTTPException: Reviewer credentials required.
+    """
     if settings.feedback_reviewer_token is None:
         raise HTTPException(status_code=503, detail="Feedback review is not configured")
     if credentials is None or not compare_digest(

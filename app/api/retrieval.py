@@ -1,3 +1,5 @@
+"""Expose scoped policy retrieval with safe HTTP error responses."""
+
 from __future__ import annotations
 
 from typing import Annotated
@@ -17,6 +19,18 @@ logger = structlog.get_logger()
 async def retrieve(
     request: RetrieveRequest, settings: Annotated[Settings, Depends(get_settings)]
 ) -> RetrieveResponse:
+    """Serve policy retrieval and translate upstream failures into a safe HTTP response.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        RetrieveResponse value produced by this operation.
+
+    Raises:
+        HTTPException: Retrieval service unavailable.
+    """
     try:
         return await retrieve_policy(request, settings)
     except Exception:
