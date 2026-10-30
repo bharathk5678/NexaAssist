@@ -1,3 +1,5 @@
+"""Define explicit agent scope, classified intent and terminal response contracts."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -27,6 +29,19 @@ type AgentStatus = Literal[
 
 
 class AgentRequest(BaseModel):
+    """Validated agent request contract.
+
+    Attributes:
+        query: User question or scoped retrieval query.
+        as_of: Policy lookup date; not the customer loan sanction date.
+        product_id: Explicit product scope, when required or supplied.
+        customer_id: Synthetic customer identifier within the authorized scope.
+        action: Explicit supported banking operation requested by the caller.
+        action_details: Typed service-request payload; never an authorization grant.
+        jurisdiction: Jurisdiction boundary retained in the policy lookup scope.
+        top_k: Maximum number of ranked primary sources requested.
+    """
+
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     query: str = Field(min_length=1, max_length=2000)
@@ -40,7 +55,14 @@ class AgentRequest(BaseModel):
 
 
 class AgentSubmissionRequest(AgentRequest):
-    """Posting this explicit scope authorizes submission after validation."""
+    """Posting this explicit scope authorizes submission after validation.
+
+    Attributes:
+        as_of: Policy lookup date; not the customer loan sanction date.
+        customer_id: Synthetic customer identifier within the authorized scope.
+        action: Explicit supported banking operation requested by the caller.
+        action_details: Typed service-request payload; never an authorization grant.
+    """
 
     as_of: date
     customer_id: str = Field(pattern=r"^NXC-[0-9]{4}$")
@@ -49,7 +71,17 @@ class AgentSubmissionRequest(AgentRequest):
 
 
 class IntentDecision(BaseModel):
-    """Structured model output; extracted values must be explicit in the request."""
+    """Structured model output; extracted values must be explicit in the request.
+
+    Attributes:
+        intent: Structured classification used to choose the graph branch.
+        product_id: Explicit product scope, when required or supplied.
+        as_of: Policy lookup date; not the customer loan sanction date.
+        customer_id: Synthetic customer identifier within the authorized scope.
+        action: Explicit supported banking operation requested by the caller.
+        product_required: Whether classification requires a product before proceeding.
+        missing_fields: Scope fields the caller must provide or reconcile.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -63,6 +95,18 @@ class IntentDecision(BaseModel):
 
 
 class AgentResponse(BaseModel):
+    """Validated agent response contract.
+
+    Attributes:
+        intent: Structured classification used to choose the graph branch.
+        status: HTTP or workflow status used by the scenario.
+        message: Safe user-facing explanation of the workflow outcome.
+        missing_fields: Scope fields the caller must provide or reconcile.
+        answer: Generated answer whose exact text and citations are being evaluated.
+        validation: Retained policy and banking validation for the exact proposed action.
+        submission: Verified banking receipt retained after an external submission.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
     intent: Intent
