@@ -2,6 +2,8 @@
 
 The [agent architecture and structural refactor report](C4-Documentation/AGENT_REFACTOR_REPORT.md)
 includes the worked request flow, code tours, before/after checks and release blockers.
+The [release fixes report](C4-Documentation/RELEASE_FIXES_REPORT.md) records the
+subsequent checker/packaging repairs and passing full local quality gate.
 
 A policy, product and lending advisor for the staff of NexaBank (a fictional bank), built as the hands-on codebase for the **Enterprise Agentic RAG** training program. Everything is synthetic.
 

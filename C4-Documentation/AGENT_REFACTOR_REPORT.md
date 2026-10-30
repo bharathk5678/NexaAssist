@@ -1,5 +1,9 @@
 # Agent architecture and structural refactor report
 
+**Follow-up:** the floor-checker and dependency-packaging blockers recorded below
+were resolved in the [release fixes report](RELEASE_FIXES_REPORT.md). This document
+preserves the earlier structural-refactor verification results.
+
 Date: 30 October 2026. Scope: the explicitly approved Phase 2 structural plan and
 Phase 3 verification. Changes are local commits; no push or deployment was performed.
 The source baseline includes the existing maintained workflow, fixtures and quality
