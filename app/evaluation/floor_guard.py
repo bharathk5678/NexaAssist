@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import codecs
 import io
 import json
 import re
@@ -21,6 +22,14 @@ SUPPRESSIONS = re.compile(
     r"noqa|type:\s*ignore|nosemgrep|gitleaks:allow|coverage:\s*ignore|pragma:\s*no\s*(?:cover|branch)",
     re.IGNORECASE,
 )
+
+
+def _diff_path(value: str) -> str:
+    """Decode Git's path quoting and optional tab delimiter without losing filename bytes."""
+    value = value.removesuffix("\t")
+    if value.startswith('"'):
+        value = codecs.escape_decode(value[1:-1].encode("utf-8"))[0].decode("utf-8")
+    return re.sub(r"^[ab]/", "", value)
 
 
 def _expected_set(node: ast.AST) -> tuple[str, frozenset[str]] | None:
@@ -42,7 +51,7 @@ def check_diff(diff: str, sources: dict[str, str]) -> list[Finding]:
 
     Args:
         diff: Unified source diff to inspect without weakening existing checks.
-        sources: Numbered policy passages and citation metadata retained for generation.
+        sources: Current Python source text keyed by repository-relative diff paths.
 
     Returns:
         Path, line and rule triples for detected constraint violations.
@@ -65,9 +74,9 @@ def check_diff(diff: str, sources: dict[str, str]) -> list[Finding]:
             old_line, line = map(int, match.groups())
             header = False
         elif header and text.startswith("--- "):
-            old_file = text[4:].removeprefix("a/")
+            old_file = _diff_path(text[4:])
         elif header and text.startswith("+++ "):
-            file = text[4:].removeprefix("b/")
+            file = _diff_path(text[4:])
             if file == "/dev/null":
                 file = old_file
                 if Path(file).name.startswith("test_"):
@@ -221,9 +230,11 @@ def main(argv: list[str] | None = None) -> int:
                     raise ValueError("Unable to inspect untracked file")
                 diff += "\n" + result.stdout
         sources = {
-            path.relative_to(root).as_posix(): path.read_text()
-            for directory in (root / "app", root / "tests")
-            for path in directory.rglob("*.py")
+            name: (root / name).read_text()
+            for name in git("ls-files", "--cached", "--others", "--exclude-standard", "-z").split(
+                "\0"
+            )
+            if name.endswith(".py") and (root / name).is_file()
         }
         findings = check_diff(diff, sources)
         baseline_path = "app/evaluation/security_baseline.json"

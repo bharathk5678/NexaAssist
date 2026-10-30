@@ -298,3 +298,60 @@ def test_floor_does_not_lose_a_multiline_assertion() -> None:
     assert floor_guard.check_diff(patch("value = 1", "assert (", file), {file: "value = 1"}) == [
         (file, 1, "assertion-removed")
     ]
+
+
+@pytest.mark.parametrize("tracked", [False, True])
+@pytest.mark.parametrize(
+    "relative",
+    ["saved sources/example.py", "saved sources/examplé.py", "saved\tsources/example.py"],
+)
+@pytest.mark.parametrize(
+    ("source", "expected_exit"),
+    [("value = 2\n", 0), ("value = 2  # noqa: F841\n", 1), ("def broken(\n", 2)],
+)
+def test_floor_inspects_python_outside_application_directories(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    tracked: bool,
+    relative: str,
+    source: str,
+    expected_exit: int,
+) -> None:
+    """Inspect external tracked/untracked sources without hiding violations or scan errors.
+
+    Args:
+        tmp_path: Isolated Git repository for the command-level regression.
+        monkeypatch: Redirects the checker to the isolated repository.
+        tracked: Whether the source exists in the committed baseline.
+        relative: Filename exercising Git's spaces, Unicode or control-character quoting.
+        source: Current clean, suppressed or invalid Python source.
+        expected_exit: Required clean, violation or inspection-failure exit code.
+    """
+    subprocess.run(["git", "init", "--quiet", str(tmp_path)], check=True, capture_output=True)
+    path = tmp_path / "C4-Documentation" / relative
+    path.parent.mkdir(parents=True)
+    if tracked:
+        path.write_text("value = 1\n")
+        subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=Pankaj",
+            "-c",
+            "user.email=fixture@localhost",
+            "commit",
+            "--quiet",
+            "--allow-empty",
+            "-m",
+            "Test baseline",
+        ],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+    path.write_text(source)
+    monkeypatch.setattr(
+        floor_guard, "__file__", str(tmp_path / "app" / "evaluation" / "floor_guard.py")
+    )
+    assert floor_guard.main(["--base", "HEAD"]) == expected_exit
