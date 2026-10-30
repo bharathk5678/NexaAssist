@@ -199,14 +199,14 @@ async def run_idempotent(request: Request, token: str, model, handler):
 
 @app.post("/v1/cases", status_code=201)
 async def create_case(request: Request, token: str = Depends(auth)):
-    def h(p: CaseCreate):
+    def create_case_record(p: CaseCreate):
         cust(p.customer_id)
         COUNTERS["case"] += 1
         cid = f"NXCASE-{COUNTERS['case']:06d}"
         CASES[cid] = {"case_id": cid, "customer_id": p.customer_id, "category": p.category, "priority": p.priority, "status": "OPEN", "summary": p.summary,
                       "related_application_id": p.related_application_id, "created_at": now(), "notes": [], "escalation": None, "_version": 1}
         return 201, _case_view(CASES[cid]), {"ETag": f'"{cid}-1"'}
-    return await run_idempotent(request, token, CaseCreate, h)
+    return await run_idempotent(request, token, CaseCreate, create_case_record)
 
 
 def _case_view(c: dict) -> dict:
@@ -228,18 +228,18 @@ def get_case(caseId: str, _: str = Depends(auth)):
 
 @app.post("/v1/cases/{caseId}/notes", status_code=201)
 async def add_note(caseId: str, request: Request, token: str = Depends(auth)):
-    def h(p: NoteCreate):
+    def append_case_note(p: NoteCreate):
         c = _case(caseId)
         COUNTERS["note"] += 1
         note = {"note_id": f"NXNOTE-{COUNTERS['note']:06d}", "case_id": caseId, "text": p.text, "created_at": now()}
         c["notes"].append(note); c["_version"] += 1
         return 201, note, {}
-    return await run_idempotent(request, token, NoteCreate, h)
+    return await run_idempotent(request, token, NoteCreate, append_case_note)
 
 
 @app.post("/v1/cases/{caseId}/escalations", status_code=201)
 async def escalate(caseId: str, request: Request, token: str = Depends(auth)):
-    def h(p: EscalationCreate):
+    def escalate_case_record(p: EscalationCreate):
         c = _case(caseId)
         if c["status"] == "ESCALATED":
             raise ProblemError(409, "already-escalated", "Case is already escalated", caseId)
@@ -247,12 +247,12 @@ async def escalate(caseId: str, request: Request, token: str = Depends(auth)):
         esc = {"escalation_id": f"NXESC-{COUNTERS['esc']:06d}", "case_id": caseId, "status": "ESCALATED", "sla_hours": 4 if p.reason == "SUSPECTED_FRAUD" else 24}
         c["status"] = "ESCALATED"; c["escalation"] = {**esc, "reason": p.reason, "summary": p.summary, "preferred_contact": p.preferred_contact}; c["_version"] += 1
         return 201, esc, {}
-    return await run_idempotent(request, token, EscalationCreate, h)
+    return await run_idempotent(request, token, EscalationCreate, escalate_case_record)
 
 
 @app.post("/v1/service-requests", status_code=201)
 async def service_request(request: Request, token: str = Depends(auth)):
-    def h(p: ServiceRequestCreate):
+    def create_service_request_record(p: ServiceRequestCreate):
         c = cust(p.customer_id)
         if p.request_type in ("OPT_IN_CIR_2026_07_PART_PREPAY", "INTEREST_CERTIFICATE"):
             loan = next((l for l in c["existing_loans"] if l["loan_account_id"] == p.loan_account_id), None)
@@ -269,7 +269,7 @@ async def service_request(request: Request, token: str = Depends(auth)):
               "loan_account_id": p.loan_account_id, "status": "RECEIVED", "created_at": now()}
         SERVICE_REQUESTS[sr_id] = sr
         return 201, sr, {}
-    return await run_idempotent(request, token, ServiceRequestCreate, h)
+    return await run_idempotent(request, token, ServiceRequestCreate, create_service_request_record)
 
 
 @app.post("/_mock/reset", include_in_schema=False)
