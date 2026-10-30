@@ -1,3 +1,5 @@
+"""Initialize shared telemetry, logging and token encoding before serving requests."""
+
 from __future__ import annotations
 
 import asyncio
@@ -14,6 +16,18 @@ from app.core.telemetry import init_telemetry
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    """Initialize telemetry, logging and token encoding before accepting requests.
+
+    Args:
+        _app: FastAPI application whose shared resources are being initialized.
+
+    Yields:
+        Control to the application after shared initialization completes.
+
+    Raises:
+        ValidationError: Required startup configuration is invalid.
+        ValueError: The tokenizer or logging configuration is invalid.
+    """
     settings = get_settings()
     init_telemetry(settings.dd_trace_enabled)
     configure_logging(settings.log_level)

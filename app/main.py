@@ -1,3 +1,5 @@
+"""Construct the RAG FastAPI application using shared startup initialization."""
+
 from __future__ import annotations
 
 from fastapi import FastAPI
@@ -10,6 +12,14 @@ from app.core.lifespan import lifespan
 
 
 def create_app() -> FastAPI:
+    """Create the RAG application with its existing routes and shared lifespan.
+
+    Returns:
+        RAG FastAPI application with the existing endpoint families.
+
+    Example:
+        app = create_app()
+    """
     app = FastAPI(title="NexaAssist", lifespan=lifespan)
     app.include_router(operations_router)
     app.include_router(retrieval_router)

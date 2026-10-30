@@ -1,3 +1,5 @@
+"""Track prompt annotations, model token use and retrieval latency summaries."""
+
 from __future__ import annotations
 
 from collections import deque
@@ -22,7 +24,17 @@ def prompt_annotation_context(
     prompt_id: str,
     version: str,
 ) -> AbstractContextManager[None]:
-    """Track the existing text prompt without maintaining a second template."""
+    """Track the existing text prompt without maintaining a second template.
+
+    Args:
+        prompt: Prompt supplied by the caller.
+        variables: Variables supplied by the caller.
+        prompt_id: Prompt id identifying the scoped record.
+        version: Version supplied by the caller.
+
+    Returns:
+        AbstractContextManager[None] value produced by this operation.
+    """
     if not LLMObs.enabled:
         return nullcontext()
     messages = prompt.format_messages(
@@ -45,6 +57,11 @@ def prompt_annotation_context(
 
 
 def latency_summary() -> dict[str, int | float]:
+    """Summarize the bounded process-local retrieval latency sample.
+
+    Returns:
+        Sample count and nearest-rank latency percentiles in milliseconds.
+    """
     values = sorted(retrieval_latencies)
     result: dict[str, int | float] = {"sample_count": len(values)}
     for label, fraction in (("p50_ms", 0.5), ("p95_ms", 0.95), ("p99_ms", 0.99)):
@@ -53,7 +70,15 @@ def latency_summary() -> dict[str, int | float]:
 
 
 class TokenUsageLogger(AsyncCallbackHandler):
+    """Record provider-reported token usage through the LangChain callback interface."""
+
     async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
+        """Log provider-reported token use for completed chat generations.
+
+        Args:
+            response: Response supplied by the caller.
+            kwargs: Additional keyword arguments accepted by the adapted interface.
+        """
         for generations in response.generations:
             for generation in generations:
                 message = getattr(generation, "message", None)

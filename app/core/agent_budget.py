@@ -1,3 +1,5 @@
+"""Bound model calls and conservatively reserve token work before provider calls."""
+
 from __future__ import annotations
 
 import json
@@ -12,7 +14,12 @@ from app.core.config import AgentSettings
 
 
 class AgentModelBudget(AsyncCallbackHandler):
-    """Reserve bounded model work before calls, including one possible provider retry."""
+    """Reserve bounded model work before calls, including one possible provider retry.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        encoding: Tokenizer encoding used for bounded context or model-work estimates.
+    """
 
     raise_error = True
 
@@ -25,6 +32,16 @@ class AgentModelBudget(AsyncCallbackHandler):
     async def on_chat_model_start(
         self, serialized: dict[str, Any], messages: list[list[BaseMessage]], **kwargs: Any
     ) -> None:
+        """Reserve bounded work before a model call, including a possible provider retry.
+
+        Args:
+            serialized: Serialized supplied by the caller.
+            messages: Messages supplied by the caller.
+            kwargs: Additional keyword arguments accepted by the adapted interface.
+
+        Raises:
+            ValueError: Agent model-work budget exceeded.
+        """
         payload = {
             "messages": [[m.model_dump(mode="json") for m in batch] for batch in messages],
             "parameters": kwargs.get("invocation_params", {}),

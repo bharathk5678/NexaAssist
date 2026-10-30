@@ -1,3 +1,7 @@
+"""Bootstrap named demo credentials only when none are configured.
+
+Execute this operator script directly; importing it also runs credential setup."""
+
 import json
 import secrets
 
