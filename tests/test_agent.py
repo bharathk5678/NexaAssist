@@ -23,6 +23,7 @@ from app.main import create_app
 from app.models.agent import AgentRequest, IntentDecision
 from app.models.answer import AnswerDraft, AnswerResponse
 from app.models.retrieval import RetrieveRequest, RetrieveResponse
+from app.models.validation import ValidationAccess
 from app.services import agent as agent_service
 
 
@@ -137,6 +138,56 @@ def test_policy_graph_runs_in_order_once(
         )
     )
     answer.assert_awaited_once_with(retrieve.call_args.args[0], evidence)
+
+
+@pytest.mark.parametrize(
+    "choice,changes,authorized,status",
+    [
+        ({"intent": "forbidden"}, {}, True, "forbidden"),
+        ({"intent": "customer_context"}, {}, False, "blocked"),
+        ({"intent": "customer_context"}, {"as_of": None}, True, "needs_clarification"),
+        ({"intent": "customer_context"}, {"action_details": None}, True, "unavailable"),
+        ({"intent": "customer_context"}, {"action": None}, True, "unavailable"),
+        (
+            {"intent": "customer_context", "customer_id": "NXC-0002"},
+            {},
+            True,
+            "needs_clarification",
+        ),
+        (
+            {"intent": "customer_context"},
+            {"action_details": {"request_type": "INTEREST_CERTIFICATE"}},
+            True,
+            "needs_clarification",
+        ),
+    ],
+)
+def test_explicit_service_request_routing_preserves_preflight_guards(
+    agent_request: AgentRequest, choice: dict, changes: dict, authorized: bool, status: str
+) -> None:
+    request = AgentRequest.model_validate(
+        {
+            **agent_request.model_dump(),
+            "query": "Prepare a callback service request.",
+            "customer_id": "NXC-0010",
+            "action": "createServiceRequest",
+            "action_details": {"request_type": "CALLBACK"},
+            **changes,
+        }
+    )
+    retrieve, validate, answer = AsyncMock(), AsyncMock(), AsyncMock()
+    graph = build_agent_graph(
+        RunnableLambda(lambda _: decision(**choice)),
+        RunnableLambda(retrieve),
+        answer,
+        validator=validate,
+        access=ValidationAccess(customer_ids={"NXC-0010"} if authorized else set()),
+    )
+    state = asyncio.run(graph.ainvoke({"request": request}))
+    assert state["response"].status == status
+    retrieve.assert_not_awaited()
+    validate.assert_not_awaited()
+    answer.assert_not_awaited()
 
 
 @pytest.mark.parametrize(
@@ -280,7 +331,9 @@ def test_agent_reuses_real_phase1_http_route_and_answer_chain(
             direct = await client.post(
                 "/retrieve",
                 json={
-                    **agent_request.model_dump(mode="json", exclude={"customer_id", "action"}),
+                    **agent_request.model_dump(
+                        mode="json", exclude={"customer_id", "action", "action_details"}
+                    ),
                 },
             )
             assert direct.json() == evidence.model_dump(mode="json")
@@ -299,7 +352,7 @@ def test_agent_reuses_real_phase1_http_route_and_answer_chain(
     retrieve.assert_awaited_once()
     assert retrieve.await_args is not None
     assert retrieve.await_args.args[0].model_dump() == agent_request.model_dump(
-        exclude={"customer_id", "action"}
+        exclude={"customer_id", "action", "action_details"}
     )
     assert len(prompts) == (2 if invalid_quote else 1)
     for prompt in prompts:
@@ -539,7 +592,16 @@ def test_original_api_contracts_remain_separate() -> None:
         "/metrics",
     } <= paths.keys()
     assert "/agent" not in paths
-    assert set(create_agent_app().openapi()["paths"]) == {"/agent", "/health", "/metrics"}
+    assert set(create_agent_app().openapi()["paths"]) == {
+        "/agent",
+        "/health",
+        "/metrics",
+        "/agent/submit",
+        "/agent/runs",
+        "/agent/runs/{run_id}",
+        "/agent/runs/{run_id}/approval",
+        "/agent/runs/{run_id}/retry",
+    }
 
 
 def test_agent_config_and_classifier_schema() -> None:

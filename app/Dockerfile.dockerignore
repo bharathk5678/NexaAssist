@@ -9,5 +9,6 @@
 !evaluation/datasets/answer.jsonl
 app/**/__pycache__/
 app/evaluation/results/
+app/evaluation/reports/
 app/**/.env
 app/**/.env.*

@@ -1,0 +1,37 @@
+{
+  "provenance": "Recorded local development verification in this chat on 2026-10-19; not a Datadog UI screenshot or benchmark.",
+  "captured_at_local": "2026-10-19T22:44:57+05:30",
+  "query": "What is the maximum loan amount for NexaHome Loan?",
+  "as_of": "2026-10-19",
+  "product_id": "NEXA-HL",
+  "request_span": {
+    "service": "nexaassist-api",
+    "operation": "fastapi.request",
+    "resource": "POST /answer",
+    "span_kind": "server",
+    "http_status": 200,
+    "duration_ms": 7080.06,
+    "trace_id_hex": "6ad6501100000000f092bf1516ec4d18"
+  },
+  "application_logs": {
+    "retrieval_completed.latency_ms": 3133.52,
+    "answer_completed.generation_ms": 3773.26,
+    "answer_completed.status": "answered",
+    "answer_completed.citation_count": 1,
+    "model_token_usage.input_tokens": 1486,
+    "model_token_usage.output_tokens": 95,
+    "model_token_usage.total_tokens": 1581
+  },
+  "evidence_limits": [
+    "Single synthetic question, not p95/p99 or a load test.",
+    "The local Agent reported receiving 20 spans for nexaassist-api.",
+    "Authenticated Datadog account visibility was not inspected.",
+    "No semantic evaluation score was produced by this ordinary UI question."
+  ],
+  "recorded_test_status": {
+    "pytest_passed": 63,
+    "ruff": "passed",
+    "mypy": "passed",
+    "scope": "Recorded checks before presentation work; tests are not proof of cloud ingestion."
+  }
+}

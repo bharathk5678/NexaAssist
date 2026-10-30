@@ -8,7 +8,46 @@ inspect quoted sources, and submit feedback. FastAPI serves retrieval, answers,
 live RAGAS evaluation and feedback review. LangChain runs the underlying logic;
 the default answer model is `gpt-6-luna`.
 
-### Current status — 21 October 2026
+### Phase 1 and Phase 2 training implementation — 27 October 2026
+
+The [session and future-development map](C4-Documentation/phase1-phase2-development-map.md)
+maps all twenty sessions to their code, tests, demonstrations and extension
+points. Phase 1 has a fresh full-dataset RAGAS/judge baseline and a fail-closed
+comparison gate; the documented Atlas text index is now provisioned for live
+hybrid retrieval. The trained local reranker has a pinned, non-root runtime in
+[compose.reranker.yaml](app/compose.reranker.yaml).
+
+The separate Agent Service now integrates **Orchestrator → HTTP Retriever →
+Validator → durable approval → Action** for all five service-request types.
+`POST /agent` remains validation-only. Start a durable workflow with
+`POST /agent/runs`; a different authorized reviewer approves or rejects its
+exact proposal before a bank write. MongoDB stores checkpoints and operation
+keys; retries preserve the original operation and banking identity.
+
+Direct `/agent/submit` is disabled by default and retained behind
+`AGENT_ALLOW_DIRECT_SUBMIT=true` for compatibility only. The ordinary RAG API
+and Streamlit policy workflow remain available. Streamlit's **Service requests**
+workspace now prepares, loads, approves/rejects and recovers durable runs through
+the Agent API. Input screening runs before model/tool calls; model-call, output
+and conservative token-work limits bound each workflow. Case tools, MCP and
+production deployment remain separate extensions.
+
+See the [workflow guide](app/agents/README.md),
+[syllabus gap analysis](.planning/phase2-four-agent-integration.md) and
+[current action sequence](C4-Documentation/c4-dynamic-approved-service-request.md).
+The [four-agent component and protocol guide](C4-Documentation/FOUR_AGENT_WORKFLOW_README.md)
+maps methods, payloads, REST/HTTP calls, local graph handoffs, persistence,
+approval and retry behavior. Its [editable training presentation](C4-Documentation/presentations/NexaAssist_Four_Agent_Workflow_ppt169_20261027/README.md)
+covers the complete implemented workflow and API boundaries.
+The [latest Phase 1/2 verification report](app/evaluation/results/phase12_completion_20261027/REPORT.md)
+records 525 tests, real MongoDB/UI checks, both live golden baselines and the
+remaining production boundaries.
+Run `make check-full` for the blocking quality contract; CI also tests the
+workflow with real MongoDB and the supplied bank OpenAPI contract.
+`make check-ai` explicitly calls configured providers/Atlas and holds the
+reviewed full-dataset baseline; see the development map before running it.
+
+### Historical Phase 1 status — 21 October 2026
 
 | Area | Available now |
 |---|---|
@@ -62,7 +101,7 @@ server are future layers.
 10. [Roadmap](#10-roadmap)
 
 For a file-by-file walkthrough, use [APP_COMPONENT_GUIDE.md](APP_COMPONENT_GUIDE.md).
-Start the chat with [Streamlit and endpoint coverage](#streamlit-and-endpoint-coverage);
+Start all four services with [Streamlit and endpoint coverage](#streamlit-and-endpoint-coverage);
 use [DATADOG_README.md](DATADOG_README.md) for tracing and scores.
 
 Open the [Datadog Field Guide](DATADOG_FIELD_GUIDE.html) locally for diagrams,
@@ -1466,15 +1505,76 @@ Phases 2 to 4 (agents, MCP, production) wrap this service without rewriting it, 
 
 ## Streamlit and endpoint coverage
 
-Install the UI and evaluation extras, then run the API and UI in separate terminals
-from the project root. Load `.env` before `ddtrace-run` so the tracer receives the
-Datadog settings before application imports:
+For the owner/reviewer handoff, approval errors, and prerequisites for every
+customer and request type, see the [Service requests operator guide](C4-Documentation/SERVICE_REQUESTS_GUIDE.md).
+
+For the **Service requests** workspace, all four services must be up and running
+together. Run each command in a separate terminal from the repository root and
+keep those terminals open. Policy chat uses the RAG API; service requests also
+need the Agent API and banking API.
+
+| Service | Port | Check or open |
+|---|---|---|
+| RAG FastAPI | 8000 | [Health](http://127.0.0.1:8000/health) |
+| Banking mock API | 8080 | [API docs](http://127.0.0.1:8080/docs) |
+| Agent FastAPI | 8001 | [Health](http://127.0.0.1:8001/health) |
+| Streamlit UI | 8501 | [NexaAssist](http://127.0.0.1:8501) |
+
+Complete [Getting started](#6-getting-started) first, including Atlas setup and
+policy ingestion. In `.env`, configure `OPENAI_API_KEY`, MongoDB settings, a
+nonempty `BANKING_API_TOKEN`, and distinct named owner/reviewer credentials in
+`AGENT_PRINCIPALS` with the required customer access. The legacy
+`AGENT_VALIDATION_TOKEN` cannot own or approve durable runs. See the
+[workflow credential example](app/agents/README.md#integrated-flow--27-october-2026).
+
+The local service URLs are:
+
+```dotenv
+API_BASE_URL=http://127.0.0.1:8000
+RAG_BASE_URL=http://127.0.0.1:8000/
+AGENT_API_BASE_URL=http://127.0.0.1:8001
+BANKING_BASE_URL=http://127.0.0.1:8080/
+```
+
+Install dependencies once:
 
 ```bash
 uv sync --locked --extra ui --extra evaluation
+```
+
+Load `.env` before `ddtrace-run` so the tracer receives the Datadog settings
+before application imports. Start the dependencies before the Agent API and UI:
+
+```bash
+# Terminal 1: RAG FastAPI
 uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+# Terminal 2: synthetic banking API (run from the repository root)
+uv run --no-sync python -m uvicorn server:app --app-dir nexa_synthetic_data/api/mock_server --host 127.0.0.1 --port 8080
+
+# Terminal 3: Agent FastAPI
+uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.agent_main:app --host 127.0.0.1 --port 8001
+
+# Terminal 4: Streamlit
 uv run --no-sync --env-file .env env DD_SERVICE=nexaassist-ui ddtrace-run python -m streamlit run app/streamlit_app.py --server.address 127.0.0.1 --server.port 8501
 ```
+
+Open Streamlit, select **Service requests**, and enter the configured owner
+credential to prepare a proposal. A different authorized reviewer must load the
+saved run and approve its exact proposal before submission.
+
+Use **Customer ID `NXC-0010`** for the demo and include it in both the owner's
+and reviewer's `AGENT_PRINCIPALS[].customer_ids`. For an `INTEREST_CERTIFICATE`
+request, use its loan account **`NXL-HL-0010`**. A customer outside the configured
+credential's scope is rejected with HTTP 403, even when it exists in the banking
+mock.
+
+If **Prepare for approval** fails, check that the banking API on port 8080 is
+still running as well as both FastAPI services. The `/health` endpoints report
+liveness only; they do not verify MongoDB, model or banking connectivity. For an
+uncertain bank submission, load and retry the same saved run rather than starting
+a new request. An "address already in use" startup error means the selected port
+is occupied; check the existing service before starting another instance.
 
 To find question traces, open [Datadog Trace Explorer](https://app.datadoghq.com/apm/traces?query=service%3Anexaassist-api%20env%3Adev),
 select **Live Search** / **Past 15 minutes**, and send a new question. Start with
@@ -1615,7 +1715,10 @@ introduced. Routing scope is sourced from `POL-OPS-001` clauses 2, 4–6, the pr
 catalog's names/IDs, and the supplied mock banking OpenAPI operations. The graph
 never calls those customer/action APIs in this stage.
 
-Start the two services from the repository root in separate terminals:
+For this routing-only example, start the two FastAPI services from the repository
+root in separate terminals. For the complete service-request UI, follow the
+[four-service startup instructions](#streamlit-and-endpoint-coverage), including
+the banking API and Streamlit:
 
 ```bash
 uv sync --locked --all-extras
@@ -1716,3 +1819,61 @@ component guide and `.env.example` retained their prior content verbatim with
 appended sections; config gained AgentSettings and an import; compatibility
 requirements gained LangGraph. Historical prompts and synthetic source data
 were untouched. No commit, stash, reset or existing-service restart was performed.
+
+## Phase 2: service-request Validator
+
+Explicit submission is available through `POST /agent/submit`, using the same
+body as `/agent` with complete customer/date/action details and an
+`Idempotency-Key` header (16–64 letters, digits, underscores or hyphens). The
+existing validator bearer token and customer allowlist apply. Successful validation
+posts the exact proposal to the banking API and returns `status: "submitted"`,
+the bank's receipt and policy evidence. `/agent` remains validation-only.
+See [submission behavior and retry limits](app/agents/README.md#explicit-service-request-submission).
+On an unconfirmed submission, retry with the same key and unchanged body; a timeout
+can follow a committed write. A received service request does not establish KYC
+completion, certificate issuance or an effective prepayment opt-in.
+
+The selected Phase 2 Sessions 1–3 decks now carry forward into the Validator
+lesson (syllabus Session 6). See the [session walkthrough and code map](app/agents/README.md)
+for the source-backed eligibility rule, setup, request example, teaching sequence,
+deck corrections and deferred Action/approval stages.
+
+`POST /agent` additionally accepts typed `action_details` for all five service
+request types in the supplied OpenAPI contract. With configured caller authorization and a
+server-controlled customer allowlist, this route retrieves policy evidence once,
+reads the customer's loan through the banking mock API, and returns a deterministic
+validation decision plus an eligible service-request proposal. Successful proposals
+use outer status `validated`; `validation.requires_approval` remains true.
+No banking write is executed and no opt-in is claimed to have occurred.
+
+| Request type | Validation performed before proposing |
+| --- | --- |
+| `OPT_IN_CIR_2026_07_PART_PREPAY` | Existing circular/version/sanction/opt-in checks; requires `NEXA-HL` and selected loan |
+| `INTEREST_CERTIFICATE` | Operations-policy permission and ownership of a required selected loan; supplied product must match |
+| `STATEMENT_COPY` | Operations-policy permission and authorized customer; any supplied loan must belong to that customer |
+| `CALLBACK` | Operations-policy permission and authorized customer; any supplied loan must belong to that customer |
+| `RE_KYC_REMINDER` | Operations-policy permission and authorized customer; this does not complete KYC or assert that re-KYC is due |
+
+All proposals require `as_of`, customer, action and request type. The Orchestrator
+clarifies missing details or a required loan before retrieval. General requests
+use one fixed bank-wide `POL-OPS-001` query with no product filter; an explicitly
+selected product stays in `AgentRequest` and is checked against the selected loan.
+The prepayment path keeps its existing product-scoped circular query. Both paths
+retain full source quotes/citations and read customer records only through HTTP.
+`createCase`, `addCaseNote` and `escalateCase` remain unavailable integrations.
+
+Configuration is disabled by default. The new variables are
+`AGENT_VALIDATION_TOKEN`, `AGENT_ALLOWED_CUSTOMER_IDS`, `BANKING_BASE_URL` and
+`BANKING_API_TOKEN`; `.env.example` contains placeholders only. The scoped token
+is a training authentication mechanism, not production identity management.
+Existing RAG endpoints and policy-only answers retain their behavior.
+
+Run `uv run --locked --no-sync pytest tests/test_validation.py tests/test_agent.py -q`
+for the original ten prepayment golden cases, ten additional service-request
+goldens, authorization and failure tests, and
+existing orchestrator/retriever regression coverage. The session guide distinguishes
+these mocked tests from live model classification and actual provider connectivity.
+
+The blocking quality contract is [CONSTRAINTS.md](CONSTRAINTS.md). Run
+`make check-fast`, `make check-task`, or `make check-full`; full security checks
+use external Semgrep source/secret rules and a fingerprinted pre-existing baseline.

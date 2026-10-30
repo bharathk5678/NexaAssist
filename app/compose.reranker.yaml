@@ -1,0 +1,28 @@
+services:
+  reranker:
+    image: ghcr.io/ggml-org/llama.cpp@sha256:5741ab30aae42af23ca57d9b98a6d4544cb09c21f372f92c5ee55312fa8b8b0c
+    user: "10001:10001"
+    ports:
+      - "127.0.0.1:${RERANKER_HOST_PORT:-18516}:8080"
+    volumes:
+      - type: bind
+        source: ${RERANKER_MODEL_FILE:?Set the path of the verified Qwen3 reranker GGUF}
+        target: /models/reranker.gguf
+        read_only: true
+    command:
+      - --model
+      - /models/reranker.gguf
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - --ctx-size
+      - "4096"
+      - --parallel
+      - "1"
+      - --threads
+      - "4"
+      - --alias
+      - qwen3-reranker
+    mem_limit: 3g
+    cpus: 4

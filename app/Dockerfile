@@ -17,5 +17,9 @@ COPY --from=dependencies /opt/nexaassist/.venv ./.venv
 COPY app ./app
 COPY evaluation/datasets/answer.jsonl ./evaluation/datasets/answer.jsonl
 ENV PATH="/opt/nexaassist/.venv/bin:$PATH"
+RUN chmod -R a+rX app evaluation \
+    && mkdir -p app/evaluation/reports \
+    && chown 10001:10001 app/evaluation/reports
+USER 10001:10001
 EXPOSE 8000
 CMD ["ddtrace-run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

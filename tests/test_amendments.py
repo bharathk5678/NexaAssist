@@ -103,11 +103,9 @@ def test_dense_and_hybrid_use_the_same_institution_scope(settings: Settings, hyb
             candidate_search=RunnableLambda(search) if hybrid else None,
         ).ainvoke(RetrieveRequest(query="fee", as_of="2026-10-01"))
     )
-    filters = (
-        search.await_args.args[0]["pre_filter"]
-        if hybrid
-        else vector.asimilarity_search_with_score.await_args.kwargs["pre_filter"]
-    )
+    call = search.await_args if hybrid else vector.asimilarity_search_with_score.await_args
+    assert call is not None
+    filters = call.args[0]["pre_filter"] if hybrid else call.kwargs["pre_filter"]
     assert {"institution": settings.institution} in filters["$and"]
 
 

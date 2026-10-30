@@ -13,6 +13,7 @@ from app.core.config import get_ui_settings
 from app.models.answer import AnswerResponse
 from app.models.evaluation import EvaluatedAnswerResponse
 from app.models.retrieval import RetrieveRequest, RetrieveResponse
+from app.ui.agent import agent_workspace
 
 
 @st.cache_resource
@@ -242,7 +243,7 @@ def main() -> None:
         )
         st.radio(
             "Workspace",
-            ["Policy chat", "Review feedback"],
+            ["Policy chat", "Review feedback", "Service requests"],
             key="workspace",
             label_visibility="collapsed",
         )
@@ -298,6 +299,10 @@ def main() -> None:
             )
         st.caption("Synthetic NexaBank policies for training.")
         st.caption("Chats stay in this browser session and reset when it ends.")
+
+    if st.session_state["workspace"] == "Service requests":
+        agent_workspace(api_client(settings.agent_api_base_url), as_of, product_id.strip() or None)
+        return
 
     if st.session_state["workspace"] == "Review feedback":
         st.title("Review feedback", anchor=False)

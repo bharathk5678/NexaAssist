@@ -13,5 +13,6 @@ def get_chat_model(settings: Settings) -> ChatOpenAI:
         use_responses_api=True,
         timeout=60,
         max_retries=1,
+        max_completion_tokens=settings.chat_max_output_tokens,
         callbacks=[TokenUsageLogger()],
     )

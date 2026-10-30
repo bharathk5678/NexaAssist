@@ -3,6 +3,8 @@
 > This file is the single source of truth for how you (Claude) must work on this project.
 > Read it before writing ANY code. Follow it strictly.
 
+Read CONSTRAINTS.md before writing code. Do not weaken it to make a change pass.
+
 ## 1. Project Context & Build Order
 
 This is a production-grade AI application built in strictly separated LAYERS. Do NOT build everything at once.

@@ -4,12 +4,17 @@ from collections.abc import Awaitable, Callable
 from typing import TypedDict
 
 from langchain_core.runnables import Runnable
+from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
+from langgraph.types import interrupt
 
+from app.agents.guardrails import unsafe_input
 from app.models.agent import AgentRequest, AgentResponse, IntentDecision, MissingField
+from app.models.agent_run import ApprovalDecision, proposal_digest
 from app.models.answer import AnswerResponse
 from app.models.retrieval import RetrieveRequest, RetrieveResponse
+from app.models.validation import SubmittedServiceRequest, ValidationAccess, ValidationResult
 
 
 class AgentState(TypedDict, total=False):
@@ -17,21 +22,52 @@ class AgentState(TypedDict, total=False):
     decision: IntentDecision
     policy_request: RetrieveRequest
     retrieved: RetrieveResponse
+    validation: ValidationResult
     response: AgentResponse
+    idempotency_key: str
+    proposal_hash: str
+    approved_hash: str
 
 
 def build_agent_graph(
     classifier: Runnable[AgentRequest, IntentDecision],
     retriever: Runnable[RetrieveRequest, RetrieveResponse],
     answerer: Callable[[RetrieveRequest, RetrieveResponse], Awaitable[AnswerResponse]],
+    *,
+    validator: Callable[[AgentRequest, RetrieveResponse], Awaitable[ValidationResult]]
+    | None = None,
+    access: ValidationAccess | None = None,
+    actioner: Callable[[AgentRequest, ValidationResult, str], Awaitable[SubmittedServiceRequest]]
+    | None = None,
+    checkpointer: BaseCheckpointSaver | None = None,
 ) -> CompiledStateGraph:
-    """One bounded graph for the current Orchestrator/Retriever stage."""
+    """Reuse the policy path; optionally pause and execute an approved service request."""
+    if actioner is not None and (checkpointer is None or validator is None):
+        raise ValueError("Actions require a validator and durable workflow checkpointing")
 
     async def orchestrator(state: AgentState) -> AgentState:
         request = state["request"]
+        if unsafe_input(request):
+            return {
+                "decision": IntentDecision(
+                    intent="forbidden",
+                    product_id=None,
+                    as_of=None,
+                    customer_id=None,
+                    action=None,
+                    product_required=False,
+                    missing_fields=[],
+                )
+            }
         decision = IntentDecision.model_validate(await classifier.ainvoke(request))
         if decision.intent == "forbidden":
             return {"decision": decision}
+        if (
+            decision.intent == "customer_context"
+            and request.action == "createServiceRequest"
+            and request.action_details is not None
+        ):
+            decision = decision.model_copy(update={"intent": "supported_action"})
 
         missing = list(decision.missing_fields)
         updates = {}
@@ -54,6 +90,25 @@ def build_agent_graph(
             missing.append("customer_id")
         if decision.intent == "supported_action" and resolved.action is None:
             missing.append("action")
+        if (
+            decision.intent == "supported_action"
+            and resolved.action == "createServiceRequest"
+            and validator is not None
+        ):
+            if resolved.as_of is None:
+                missing.append("as_of")
+            if resolved.action_details is None or (
+                resolved.action_details.request_type
+                in ("OPT_IN_CIR_2026_07_PART_PREPAY", "INTEREST_CERTIFICATE")
+                and resolved.action_details.loan_account_id is None
+            ):
+                missing.append("action_details")
+            if (
+                resolved.action_details is not None
+                and resolved.action_details.request_type == "OPT_IN_CIR_2026_07_PART_PREPAY"
+                and resolved.product_id is None
+            ):
+                missing.append("product_id")
         if decision.intent == "missing_information" and not missing:
             missing.append("question")
         if missing:
@@ -67,8 +122,23 @@ def build_agent_graph(
 
     async def retrieve(state: AgentState) -> AgentState:
         request = RetrieveRequest.model_validate(
-            state["request"].model_dump(exclude={"customer_id", "action"})
+            state["request"].model_dump(exclude={"customer_id", "action", "action_details"})
         )
+        if state["decision"].intent == "supported_action":
+            details = state["request"].action_details
+            assert details is not None
+            opt_in = details.request_type == "OPT_IN_CIR_2026_07_PART_PREPAY"
+            request = request.model_copy(
+                update={
+                    "query": (
+                        "CIR-2026-07 clause 5.2 existing NexaHome borrowers prepayment opt-in"
+                        if opt_in
+                        else "POL-OPS-001 clause 5.1 permitted advisory assistant service requests"
+                    ),
+                    # Operations policy is bank-wide; the selected product stays in AgentRequest.
+                    "product_id": request.product_id if opt_in else None,
+                }
+            )
         return {"policy_request": request, "retrieved": await retriever.ainvoke(request)}
 
     async def grounded_answer(state: AgentState) -> AgentState:
@@ -119,12 +189,110 @@ def build_agent_graph(
         }
 
     def supported_action(state: AgentState) -> AgentState:
+        request = state["request"]
+        if validator is not None and request.action_details is not None:
+            if (
+                access is None
+                or request.customer_id not in access.customer_ids
+                or request.action != "createServiceRequest"
+                or (
+                    request.action_details.request_type == "OPT_IN_CIR_2026_07_PART_PREPAY"
+                    and request.product_id != "NEXA-HL"
+                )
+            ):
+                return {
+                    "response": AgentResponse(
+                        intent="supported_action",
+                        status="blocked",
+                        message="An authorized customer and supported service-request scope are required.",
+                    )
+                }
+            return {}
         return {
             "response": AgentResponse(
                 intent="supported_action",
                 status="unavailable",
-                message="This action requires the Validator and Action stages, "
-                "which are not connected yet. No action was performed.",
+                message="This action or its required integration is unavailable. "
+                "No action was performed.",
+            )
+        }
+
+    async def validate(state: AgentState) -> AgentState:
+        assert validator is not None
+        result = await validator(state["request"], state["retrieved"])
+        response = AgentResponse(
+            intent="supported_action",
+            status="validated" if result.decision == "allowed" else result.decision,
+            message=result.reason,
+            validation=result,
+        )
+        updates: AgentState = {"validation": result, "response": response}
+        if result.decision == "allowed" and actioner is not None:
+            updates["proposal_hash"] = proposal_digest(state["request"], result)
+        return updates
+
+    def approval(state: AgentState) -> AgentState:
+        decision = ApprovalDecision.model_validate(
+            interrupt(
+                {
+                    "proposal_hash": state["proposal_hash"],
+                    "validation": state["validation"].model_dump(mode="json"),
+                }
+            )
+        )
+        if decision.proposal_hash != state["proposal_hash"]:
+            raise ValueError("Approval does not match the pending proposal")
+        if decision.decision == "reject":
+            return {
+                "response": AgentResponse(
+                    intent="supported_action",
+                    status="rejected",
+                    message="The proposal was rejected. No action was performed.",
+                    validation=state["validation"],
+                )
+            }
+        return {"approved_hash": decision.proposal_hash}
+
+    async def revalidate(state: AgentState) -> AgentState:
+        assert validator is not None
+        evidence = await retriever.ainvoke(state["policy_request"])
+        result = await validator(state["request"], evidence)
+        if (
+            result.decision == "allowed"
+            and proposal_digest(state["request"], result) != state["approved_hash"]
+        ):
+            result = ValidationResult(
+                decision="blocked",
+                evidence=result.evidence,
+                reason="The proposal or policy evidence changed. Start a new run for fresh approval.",
+            )
+        return {
+            "retrieved": evidence,
+            "validation": result,
+            "response": AgentResponse(
+                intent="supported_action",
+                status="validated" if result.decision == "allowed" else result.decision,
+                message=result.reason,
+                validation=result,
+            ),
+        }
+
+    async def action(state: AgentState) -> AgentState:
+        if (
+            actioner is None
+            or access is None
+            or state["request"].customer_id not in access.customer_ids
+            or state.get("approved_hash") != proposal_digest(state["request"], state["validation"])
+        ):
+            raise ValueError("Execution requires authorization and an exact approved proposal")
+        result = await actioner(state["request"], state["validation"], state["idempotency_key"])
+        return {
+            "response": AgentResponse(
+                intent="supported_action",
+                status="submitted",
+                message="The bank accepted the service request. It has not necessarily completed it.",
+                validation=state["validation"],
+                submission=result,
             )
         }
 
@@ -136,6 +304,10 @@ def build_agent_graph(
     graph.add_node("forbidden", forbidden)
     graph.add_node("customer_context", customer_context)
     graph.add_node("supported_action", supported_action)
+    graph.add_node("validator", validate)
+    graph.add_node("approval", approval)
+    graph.add_node("revalidate", revalidate)
+    graph.add_node("action", action)
     graph.add_edge(START, "orchestrator")
     graph.add_conditional_edges(
         "orchestrator",
@@ -148,13 +320,43 @@ def build_agent_graph(
             "supported_action": "supported_action",
         },
     )
-    graph.add_edge("retriever", "grounded_answer")
+    graph.add_conditional_edges(
+        "supported_action",
+        lambda state: "end" if "response" in state else "retrieve",
+        {"end": END, "retrieve": "retriever"},
+    )
+    graph.add_conditional_edges(
+        "retriever",
+        lambda state: (
+            "validator" if state["decision"].intent == "supported_action" else "grounded_answer"
+        ),
+        {"validator": "validator", "grounded_answer": "grounded_answer"},
+    )
     for node in (
         "grounded_answer",
         "clarification",
         "forbidden",
         "customer_context",
-        "supported_action",
     ):
         graph.add_edge(node, END)
-    return graph.compile()
+    graph.add_conditional_edges(
+        "validator",
+        lambda state: (
+            "approval"
+            if actioner is not None and state["validation"].decision == "allowed"
+            else "end"
+        ),
+        {"approval": "approval", "end": END},
+    )
+    graph.add_conditional_edges(
+        "approval",
+        lambda state: "revalidate" if "approved_hash" in state else "end",
+        {"revalidate": "revalidate", "end": END},
+    )
+    graph.add_conditional_edges(
+        "revalidate",
+        lambda state: "action" if state["validation"].decision == "allowed" else "end",
+        {"action": "action", "end": END},
+    )
+    graph.add_edge("action", END)
+    return graph.compile(checkpointer=checkpointer)
