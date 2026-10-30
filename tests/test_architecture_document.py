@@ -1,3 +1,5 @@
+"""Regression tests for architecture document."""
+
 from __future__ import annotations
 
 import json

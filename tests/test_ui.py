@@ -1,3 +1,5 @@
+"""Regression tests for ui."""
+
 from __future__ import annotations
 
 from collections.abc import Iterator
@@ -30,6 +32,15 @@ from app.ui import app as ui
 
 @pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch, settings: Settings) -> Iterator[httpx.Client]:
+    """Provide client for the ui scenario.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+
+    Yields:
+        Each fixture value or stored key produced by this operation.
+    """
     settings = settings.model_copy(
         update={"feedback_reviewer_token": SecretStr("reviewer-test-token-000000000000000000")}
     )
@@ -117,6 +128,12 @@ def client(monkeypatch: pytest.MonkeyPatch, settings: Settings) -> Iterator[http
 
 @pytest.mark.parametrize("decision", ["accepted", "rejected"])
 def test_existing_ui_endpoint_coverage(client: httpx.Client, decision: str) -> None:
+    """Verify existing ui endpoint coverage.
+
+    Args:
+        client: HTTP client configured for the required upstream service.
+        decision: Reviewer decision bound to the exact retained proposal hash.
+    """
     responses: list[httpx.Response] = []
     client.event_hooks["response"].append(responses.append)
     app = AppTest.from_file(Path("app/streamlit_app.py").resolve()).run()
@@ -191,6 +208,13 @@ def test_existing_ui_endpoint_coverage(client: httpx.Client, decision: str) -> N
 def test_ui_reports_service_unavailability(
     monkeypatch: pytest.MonkeyPatch, client: httpx.Client
 ) -> None:
+    """Verify ui reports service unavailability.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        client: HTTP client configured for the required upstream service.
+    """
+
     def unavailable(*args: Any, **kwargs: Any) -> httpx.Response:
         raise httpx.ConnectError("private connection details")
 
@@ -206,6 +230,12 @@ def test_live_quality_is_hidden_but_datadog_link_and_evaluation_remain(
     monkeypatch: pytest.MonkeyPatch,
     client: httpx.Client,
 ) -> None:
+    """Verify live quality is hidden but datadog link and evaluation remain.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        client: HTTP client configured for the required upstream service.
+    """
     answer = AnswerResponse.model_validate(
         client.post("/answer", json={"query": "Question", "as_of": "2026-10-19"}).json()
     )
@@ -243,6 +273,11 @@ def test_live_quality_is_hidden_but_datadog_link_and_evaluation_remain(
 
 
 def test_chat_history_filters_and_feedback_are_isolated(client: httpx.Client) -> None:
+    """Verify chat history filters and feedback are isolated.
+
+    Args:
+        client: HTTP client configured for the required upstream service.
+    """
     responses: list[httpx.Response] = []
     client.event_hooks["response"].append(responses.append)
     app = AppTest.from_file(Path("app/streamlit_app.py").resolve()).run()
@@ -295,6 +330,12 @@ def test_chat_history_filters_and_feedback_are_isolated(client: httpx.Client) ->
 def test_failed_question_retries_original_scope(
     monkeypatch: pytest.MonkeyPatch, client: httpx.Client
 ) -> None:
+    """Verify failed question retries original scope.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        client: HTTP client configured for the required upstream service.
+    """
     post = client.post
     monkeypatch.setattr(
         client,
@@ -320,6 +361,11 @@ def test_failed_question_retries_original_scope(
 
 
 def test_suggestion_and_blank_input(client: httpx.Client) -> None:
+    """Verify suggestion and blank input.
+
+    Args:
+        client: HTTP client configured for the required upstream service.
+    """
     responses: list[httpx.Response] = []
     client.event_hooks["response"].append(responses.append)
     app = AppTest.from_file(Path("app/streamlit_app.py").resolve()).run()
@@ -334,6 +380,11 @@ def test_suggestion_and_blank_input(client: httpx.Client) -> None:
 
 
 def test_reference_and_correction_survive_immediate_submission(client: httpx.Client) -> None:
+    """Verify reference and correction survive immediate submission.
+
+    Args:
+        client: HTTP client configured for the required upstream service.
+    """
     import json
 
     responses: list[httpx.Response] = []
@@ -356,6 +407,11 @@ def test_reference_and_correction_survive_immediate_submission(client: httpx.Cli
 
 
 def test_changing_reviewer_credentials_clears_loaded_records(client: httpx.Client) -> None:
+    """Verify changing reviewer credentials clears loaded records.
+
+    Args:
+        client: HTTP client configured for the required upstream service.
+    """
     app = AppTest.from_file(Path("app/streamlit_app.py").resolve()).run()
     app.radio(key="workspace").set_value("Review feedback").run()
     app.text_input(key="reviewer_token").input("reviewer-test-token-000000000000000000").run()

@@ -1,3 +1,5 @@
+"""Regression tests for agent persistence."""
+
 from __future__ import annotations
 
 import asyncio
@@ -16,6 +18,11 @@ from app.models.agent import AgentRequest
 
 
 def test_workflow_mongo_client_is_bounded(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify workflow mongo client is bounded.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     constructor = Mock()
     agent_runs._agent_client.cache_clear()
     monkeypatch.setattr(agent_runs, "MongoClient", constructor)
@@ -35,6 +42,13 @@ def test_workflow_mongo_client_is_bounded(monkeypatch: pytest.MonkeyPatch) -> No
 def test_atomic_lease_and_institution_isolation(
     run_store: MongoRunStore, workflow_settings: Settings
 ) -> None:
+    """Verify atomic lease and institution isolation.
+
+    Args:
+        run_store: Isolated durable-run and checkpoint store supplied by the test fixture.
+        workflow_settings: Test configuration with an isolated workflow database.
+    """
+
     async def run() -> None:
         assert await run_store.get("missing") is None
         await run_store.create({"_id": "run", "status": "running"})
@@ -63,6 +77,13 @@ def test_atomic_lease_and_institution_isolation(
 def test_real_checkpointer_round_trips_typed_state_after_reconstruction(
     run_store: MongoRunStore, workflow_settings: Settings
 ) -> None:
+    """Verify real checkpointer round trips typed state after reconstruction.
+
+    Args:
+        run_store: Isolated durable-run and checkpoint store supplied by the test fixture.
+        workflow_settings: Test configuration with an isolated workflow database.
+    """
+
     async def run() -> None:
         builder = StateGraph(AgentState)
         builder.add_node("retain", lambda state: state)

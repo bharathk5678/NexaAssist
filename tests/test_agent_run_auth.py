@@ -1,3 +1,5 @@
+"""Regression tests for agent run auth."""
+
 from __future__ import annotations
 
 import json
@@ -14,6 +16,11 @@ from app.core.config import AgentSettings
 
 
 def configuration() -> AgentSettings:
+    """Provide configuration for the agent run auth scenario.
+
+    Returns:
+        AgentSettings value produced by this operation.
+    """
     return AgentSettings(
         _env_file=None,
         agent_principals=[
@@ -34,6 +41,13 @@ def configuration() -> AgentSettings:
 def test_identity_scope_comes_from_server_configuration(
     token: str, principal: str, reviewer: bool
 ) -> None:
+    """Verify identity scope comes from server configuration.
+
+    Args:
+        token: Token fixture or parametrized input for this scenario.
+        principal: Principal fixture or parametrized input for this scenario.
+        reviewer: Reviewer fixture or parametrized input for this scenario.
+    """
     access = get_validation_access(
         configuration(), HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
     )
@@ -47,6 +61,11 @@ def test_identity_scope_comes_from_server_configuration(
     "credentials", [None, HTTPAuthorizationCredentials(scheme="Bearer", credentials="wrong")]
 )
 def test_bad_identity_has_no_access(credentials: HTTPAuthorizationCredentials | None) -> None:
+    """Verify bad identity has no access.
+
+    Args:
+        credentials: Bearer credentials supplied at the authentication boundary.
+    """
     assert get_validation_access(configuration(), credentials) is None
 
 
@@ -54,6 +73,11 @@ def test_bad_identity_has_no_access(credentials: HTTPAuthorizationCredentials | 
     "change", ["duplicate_name", "duplicate_token", "reserved", "bad_customer", "legacy_collision"]
 )
 def test_ambiguous_identity_configuration_is_rejected(change: str) -> None:
+    """Verify ambiguous identity configuration is rejected.
+
+    Args:
+        change: Configuration or payload mutation selected for the regression case.
+    """
     body = configuration().model_dump()
     if change == "duplicate_name":
         body["agent_principals"][1]["principal_id"] = "owner"
@@ -71,6 +95,7 @@ def test_ambiguous_identity_configuration_is_rejected(change: str) -> None:
 
 
 def test_configuration_errors_do_not_echo_credentials() -> None:
+    """Verify configuration errors do not echo credentials."""
     token = "private-test-token"
     with pytest.raises(ValidationError) as caught:
         AgentSettings(_env_file=None, agent_validation_token=token)
@@ -84,6 +109,14 @@ def test_credential_setup_preserves_existing_configuration(
     capsys: pytest.CaptureFixture[str],
     already_configured: bool,
 ) -> None:
+    """Verify credential setup preserves existing configuration.
+
+    Args:
+        tmp_path: Isolated temporary directory for this test's files.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        capsys: Pytest fixture capturing output without exposing live credentials.
+        already_configured: Already configured fixture or parametrized input for this scenario.
+    """
     script = Path("app/get_bearer_token.py").resolve()
     initial = "UNRELATED_SETTING=preserve-me\n"
     if already_configured:

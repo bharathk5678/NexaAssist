@@ -1,3 +1,5 @@
+"""Regression tests for ingestion."""
+
 from __future__ import annotations
 
 import asyncio
@@ -51,6 +53,11 @@ METADATA_FIELDS = {
 
 @pytest.fixture(scope="module")
 def settings() -> Settings:
+    """Provide settings for the ingestion scenario.
+
+    Returns:
+        Settings value produced by this operation.
+    """
     return Settings(
         _env_file=None,
         mongodb_uri="mongodb://unused",
@@ -65,15 +72,35 @@ def settings() -> Settings:
 
 @pytest.fixture(scope="module")
 def requests(settings: Settings) -> dict[str, IngestRequest]:
+    """Provide requests for the ingestion scenario.
+
+    Args:
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     return {request.doc_id: request for request in requests_from_register(REGISTER, settings)}
 
 
 class CountingEmbedding(DeterministicFakeEmbedding):
-    """Fake embeddings that record how many texts were sent to the model."""
+    """Fake embeddings that record how many texts were sent to the model.
+
+    Attributes:
+        embedded: Embedded retained by this contract.
+    """
 
     embedded: int = 0
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        """Provide embed documents for the ingestion scenario.
+
+        Args:
+            texts: Texts fixture or parametrized input for this scenario.
+
+        Returns:
+            Ordered results produced by the documented operation.
+        """
         self.embedded += len(texts)
         return super().embed_documents(texts)
 
@@ -84,6 +111,17 @@ def run_chain(
     request: IngestRequest,
     parents: InMemoryStore | None = None,
 ) -> IngestResponse:
+    """Provide run chain for the ingestion scenario.
+
+    Args:
+        store: Scoped run persistence and checkpoint adapter.
+        settings: Validated application configuration for this operation.
+        request: Validated request retaining the caller's explicit scope and action details.
+        parents: Parents fixture or parametrized input for this scenario.
+
+    Returns:
+        IngestResponse value produced by this operation.
+    """
     chain = build_ingestion_chain(store, parents or InMemoryStore(), settings)
     response: IngestResponse = asyncio.run(chain.ainvoke({"request": request}))
     assert response.chunk_count == len(response.chunk_ids) > 0
@@ -97,16 +135,41 @@ def ingest(
     request: IngestRequest,
     parents: InMemoryStore | None = None,
 ) -> list[Document]:
+    """Ingest the requested document using configured parsing, embeddings and storage.
+
+    Args:
+        store: Scoped run persistence and checkpoint adapter.
+        settings: Validated application configuration for this operation.
+        request: Validated request retaining the caller's explicit scope and action details.
+        parents: Parents fixture or parametrized input for this scenario.
+
+    Returns:
+        Ordered results produced by the documented operation.
+    """
     return store.get_by_ids(run_chain(store, settings, request, parents).chunk_ids)
 
 
 @pytest.fixture(scope="module")
 def home_loan_v3(settings: Settings, requests: dict[str, IngestRequest]) -> list[Document]:
+    """Provide home loan v3 for the ingestion scenario.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+
+    Returns:
+        Ordered results produced by the documented operation.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     return ingest(store, settings, requests["POL-HL-V3"])
 
 
 def test_register_maps_to_requests(requests: dict[str, IngestRequest]) -> None:
+    """Verify register maps to requests.
+
+    Args:
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     assert len(requests) == 8
     circular = requests["CIR-2026-07"]
     assert circular.doc_type == "circular"
@@ -118,6 +181,12 @@ def test_register_maps_to_requests(requests: dict[str, IngestRequest]) -> None:
 def test_every_document_parses_and_chunks(
     settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify every document parses and chunks.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     for request in requests.values():
         for document in ingest(store, settings, request):
@@ -128,6 +197,11 @@ def test_every_document_parses_and_chunks(
 
 
 def test_version_metadata_is_stamped_on_every_chunk(home_loan_v3: list[Document]) -> None:
+    """Verify version metadata is stamped on every chunk.
+
+    Args:
+        home_loan_v3: Home loan v3 fixture or parametrized input for this scenario.
+    """
     for document in home_loan_v3:
         assert document.metadata["product_id"] == "NEXA-HL"
         assert document.metadata["policy_version"] == "3.0"
@@ -140,6 +214,12 @@ def test_version_metadata_is_stamped_on_every_chunk(home_loan_v3: list[Document]
 def test_expired_document_keeps_indexable_end_date(
     settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify expired document keeps indexable end date.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     chunks = ingest(store, settings, requests["POL-HL-V2"])
     assert chunks
@@ -147,6 +227,11 @@ def test_expired_document_keeps_indexable_end_date(
 
 
 def test_tables_are_kept_whole(home_loan_v3: list[Document]) -> None:
+    """Verify tables are kept whole.
+
+    Args:
+        home_loan_v3: Home loan v3 fixture or parametrized input for this scenario.
+    """
     tables = [d.page_content for d in home_loan_v3 if d.metadata["section_type"] == "table"]
     foir = next(table for table in tables if "Maximum FOIR" in table)
     # The table stays with the clause that introduces it.
@@ -160,6 +245,11 @@ def test_tables_are_kept_whole(home_loan_v3: list[Document]) -> None:
 
 
 def test_running_headers_and_footers_are_dropped(home_loan_v3: list[Document]) -> None:
+    """Verify running headers and footers are dropped.
+
+    Args:
+        home_loan_v3: Home loan v3 fixture or parametrized input for this scenario.
+    """
     text = "\n".join(document.page_content for document in home_loan_v3)
     assert "SYNTHETIC DOCUMENT" not in text
     assert "Not a real bank" not in text
@@ -167,6 +257,12 @@ def test_running_headers_and_footers_are_dropped(home_loan_v3: list[Document]) -
 
 
 def test_reingesting_is_idempotent(settings: Settings, requests: dict[str, IngestRequest]) -> None:
+    """Verify reingesting is idempotent.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     first = ingest(store, settings, requests["CIR-2026-07"])
     second = ingest(store, settings, requests["CIR-2026-07"])
@@ -178,6 +274,12 @@ def test_reingesting_is_idempotent(settings: Settings, requests: dict[str, Inges
 def test_every_registered_clause_is_exactly_one_chunk(
     settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify every registered clause is exactly one chunk.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     for entry in json.loads(REGISTER.read_text()):
         chunks = ingest(store, settings, requests[entry["doc_id"]])
@@ -189,6 +291,12 @@ def test_every_registered_clause_is_exactly_one_chunk(
 def test_every_golden_citation_resolves_to_a_chunk(
     settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify every golden citation resolves to a chunk.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     indexed = {
         (d.metadata["doc_id"], d.metadata["clause"])
@@ -205,6 +313,11 @@ def test_every_golden_citation_resolves_to_a_chunk(
 
 
 def test_chunk_carries_identity_header_and_clause_id(home_loan_v3: list[Document]) -> None:
+    """Verify chunk carries identity header and clause id.
+
+    Args:
+        home_loan_v3: Home loan v3 fixture or parametrized input for this scenario.
+    """
     fee = next(d for d in home_loan_v3 if d.metadata["clause"] == "6.2")
     assert fee.id == "POL-HL-V3_6.2_c01"
     assert fee.metadata["clause_heading"] == "Processing fee"
@@ -216,6 +329,7 @@ def test_chunk_carries_identity_header_and_clause_id(home_loan_v3: list[Document
 
 
 def test_oversized_clause_splits_narrative_with_overlap_but_never_the_table() -> None:
+    """Verify oversized clause splits narrative with overlap but never the table."""
     table = Table(
         text="Band Fee A 1% B 2%",
         metadata=ElementMetadata(
@@ -243,6 +357,7 @@ def test_oversized_clause_splits_narrative_with_overlap_but_never_the_table() ->
 
 
 def test_oversized_list_clause_is_packed_not_split_per_item() -> None:
+    """Verify oversized list clause is packed not split per item."""
     items = [f"Item {n}: required document number {n} for the loan." for n in range(1, 8)]
     elements: list[Element] = [
         Title("1. Documents"),
@@ -263,6 +378,12 @@ def test_oversized_list_clause_is_packed_not_split_per_item() -> None:
 def test_parent_section_holds_every_clause_of_the_section(
     settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify parent section holds every clause of the section.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     parents: InMemoryStore = InMemoryStore()
     chunks = ingest(store, settings, requests["POL-HL-V3"], parents)
@@ -285,6 +406,12 @@ def test_parent_section_holds_every_clause_of_the_section(
 def test_reingesting_replaces_parent_sections(
     settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify reingesting replaces parent sections.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     parents: InMemoryStore = InMemoryStore()
     ingest(store, settings, requests["CIR-2026-07"], parents)
@@ -296,6 +423,13 @@ def test_reingesting_replaces_parent_sections(
 def test_empty_parse_preserves_existing_chunks_and_parents(
     settings: Settings, requests: dict[str, IngestRequest], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Verify empty parse preserves existing chunks and parents.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     parents: InMemoryStore = InMemoryStore()
     request = requests["CIR-2026-07"]
@@ -315,6 +449,12 @@ def test_empty_parse_preserves_existing_chunks_and_parents(
 def test_only_new_or_changed_chunks_are_embedded(
     settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify only new or changed chunks are embedded.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     embedding = CountingEmbedding(size=8)
     store = InMemoryVectorStore(embedding)
     request = requests["POL-HL-V3"]
@@ -336,6 +476,12 @@ def test_only_new_or_changed_chunks_are_embedded(
 def test_changing_the_embedding_model_re_embeds_everything(
     settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify changing the embedding model re embeds everything.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     first = run_chain(store, settings, requests["CIR-2026-07"])
     other_model = settings.model_copy(update={"embedding_model": "another-model"})
@@ -344,6 +490,7 @@ def test_changing_the_embedding_model_re_embeds_everything(
 
 
 def test_stale_chunks_are_deleted_and_current_ones_kept() -> None:
+    """Verify stale chunks are deleted and current ones kept."""
     collection: Any = mongomock.MongoClient().db.chunks
     collection.insert_many(
         [
@@ -359,6 +506,12 @@ def test_stale_chunks_are_deleted_and_current_ones_kept() -> None:
 def test_dimension_change_reembeds_every_chunk(
     settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify dimension change reembeds every chunk.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     request = requests["CIR-2026-07"]
     first = run_chain(store, settings, request)
@@ -373,6 +526,13 @@ def test_dimension_change_reembeds_every_chunk(
 def test_failed_embedding_keeps_existing_parent_evidence(
     monkeypatch: pytest.MonkeyPatch, settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify failed embedding keeps existing parent evidence.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     parents = InMemoryStore()
     request = requests["CIR-2026-07"]
@@ -387,6 +547,12 @@ def test_failed_embedding_keeps_existing_parent_evidence(
 def test_parent_store_uses_upserts_and_literal_document_prefixes(
     monkeypatch: pytest.MonkeyPatch, settings: Settings
 ) -> None:
+    """Verify parent store uses upserts and literal document prefixes.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+    """
     storage: Any = mongomock.MongoClient().db
     monkeypatch.setattr(mongo, "_database", lambda _: storage)
     collection = storage[settings.mongodb_parent_collection]
@@ -407,6 +573,12 @@ def test_parent_store_uses_upserts_and_literal_document_prefixes(
 def test_reingest_preserves_documents_sharing_a_parent_key_prefix(
     settings: Settings, requests: dict[str, IngestRequest]
 ) -> None:
+    """Verify reingest preserves documents sharing a parent key prefix.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        requests: Requests fixture or parametrized input for this scenario.
+    """
     vector = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
     parents = InMemoryStore()
     foreign = "CIR-2026-07_s02_s01"

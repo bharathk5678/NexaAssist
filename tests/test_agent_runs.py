@@ -1,3 +1,5 @@
+"""Regression tests for agent runs."""
+
 from __future__ import annotations
 
 import asyncio
@@ -45,6 +47,11 @@ WORKFLOW_CASES = [
 
 @pytest.fixture(scope="module")
 def published_evidence() -> dict[str, RetrieveResponse]:
+    """Provide published evidence for the agent runs scenario.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     result = {}
     for name, doc, filename, effective_date in (
         (
@@ -93,6 +100,17 @@ def world(
     published_evidence: dict[str, RetrieveResponse],
     monkeypatch: pytest.MonkeyPatch,
 ):
+    """Provide world for the agent runs scenario.
+
+    Args:
+        run_store: Isolated durable-run and checkpoint store supplied by the test fixture.
+        workflow_settings: Test configuration with an isolated workflow database.
+        published_evidence: Published evidence fixture or parametrized input for this scenario.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+
+    Yields:
+        Each fixture value or stored key produced by this operation.
+    """
     name = "workflow_bank_" + uuid4().hex
     spec = importlib.util.spec_from_file_location(
         name, "nexa_synthetic_data/api/mock_server/server.py"
@@ -219,6 +237,14 @@ def world(
 
 
 def payload(request_type: str = "CALLBACK") -> dict:
+    """Provide payload for the agent runs scenario.
+
+    Args:
+        request_type: Request type fixture or parametrized input for this scenario.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     details = {"request_type": request_type}
     body = {
         "query": "Prepare this service request.",
@@ -235,6 +261,12 @@ def payload(request_type: str = "CALLBACK") -> dict:
 
 @pytest.mark.parametrize("case", WORKFLOW_CASES, ids=[case["id"] for case in WORKFLOW_CASES])
 def test_full_http_graph_approval_and_action(world, case: dict) -> None:
+    """Verify full http graph approval and action.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        case: One parametrized golden or contract scenario.
+    """
     request_type, decision = (
         case["input"]["action_details"]["request_type"],
         case["context"]["approval"],
@@ -289,6 +321,14 @@ def test_full_http_graph_approval_and_action(world, case: dict) -> None:
 def test_uncertain_submission_retries_same_persisted_operation(
     world, request_type: str, fault: str
 ) -> None:
+    """Verify uncertain submission retries same persisted operation.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        request_type: Request type fixture or parametrized input for this scenario.
+        fault: Fault fixture or parametrized input for this scenario.
+    """
+
     async def run() -> None:
         async with world.clients() as caller:
             pending = (
@@ -340,6 +380,13 @@ def test_uncertain_submission_retries_same_persisted_operation(
     ],
 )
 def test_early_stops_and_invalid_evidence_never_write(world, failure: str) -> None:
+    """Verify early stops and invalid evidence never write.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        failure: Failure mode selected by the parametrized test.
+    """
+
     async def run() -> None:
         body = payload("INTEREST_CERTIFICATE")
         headers = OWNER
@@ -405,6 +452,13 @@ def test_early_stops_and_invalid_evidence_never_write(world, failure: str) -> No
     ],
 )
 def test_approval_is_owner_scoped_exact_current_and_non_bypassable(world, failure: str) -> None:
+    """Verify approval is owner scoped exact current and non bypassable.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        failure: Failure mode selected by the parametrized test.
+    """
+
     async def run() -> None:
         kind = "OPT_IN_CIR_2026_07_PART_PREPAY" if failure == "changed_facts" else "CALLBACK"
         async with world.clients() as caller:
@@ -473,6 +527,12 @@ def test_approval_is_owner_scoped_exact_current_and_non_bypassable(world, failur
 
 
 def test_concurrent_approvals_serialize_the_bank_write(world) -> None:
+    """Verify concurrent approvals serialize the bank write.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+    """
+
     async def run() -> None:
         world.post_entered, world.post_release = asyncio.Event(), asyncio.Event()
         async with world.clients() as caller:
@@ -491,6 +551,12 @@ def test_concurrent_approvals_serialize_the_bank_write(world) -> None:
 
 
 def test_foreign_reads_missing_runs_and_unapproved_retry_are_rejected(world) -> None:
+    """Verify foreign reads missing runs and unapproved retry are rejected.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+    """
+
     async def run() -> None:
         async with world.clients() as caller:
             pending = (await caller.post("/agent/runs", headers=OWNER, json=payload())).json()
@@ -508,6 +574,12 @@ def test_foreign_reads_missing_runs_and_unapproved_retry_are_rejected(world) -> 
 
 
 def test_uncertain_retry_after_bank_retention_window_requires_reconciliation(world) -> None:
+    """Verify uncertain retry after bank retention window requires reconciliation.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+    """
+
     async def run() -> None:
         async with world.clients() as caller:
             pending = (await caller.post("/agent/runs", headers=OWNER, json=payload())).json()
@@ -532,6 +604,13 @@ def test_uncertain_retry_after_bank_retention_window_requires_reconciliation(wor
 
 @pytest.mark.parametrize("request_type", TYPES)
 def test_direct_submission_is_disabled_by_default(world, request_type: str) -> None:
+    """Verify direct submission is disabled by default.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        request_type: Request type fixture or parametrized input for this scenario.
+    """
+
     async def run() -> None:
         async with world.clients() as caller:
             response = await caller.post(
@@ -547,6 +626,12 @@ def test_direct_submission_is_disabled_by_default(world, request_type: str) -> N
 
 
 def test_policy_only_run_keeps_one_retrieval_and_never_enters_action(world) -> None:
+    """Verify policy only run keeps one retrieval and never enters action.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+    """
+
     async def run() -> None:
         world.intent = "policy_question"
         async with world.clients() as caller:
@@ -567,6 +652,12 @@ def test_policy_only_run_keeps_one_retrieval_and_never_enters_action(world) -> N
 
 
 def test_checkpoint_preserves_complete_amendments_and_nested_citations(world) -> None:
+    """Verify checkpoint preserves complete amendments and nested citations.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+    """
+
     async def run() -> None:
         amendment = world.evidence["circular"].amendments[0].model_copy(deep=True)
         world.evidence["operations"].amendments.append(amendment)
@@ -586,6 +677,12 @@ def test_checkpoint_preserves_complete_amendments_and_nested_citations(world) ->
 
 
 def test_storage_errors_return_safe_api_messages(world, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify storage errors return safe api messages.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     from pymongo.errors import ConnectionFailure
 
     from app.services.agent_runs import AgentRunService
@@ -609,6 +706,13 @@ def test_storage_errors_return_safe_api_messages(world, monkeypatch: pytest.Monk
 def test_lost_run_lease_never_starts_an_unowned_write(
     world, monkeypatch: pytest.MonkeyPatch, stage: str
 ) -> None:
+    """Verify lost run lease never starts an unowned write.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        stage: Stage fixture or parametrized input for this scenario.
+    """
     original = MongoRunStore.update
 
     async def lose_lease(self, run_id, lease, **changes):
@@ -644,6 +748,12 @@ def test_lost_run_lease_never_starts_an_unowned_write(
 def test_pending_run_survives_application_and_real_process_restart(
     world, workflow_settings: Settings
 ) -> None:
+    """Verify pending run survives application and real process restart.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        workflow_settings: Test configuration with an isolated workflow database.
+    """
     import os
     import subprocess
 
@@ -701,6 +811,12 @@ print(json.dumps({'proposal_hash': asyncio.run(load())}))
 def test_deadline_includes_checkpoint_preparation_before_graph_resume(
     world, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Verify deadline includes checkpoint preparation before graph resume.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     original = MongoRunStore.update
 
     async def slow_approval(self, run_id, lease, **changes):
@@ -729,6 +845,12 @@ def test_deadline_includes_checkpoint_preparation_before_graph_resume(
 
 
 def test_policy_answer_and_exact_citation_survive_the_persistent_run(world) -> None:
+    """Verify policy answer and exact citation survive the persistent run.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+    """
+
     async def run() -> None:
         world.intent = "policy_question"
         quote = world.evidence["operations"].results[0].parent_text.splitlines()[0]
@@ -753,6 +875,12 @@ def test_policy_answer_and_exact_citation_survive_the_persistent_run(world) -> N
 
 
 def test_validation_only_api_preserves_its_existing_response_fields(world) -> None:
+    """Verify validation only api preserves its existing response fields.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+    """
+
     async def run() -> None:
         async with world.clients() as caller:
             response = await caller.post("/agent", headers=OWNER, json=payload())
@@ -773,6 +901,12 @@ def test_validation_only_api_preserves_its_existing_response_fields(world) -> No
 
 @pytest.mark.parametrize("field", ["query", "notes"])
 def test_sensitive_input_is_rejected_before_durable_request_storage(world, field: str) -> None:
+    """Verify sensitive input is rejected before durable request storage.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        field: Field fixture or parametrized input for this scenario.
+    """
     secret = "sk-synthetic-credential-that-must-not-be-checkpointed"
 
     async def run() -> None:
@@ -796,6 +930,13 @@ def test_sensitive_input_is_rejected_before_durable_request_storage(world, field
 def test_streamlit_owner_reviewer_flow_through_actual_graph_and_bank(
     world, monkeypatch, decision: str
 ) -> None:
+    """Verify streamlit owner reviewer flow through actual graph and bank.
+
+    Args:
+        world: Isolated graph, API, storage and banking test harness.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        decision: Reviewer decision bound to the exact retained proposal hash.
+    """
     from fastapi.testclient import TestClient
     from streamlit.testing.v1 import AppTest
 

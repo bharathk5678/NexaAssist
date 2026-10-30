@@ -1,3 +1,5 @@
+"""Regression tests for live evaluation."""
+
 from __future__ import annotations
 
 import asyncio
@@ -27,6 +29,14 @@ def test_plain_answers_export_feedback_target_without_requiring_ragas(
     answer: AnswerResponse,
     telemetry: str,
 ) -> None:
+    """Verify plain answers export feedback target without requiring ragas.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        answer: Generated answer whose exact text and citations are being evaluated.
+        telemetry: Telemetry fixture or parametrized input for this scenario.
+    """
     datadog = SimpleNamespace(
         enabled=telemetry != "disabled",
         workflow=Mock(return_value=nullcontext(object())),
@@ -51,6 +61,7 @@ def test_plain_answers_export_feedback_target_without_requiring_ragas(
 
 
 def test_cosine_roundoff_is_normalized_but_invalid_scores_are_rejected() -> None:
+    """Verify cosine roundoff is normalized but invalid scores are rejected."""
     assert QualityScore(status="scored", value=1.0000000000000002).value == 1.0
     assert QualityScore(status="scored", value=-1e-16).value == 0.0
     for invalid in (1.01, -0.1, float("inf"), float("nan")):
@@ -60,6 +71,11 @@ def test_cosine_roundoff_is_normalized_but_invalid_scores_are_rejected() -> None
 
 @pytest.fixture
 def evidence() -> RetrieveResponse:
+    """Combine complete amendments and results without duplicating document versions.
+
+    Returns:
+        RetrieveResponse value produced by this operation.
+    """
     hit = {
         "rank": 1,
         "score": 0.9,
@@ -84,6 +100,14 @@ def evidence() -> RetrieveResponse:
 
 @pytest.fixture
 def answer(evidence: RetrieveResponse) -> AnswerResponse:
+    """Generate a grounded answer using evidence retained for the request.
+
+    Args:
+        evidence: Retained retrieval results and complete applicable amendments.
+
+    Returns:
+        AnswerResponse value produced by this operation.
+    """
     return AnswerResponse(
         as_of=evidence.as_of,
         status="answered",
@@ -104,6 +128,16 @@ def test_live_scores_reuse_one_answer_and_its_exact_evidence(
     reference_source: str,
     telemetry_fails: bool,
 ) -> None:
+    """Verify live scores reuse one answer and its exact evidence.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        evidence: Retained retrieval results and complete applicable amendments.
+        answer: Generated answer whose exact text and citations are being evaluated.
+        reference_source: Reference source fixture or parametrized input for this scenario.
+        telemetry_fails: Telemetry fails fixture or parametrized input for this scenario.
+    """
     request = EvaluatedAnswerRequest(
         query="What is the maximum loan amount for a NexaHome Loan?",
         as_of=date(2026, 10, 20) if reference_source == "none" else evidence.as_of,
@@ -167,6 +201,15 @@ def test_invalid_optional_golden_file_preserves_answer(
     answer: AnswerResponse,
     tmp_path: Path,
 ) -> None:
+    """Verify invalid optional golden file preserves answer.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        evidence: Retained retrieval results and complete applicable amendments.
+        answer: Generated answer whose exact text and citations are being evaluated.
+        tmp_path: Isolated temporary directory for this test's files.
+    """
     dataset = tmp_path / "invalid.jsonl"
     dataset.write_text('{"invalid": "golden case"}\n')
     monkeypatch.setattr(service, "GOLDEN_DATASET", dataset)
@@ -196,6 +239,14 @@ def test_ragas_failures_are_explicit_and_do_not_discard_other_metrics(
     answer: AnswerResponse,
     reference: str | None,
 ) -> None:
+    """Verify ragas failures are explicit and do not discard other metrics.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        answer: Generated answer whose exact text and citations are being evaluated.
+        reference: Optional expected answer used by reference-based metrics.
+    """
     monkeypatch.setenv("RAGAS_DO_NOT_TRACK", "true")
     pytest.importorskip("ragas")
     from app.evaluation import ragas_metrics
@@ -228,6 +279,13 @@ def test_nonfinite_ragas_scores_are_errors(
     settings: Settings,
     answer: AnswerResponse,
 ) -> None:
+    """Verify nonfinite ragas scores are errors.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        answer: Generated answer whose exact text and citations are being evaluated.
+    """
     monkeypatch.setenv("RAGAS_DO_NOT_TRACK", "true")
     pytest.importorskip("ragas")
     from app.evaluation import ragas_metrics

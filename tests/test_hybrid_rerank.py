@@ -1,3 +1,5 @@
+"""Regression tests for hybrid rerank."""
+
 from __future__ import annotations
 
 import asyncio
@@ -26,6 +28,14 @@ from app.services import retrieval as retrieval_service
 def test_service_applies_configured_search_and_reranking(
     monkeypatch: pytest.MonkeyPatch, settings: Settings, hybrid: bool, rerank: bool
 ) -> None:
+    """Verify service applies configured search and reranking.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        hybrid: Hybrid fixture or parametrized input for this scenario.
+        rerank: Rerank fixture or parametrized input for this scenario.
+    """
     from unittest.mock import AsyncMock
 
     settings = settings.model_copy(
@@ -85,6 +95,11 @@ def test_service_applies_configured_search_and_reranking(
 
 
 def test_hybrid_pipeline_filters_both_branches_before_ranking(settings: Settings) -> None:
+    """Verify hybrid pipeline filters both branches before ranking.
+
+    Args:
+        settings: Validated application configuration for this operation.
+    """
     collection: Any = mongomock.MongoClient().db.chunks
     collection.aggregate = Mock(
         return_value=[
@@ -127,6 +142,7 @@ def test_hybrid_pipeline_filters_both_branches_before_ranking(settings: Settings
 
 
 def test_ollama_content_array_logprobs() -> None:
+    """Verify ollama content array logprobs."""
     probabilities = completion_probabilities(
         {
             "choices": [
@@ -151,6 +167,11 @@ def test_ollama_content_array_logprobs() -> None:
 
 
 def test_local_reranker_uses_openai_completions_and_likelihoods(settings: Settings) -> None:
+    """Verify local reranker uses openai completions and likelihoods.
+
+    Args:
+        settings: Validated application configuration for this operation.
+    """
     settings = settings.model_copy(
         update={"rerank_api": "openai", "rerank_base_url": "http://127.0.0.1:11434/v1"}
     )
@@ -202,6 +223,12 @@ def test_local_reranker_uses_openai_completions_and_likelihoods(settings: Settin
 
 
 def test_native_ollama_reranker_uses_raw_scoring_prompt(settings: Settings) -> None:
+    """Verify native ollama reranker uses raw scoring prompt.
+
+    Args:
+        settings: Validated application configuration for this operation.
+    """
+
     def respond(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/api/generate"
         payload = json.loads(request.content)
@@ -237,16 +264,23 @@ def test_native_ollama_reranker_uses_raw_scoring_prompt(settings: Settings) -> N
 def test_missing_or_invalid_local_likelihoods_do_not_fabricate_scores(
     probabilities: dict[str, float],
 ) -> None:
+    """Verify missing or invalid local likelihoods do not fabricate scores.
+
+    Args:
+        probabilities: Probabilities fixture or parametrized input for this scenario.
+    """
     with pytest.raises(ValueError, match="yes AND no"):
         relevance_probability(probabilities)
 
 
 def test_case_and_whitespace_variants_do_not_replace_qwen_scoring_tokens() -> None:
+    """Verify case and whitespace variants do not replace qwen scoring tokens."""
     exact = {"yes": -0.1, "no": -8}
     alternatives = {**exact, "Yes": -9, "NO": -0.01, " yes": -10, " no": -0.01}
     assert relevance_probability(alternatives) == relevance_probability(exact)
 
 
 def test_case_variants_cannot_substitute_for_missing_exact_qwen_tokens() -> None:
+    """Verify case variants cannot substitute for missing exact qwen tokens."""
     with pytest.raises(ValueError, match="yes AND no"):
         relevance_probability({"Yes": -0.1, "No": -8})

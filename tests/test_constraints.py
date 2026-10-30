@@ -1,3 +1,5 @@
+"""Regression tests for constraints."""
+
 from __future__ import annotations
 
 import json
@@ -12,6 +14,16 @@ from app.evaluation import floor_guard, security_gate
 
 
 def patch(added: str, removed: str = "", file: str = "app/example.py") -> str:
+    """Provide patch for the constraints scenario.
+
+    Args:
+        added: Added fixture or parametrized input for this scenario.
+        removed: Removed fixture or parametrized input for this scenario.
+        file: File fixture or parametrized input for this scenario.
+
+    Returns:
+        Text representation produced by the documented operation.
+    """
     return (
         f"diff --git a/{file} b/{file}\n--- a/{file}\n+++ b/{file}\n"
         f"@@ -1,{len(removed.splitlines())} +1,{len(added.splitlines())} @@\n"
@@ -35,17 +47,25 @@ def patch(added: str, removed: str = "", file: str = "app/example.py") -> str:
     ],
 )
 def test_floor_detects_added_bypasses(source: str, rule: str) -> None:
+    """Verify floor detects added bypasses.
+
+    Args:
+        source: Source fixture or parametrized input for this scenario.
+        rule: Rule fixture or parametrized input for this scenario.
+    """
     result = floor_guard.check_diff(patch(source), {"app/example.py": source})
     assert any(finding[2] == rule for finding in result)
 
 
 def test_floor_ignores_examples_and_unchanged_comments() -> None:
+    """Verify floor ignores examples and unchanged comments."""
     source = 'example = "# noqa: example only"\n# noqa: existing\nvalue = 1'
     diff = patch('example = "# noqa: example only"')
     assert floor_guard.check_diff(diff, {"app/example.py": source}) == []
 
 
 def test_floor_preserves_line_numbers_with_diff_context() -> None:
+    """Verify floor preserves line numbers with diff context."""
     source = "first = 1\nsecond = 2\nlast = 3  # noqa"
     diff = (
         "diff --git a/app/example.py b/app/example.py\n--- a/app/example.py\n"
@@ -57,6 +77,7 @@ def test_floor_preserves_line_numbers_with_diff_context() -> None:
 
 
 def test_floor_catches_deleted_tests_and_assertions() -> None:
+    """Verify floor catches deleted tests and assertions."""
     diff = patch("value = 1", "assert value == 1", "tests/test_example.py")
     assert ("tests/test_example.py", 1, "assertion-removed") in floor_guard.check_diff(
         diff, {"tests/test_example.py": "value = 1"}
@@ -81,6 +102,12 @@ def test_floor_catches_deleted_tests_and_assertions() -> None:
 def test_floor_retains_exact_inventory_assertions_without_losing_members(
     replacement: str, blocked: bool
 ) -> None:
+    """Verify floor retains exact inventory assertions without losing members.
+
+    Args:
+        replacement: Replacement fixture or parametrized input for this scenario.
+        blocked: Blocked fixture or parametrized input for this scenario.
+    """
     name = "tests/test_example.py"
     findings = floor_guard.check_diff(
         patch(replacement, 'assert paths == {"/agent"}', name), {name: replacement}
@@ -102,11 +129,19 @@ def test_floor_retains_exact_inventory_assertions_without_losing_members(
     ],
 )
 def test_floor_ratchet(old: str, new: str, blocked: bool) -> None:
+    """Verify floor ratchet.
+
+    Args:
+        old: Old fixture or parametrized input for this scenario.
+        new: New fixture or parametrized input for this scenario.
+        blocked: Blocked fixture or parametrized input for this scenario.
+    """
     findings = floor_guard.check_diff(patch(new, old, "CONSTRAINTS.md"), {})
     assert bool(findings) == blocked
 
 
 def test_floor_fails_on_an_invalid_hunk() -> None:
+    """Verify floor fails on an invalid hunk."""
     with pytest.raises(ValueError, match="Invalid diff hunk"):
         floor_guard.check_diff("@@ invalid", {})
 
@@ -114,6 +149,12 @@ def test_floor_fails_on_an_invalid_hunk() -> None:
 def test_floor_command_success_failure_and_baseline_expansion(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Verify floor command success failure and baseline expansion.
+
+    Args:
+        tmp_path: Isolated temporary directory for this test's files.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     evaluation = tmp_path / "app" / "evaluation"
     evaluation.mkdir(parents=True)
     baseline = evaluation / "security_baseline.json"
@@ -149,6 +190,11 @@ def test_floor_command_success_failure_and_baseline_expansion(
 
 
 def report() -> dict:
+    """Provide report for the constraints scenario.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     return {
         "errors": [],
         "paths": {"scanned": ["app/services/validation.py", "app/models/validation.py"]},
@@ -166,6 +212,13 @@ def report() -> dict:
 def test_security_gate_freezes_content_and_never_logs_matches(
     tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Verify security gate freezes content and never logs matches.
+
+    Args:
+        tmp_path: Isolated temporary directory for this test's files.
+        capsys: Pytest fixture capturing output without exposing live credentials.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     data = report()
     baseline = [{"fingerprint": security_gate.finding_fingerprint(data["results"][0])}]
     assert security_gate.check_report(data, baseline) == []
@@ -188,6 +241,11 @@ def test_security_gate_freezes_content_and_never_logs_matches(
 
 @pytest.mark.parametrize("failure", ["scan_error", "omitted_validator"])
 def test_security_gate_rejects_incomplete_scans(failure: str) -> None:
+    """Verify security gate rejects incomplete scans.
+
+    Args:
+        failure: Failure mode selected by the parametrized test.
+    """
     data = report()
     if failure == "scan_error":
         data["errors"] = [{"type": "parse error"}]
@@ -201,6 +259,13 @@ def test_security_gate_rejects_incomplete_scans(failure: str) -> None:
 def test_security_cli_returns_real_process_exit_codes(
     valid: bool, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Verify security cli returns real process exit codes.
+
+    Args:
+        valid: Valid fixture or parametrized input for this scenario.
+        tmp_path: Isolated temporary directory for this test's files.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     data = report()
     data["results"] = []
     path = tmp_path / "report.json"
@@ -215,6 +280,12 @@ def test_security_cli_returns_real_process_exit_codes(
 def test_floor_cli_returns_real_process_exit_codes(
     valid: bool, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Verify floor cli returns real process exit codes.
+
+    Args:
+        valid: Valid fixture or parametrized input for this scenario.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     monkeypatch.setattr(sys, "argv", ["floor_guard", "--base", "HEAD" if valid else "missing-ref"])
     with pytest.raises(SystemExit) as result:
         runpy.run_path(floor_guard.__file__, run_name="__main__")
@@ -222,6 +293,7 @@ def test_floor_cli_returns_real_process_exit_codes(
 
 
 def test_floor_does_not_lose_a_multiline_assertion() -> None:
+    """Verify floor does not lose a multiline assertion."""
     file = "tests/test_example.py"
     assert floor_guard.check_diff(patch("value = 1", "assert (", file), {file: "value = 1"}) == [
         (file, 1, "assertion-removed")

@@ -38,11 +38,29 @@ app = FastAPI(title="NexaBank Case and Core Banking Mock API", version="1.0.0")
 
 
 class ProblemError(Exception):
+    """Carry status, problem details and retry metadata for synthetic banking failures.
+
+    Args:
+        status: HTTP or workflow status used by the scenario.
+        type_: Type supplied by the caller.
+        title: Title supplied by the caller.
+        detail: Detail supplied by the caller.
+        headers: Headers supplied by the caller.
+        retryable: Retryable supplied by the caller.
+    """
     def __init__(self, status, type_, title, detail=None, headers=None, retryable=False):
         self.status, self.type_, self.title, self.detail, self.headers, self.retryable = status, type_, title, detail, headers, retryable
 
 
 def problem_response(e: ProblemError) -> JSONResponse:
+    """Render a banking error using the supplied problem-JSON contract.
+
+    Args:
+        e: E supplied by the caller.
+
+    Returns:
+        JSONResponse value produced by this operation.
+    """
     return JSONResponse({"type": f"https://api.nexabank.example/problems/{e.type_}", "title": e.title, "status": e.status,
                          "detail": e.detail, "retryable": e.retryable}, status_code=e.status, media_type="application/problem+json", headers=e.headers)
 
@@ -58,6 +76,17 @@ async def _validation_handler(request: Request, exc: RequestValidationError):
 
 
 def auth(request: Request) -> str:
+    """Require a nonempty bearer credential and return its mock caller identity.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+
+    Returns:
+        Nonempty bearer token used only as the synthetic caller identity.
+
+    Raises:
+        ProblemError: unauthorized.
+    """
     h = request.headers.get("Authorization", "")
     if not h.startswith("Bearer ") or len(h) < 8:
         raise ProblemError(401, "unauthorized", "Missing or invalid bearer token")
@@ -65,6 +94,17 @@ def auth(request: Request) -> str:
 
 
 def cust(cid: str) -> dict:
+    """Resolve a synthetic customer or raise the mock not-found problem.
+
+    Args:
+        cid: Cid supplied by the caller.
+
+    Returns:
+        Bundled synthetic customer record.
+
+    Raises:
+        ProblemError: not-found.
+    """
     c = CUSTOMERS.get(cid)
     if not c:
         raise ProblemError(404, "not-found", "Customer not found", cid)
@@ -72,18 +112,41 @@ def cust(cid: str) -> dict:
 
 
 def now() -> str:
+    """Return a timezone-aware UTC timestamp for synthetic banking receipts.
+
+    Returns:
+        UTC timestamp formatted to seconds with timezone information.
+    """
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 # ------------------------------------------------------------------ reads
 @app.get("/v1/customers/{customerId}")
 def get_profile(customerId: str, _: str = Depends(auth)):
+    """Return the permitted synthetic customer profile fields.
+
+    Args:
+        customerId: Customer path parameter named by the supplied banking API contract.
+        _: Authenticated caller dependency; not otherwise used by this read operation.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     c = cust(customerId)
     return {"customer_id": customerId, "profile": c["profile"]}
 
 
 @app.get("/v1/customers/{customerId}/accounts")
 def list_accounts(customerId: str, _: str = Depends(auth)):
+    """Return the customer's accounts and loans with current mock opt-in flags.
+
+    Args:
+        customerId: Customer path parameter named by the supplied banking API contract.
+        _: Authenticated caller dependency; not otherwise used by this read operation.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     c = cust(customerId)
     loans = [{**l, "circ_2026_07_part_prepay_opt_in": customerId in OPTED_IN} if l["product_id"] == "NEXA-HL" else l for l in c["existing_loans"]]
     return {"customer_id": customerId, "accounts": [a for a in c["accounts"] if a["type"] != "loan"], "loans": loans}
@@ -92,6 +155,22 @@ def list_accounts(customerId: str, _: str = Depends(auth)):
 @app.get("/v1/accounts/{accountId}/transactions")
 def list_transactions(accountId: str, _: str = Depends(auth), from_: Optional[str] = Query(None, alias="from"), to: Optional[str] = None,
                       limit: int = Query(50, ge=1, le=200), cursor: Optional[str] = None):
+    """Return the account's transactions in descending order with cursor pagination.
+
+    Args:
+        accountId: Account path parameter named by the supplied banking API contract.
+        _: Authenticated caller dependency; not otherwise used by this read operation.
+        from_: From supplied by the caller.
+        to: To supplied by the caller.
+        limit: Limit supplied by the caller.
+        cursor: Cursor supplied by the caller.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+
+    Raises:
+        ProblemError: not-found.
+    """
     if accountId not in ACCOUNT_OWNER:
         raise ProblemError(404, "not-found", "Account not found", accountId)
     rows = sorted(TXNS.get(accountId, []), key=lambda r: (r["txn_date"], r["txn_id"]), reverse=True)
@@ -104,17 +183,44 @@ def list_transactions(accountId: str, _: str = Depends(auth), from_: Optional[st
 
 @app.get("/v1/customers/{customerId}/kyc-status")
 def get_kyc(customerId: str, _: str = Depends(auth)):
+    """Return the synthetic customer KYC-status response.
+
+    Args:
+        customerId: Customer path parameter named by the supplied banking API contract.
+        _: Authenticated caller dependency; not otherwise used by this read operation.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     return {"customer_id": customerId, **cust(customerId)["kyc"]}
 
 
 @app.get("/v1/customers/{customerId}/bureau-summary")
 def get_bureau(customerId: str, _: str = Depends(auth)):
+    """Return the permitted bureau summary without the internal note.
+
+    Args:
+        customerId: Customer path parameter named by the supplied banking API contract.
+        _: Authenticated caller dependency; not otherwise used by this read operation.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     b = dict(cust(customerId)["bureau_summary"]); b.pop("note", None)
     return {"customer_id": customerId, **b}
 
 
 @app.get("/v1/customers/{customerId}/income")
 def get_income(customerId: str, _: str = Depends(auth)):
+    """Return disclosed income and verification facts allowed by the mock contract.
+
+    Args:
+        customerId: Customer path parameter named by the supplied banking API contract.
+        _: Authenticated caller dependency; not otherwise used by this read operation.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     c = cust(customerId)
     return {"customer_id": customerId, "disclosed_income": c["disclosed_income"],
             "income_verification": {"status": c["income_verification"]["status"], "method": c["income_verification"]["method"]}}
@@ -122,11 +228,30 @@ def get_income(customerId: str, _: str = Depends(auth)):
 
 @app.get("/v1/customers/{customerId}/applications")
 def get_apps(customerId: str, _: str = Depends(auth)):
+    """Return the customer's open synthetic loan applications.
+
+    Args:
+        customerId: Customer path parameter named by the supplied banking API contract.
+        _: Authenticated caller dependency; not otherwise used by this read operation.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     return {"customer_id": customerId, "applications": cust(customerId)["open_applications"]}
 
 
 # ------------------------------------------------------------------ idempotent writes
 class CaseCreate(BaseModel):
+    """Validated case create contract.
+
+    Attributes:
+        customer_id: Synthetic customer identifier within the authorized scope.
+        category: Category retained by this contract.
+        priority: Priority retained by this contract.
+        summary: Safe concise description of the synthetic banking case.
+        related_application_id: Related application id retained by this contract.
+        channel: Channel retained by this contract.
+    """
     model_config = ConfigDict(extra="forbid")
     customer_id: str = Field(pattern=r"^NXC-[0-9]{4}$")
     category: Literal["LOAN_ENQUIRY", "KYC_ISSUE", "FEE_WAIVER_REQUEST", "COMPLAINT", "SUSPECTED_FRAUD", "DOCUMENT_ANOMALY", "OTHER"]
@@ -137,11 +262,23 @@ class CaseCreate(BaseModel):
 
 
 class NoteCreate(BaseModel):
+    """Validated note create contract.
+
+    Attributes:
+        text: Retained source passage or bounded note content.
+    """
     model_config = ConfigDict(extra="forbid")
     text: str = Field(min_length=1, max_length=2000)
 
 
 class EscalationCreate(BaseModel):
+    """Validated escalation create contract.
+
+    Attributes:
+        reason: Safe explanation of a validation or metric availability outcome.
+        summary: Safe concise description of the synthetic banking case.
+        preferred_contact: Preferred contact retained by this contract.
+    """
     model_config = ConfigDict(extra="forbid")
     reason: Literal["COMPLAINT", "FEE_WAIVER_OR_SPECIAL_RATE", "SUSPECTED_FRAUD", "HARDSHIP", "KYC_DISCREPANCY", "UPLOAD_WITH_EMBEDDED_INSTRUCTIONS", "OUT_OF_SCOPE_REQUEST"]
     summary: str = Field(min_length=5, max_length=1000)
@@ -149,6 +286,14 @@ class EscalationCreate(BaseModel):
 
 
 class ServiceRequestCreate(BaseModel):
+    """Validated service request create contract.
+
+    Attributes:
+        customer_id: Synthetic customer identifier within the authorized scope.
+        request_type: Supported service-request category selected for the operation.
+        loan_account_id: Existing loan account selected for ownership and eligibility checks.
+        notes: Optional bounded service-request notes, screened before model/tool execution.
+    """
     model_config = ConfigDict(extra="forbid")
     customer_id: str = Field(pattern=r"^NXC-[0-9]{4}$")
     request_type: Literal["STATEMENT_COPY", "CALLBACK", "RE_KYC_REMINDER", "OPT_IN_CIR_2026_07_PART_PREPAY", "INTEREST_CERTIFICATE"]
@@ -161,6 +306,20 @@ def _hash(payload: BaseModel) -> str:
 
 
 async def run_idempotent(request: Request, token: str, model, handler):
+    """Execute a validated mock write once per caller, endpoint and operation key.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        token: Token supplied by the caller.
+        model: Model supplied by the caller.
+        handler: Handler supplied by the caller.
+
+    Returns:
+        HTTP response matching the mock API contract.
+
+    Raises:
+        ProblemError: upstream-timeout.
+    """
     key = request.headers.get("Idempotency-Key", "")
     if not (16 <= len(key) <= 64):
         raise ProblemError(400, "idempotency-key-required", "Idempotency-Key header is required (16 to 64 characters)")
@@ -199,6 +358,15 @@ async def run_idempotent(request: Request, token: str, model, handler):
 
 @app.post("/v1/cases", status_code=201)
 async def create_case(request: Request, token: str = Depends(auth)):
+    """Create a case through the idempotent mock write handler.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        token: Token supplied by the caller.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     def create_case_record(p: CaseCreate):
         cust(p.customer_id)
         COUNTERS["case"] += 1
@@ -222,12 +390,31 @@ def _case(case_id: str) -> dict:
 
 @app.get("/v1/cases/{caseId}")
 def get_case(caseId: str, _: str = Depends(auth)):
+    """Return the current synthetic case representation and version header.
+
+    Args:
+        caseId: Case path parameter named by the supplied banking API contract.
+        _: Authenticated caller dependency; not otherwise used by this read operation.
+
+    Returns:
+        HTTP response matching the mock API contract.
+    """
     c = _case(caseId)
     return JSONResponse(_case_view(c), headers={"ETag": f'"{caseId}-{c["_version"]}"'})
 
 
 @app.post("/v1/cases/{caseId}/notes", status_code=201)
 async def add_note(caseId: str, request: Request, token: str = Depends(auth)):
+    """Append a case note through the idempotent mock write handler.
+
+    Args:
+        caseId: Case path parameter named by the supplied banking API contract.
+        request: Validated request retaining the caller's explicit scope and action details.
+        token: Token supplied by the caller.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     def append_case_note(p: NoteCreate):
         c = _case(caseId)
         COUNTERS["note"] += 1
@@ -239,6 +426,16 @@ async def add_note(caseId: str, request: Request, token: str = Depends(auth)):
 
 @app.post("/v1/cases/{caseId}/escalations", status_code=201)
 async def escalate(caseId: str, request: Request, token: str = Depends(auth)):
+    """Escalate a case with the supplied supported reason and optimistic version check.
+
+    Args:
+        caseId: Case path parameter named by the supplied banking API contract.
+        request: Validated request retaining the caller's explicit scope and action details.
+        token: Token supplied by the caller.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     def escalate_case_record(p: EscalationCreate):
         c = _case(caseId)
         if c["status"] == "ESCALATED":
@@ -252,6 +449,15 @@ async def escalate(caseId: str, request: Request, token: str = Depends(auth)):
 
 @app.post("/v1/service-requests", status_code=201)
 async def service_request(request: Request, token: str = Depends(auth)):
+    """Accept a supported service request and return a RECEIVED receipt.
+
+    Args:
+        request: Validated request retaining the caller's explicit scope and action details.
+        token: Token supplied by the caller.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     def create_service_request_record(p: ServiceRequestCreate):
         c = cust(p.customer_id)
         if p.request_type in ("OPT_IN_CIR_2026_07_PART_PREPAY", "INTEREST_CERTIFICATE"):
@@ -274,6 +480,11 @@ async def service_request(request: Request, token: str = Depends(auth)):
 
 @app.post("/_mock/reset", include_in_schema=False)
 def reset():
+    """Reset process-local synthetic cases, receipts, operation keys and opt-in flags.
+
+    Returns:
+        Result matching the documented request or adapter contract.
+    """
     CASES.clear(); SERVICE_REQUESTS.clear(); IDEM.clear(); FAULTED.clear()
     OPTED_IN.clear(); OPTED_IN.update(cid for cid, c in CUSTOMERS.items() if c["flags"]["opted_in_cir_2026_07_part_prepay_minimum"])
     for k in COUNTERS: COUNTERS[k] = 0

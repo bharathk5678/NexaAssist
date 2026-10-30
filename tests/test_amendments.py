@@ -1,3 +1,5 @@
+"""Regression tests for amendments."""
+
 from __future__ import annotations
 
 import asyncio
@@ -20,6 +22,14 @@ from app.models.retrieval import RetrieveRequest
 def test_linked_circular_keeps_fee_and_applicability_in_scope(
     monkeypatch: pytest.MonkeyPatch, settings: Settings, as_of: str, expected: int
 ) -> None:
+    """Verify linked circular keeps fee and applicability in scope.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        as_of: As of fixture or parametrized input for this scenario.
+        expected: Expected outcome for the selected scenario.
+    """
     storage: Any = mongomock.MongoClient().db
     settings = settings.model_copy(update={"mongodb_collection": "chunks"})
     monkeypatch.setattr(database, "_database", lambda _: storage)
@@ -92,6 +102,12 @@ def test_linked_circular_keeps_fee_and_applicability_in_scope(
 
 @pytest.mark.parametrize("hybrid", [False, True])
 def test_dense_and_hybrid_use_the_same_institution_scope(settings: Settings, hybrid: bool) -> None:
+    """Verify dense and hybrid use the same institution scope.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        hybrid: Hybrid fixture or parametrized input for this scenario.
+    """
     vector = Mock()
     vector.asimilarity_search_with_score = AsyncMock(return_value=[])
     search = AsyncMock(return_value=[])
@@ -112,6 +128,12 @@ def test_dense_and_hybrid_use_the_same_institution_scope(settings: Settings, hyb
 def test_amendments_follow_links_until_no_new_instrument_remains(
     monkeypatch: pytest.MonkeyPatch, settings: Settings
 ) -> None:
+    """Verify amendments follow links until no new instrument remains.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+    """
     storage: Any = mongomock.MongoClient().db
     monkeypatch.setattr(database, "_database", lambda _: storage)
     for name, supersedes in (("A", "P"), ("B", "A"), ("C", "B")):
@@ -147,6 +169,14 @@ def test_inconsistent_circular_fails_closed_instead_of_returning_a_partial_instr
     changed_field: str,
     changed_value: str | None,
 ) -> None:
+    """Verify inconsistent circular fails closed instead of returning a partial instrument.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        changed_field: Changed field fixture or parametrized input for this scenario.
+        changed_value: Changed value fixture or parametrized input for this scenario.
+    """
     storage: Any = mongomock.MongoClient().db
     monkeypatch.setattr(database, "_database", lambda _: storage)
     metadata = {

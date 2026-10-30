@@ -1,3 +1,5 @@
+"""Regression tests for evaluation."""
+
 from __future__ import annotations
 
 import asyncio
@@ -17,6 +19,7 @@ from app.evaluation.run import JudgeScore, load_cases, quality_gate
 
 
 def test_phase1_cases_include_supported_and_abstention_questions() -> None:
+    """Verify phase1 cases include supported and abstention questions."""
     cases = load_cases(Path("evaluation/datasets/answer.jsonl"))
     assert len(cases) == 10
     assert sum(case.expected_status == "insufficient_evidence" for case in cases) == 2
@@ -24,6 +27,7 @@ def test_phase1_cases_include_supported_and_abstention_questions() -> None:
 
 
 def test_quality_gate_rejects_low_quality_and_wrong_abstention() -> None:
+    """Verify quality gate rejects low quality and wrong abstention."""
     report: dict[str, Any] = {
         "ragas": {"means": {"faithfulness": 0.9}},
         "records": [{"judge": {"correctness": 0.9, "groundedness": 0.9, "status_matches": True}}],
@@ -38,6 +42,12 @@ def test_quality_gate_rejects_low_quality_and_wrong_abstention() -> None:
 def test_ragas_scores_actual_text_and_penalizes_missing_evidence(
     monkeypatch: pytest.MonkeyPatch, settings: Settings
 ) -> None:
+    """Verify ragas scores actual text and penalizes missing evidence.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+    """
     monkeypatch.setenv("RAGAS_DO_NOT_TRACK", "true")
     settings = settings.model_copy(update={"eval_judge_model": "separate-test-judge"})
     model_factory = Mock(wraps=evaluation.get_chat_model)
@@ -82,6 +92,13 @@ def test_ragas_scores_actual_text_and_penalizes_missing_evidence(
 def test_batch_metrics_validate_scores_like_live_metrics(
     monkeypatch: pytest.MonkeyPatch, settings: Settings, value: float
 ) -> None:
+    """Verify batch metrics validate scores like live metrics.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        value: Candidate value supplied by validation or the calling integration.
+    """
     pytest.importorskip("ragas")
     from app.evaluation import ragas_metrics
     from app.models.evaluation import METRIC_NAMES
@@ -114,6 +131,13 @@ def test_batch_metrics_validate_scores_like_live_metrics(
 def test_evaluation_reuses_generation_evidence_and_collects_trace(
     monkeypatch: pytest.MonkeyPatch, settings: Settings, datadog_enabled: bool
 ) -> None:
+    """Verify evaluation reuses generation evidence and collects trace.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        datadog_enabled: Datadog enabled fixture or parametrized input for this scenario.
+    """
     from langchain_core.language_models.chat_models import BaseChatModel
     from langchain_core.runnables import RunnableLambda
 
@@ -215,6 +239,11 @@ def test_evaluation_reuses_generation_evidence_and_collects_trace(
 def test_datadog_scores_join_the_correct_case_and_skip_ragas_for_abstentions(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify datadog scores join the correct case and skip ragas for abstentions.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     submit = Mock()
     monkeypatch.setattr(evaluation.LLMObs, "submit_evaluation", submit)
     records = [
@@ -253,6 +282,13 @@ def test_datadog_scores_join_the_correct_case_and_skip_ragas_for_abstentions(
 def test_datadog_export_is_optional_and_flushes_when_enabled(
     monkeypatch: pytest.MonkeyPatch, settings: Settings, enabled: bool
 ) -> None:
+    """Verify datadog export is optional and flushes when enabled.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        enabled: Whether to patch supported Datadog integrations.
+    """
     datadog = SimpleNamespace(enabled=enabled, flush=Mock())
     monkeypatch.setattr(evaluation, "LLMObs", datadog)
     monkeypatch.setattr(evaluation, "collect_records", AsyncMock(return_value=[]))

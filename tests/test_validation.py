@@ -1,3 +1,5 @@
+"""Regression tests for validation."""
+
 from __future__ import annotations
 
 import asyncio
@@ -34,11 +36,21 @@ CASES = [
 
 @pytest.fixture
 def opt_in_request() -> AgentRequest:
+    """Provide opt in request for the validation scenario.
+
+    Returns:
+        AgentRequest value produced by this operation.
+    """
     return AgentRequest.model_validate(CASES[0]["input"])
 
 
 @pytest.fixture
 def banking_body() -> dict[str, Any]:
+    """Provide banking body for the validation scenario.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+    """
     return {
         "customer_id": "NXC-0010",
         "accounts": [],
@@ -58,6 +70,11 @@ def banking_body() -> dict[str, Any]:
 
 @pytest.fixture(scope="module")
 def circular_text() -> str:
+    """Provide circular text for the validation scenario.
+
+    Returns:
+        Text representation produced by the documented operation.
+    """
     path = "nexa_synthetic_data/policies/CIR-2026-07_Circular_NexaHome_Fee_and_PartPrepayment.pdf"
     with pdfplumber.open(path) as document:
         return "\n".join(page.extract_text() or "" for page in document.pages)
@@ -65,6 +82,14 @@ def circular_text() -> str:
 
 @pytest.fixture
 def policy_evidence(circular_text: str) -> RetrieveResponse:
+    """Provide policy evidence for the validation scenario.
+
+    Args:
+        circular_text: Circular text fixture or parametrized input for this scenario.
+
+    Returns:
+        RetrieveResponse value produced by this operation.
+    """
     return RetrieveResponse.model_validate(
         {
             "as_of": "2026-10-01",
@@ -95,6 +120,13 @@ def test_validator_golden_cases(
     banking_body: dict,
     policy_evidence: RetrieveResponse,
 ) -> None:
+    """Verify validator golden cases.
+
+    Args:
+        case: One parametrized golden or contract scenario.
+        banking_body: Banking body fixture or parametrized input for this scenario.
+        policy_evidence: Policy evidence fixture or parametrized input for this scenario.
+    """
     request = AgentRequest.model_validate(case["input"])
     context = case["context"]
     banking_body["loans"][0].update(context.get("loan_changes", {}))
@@ -167,6 +199,16 @@ def test_agent_validator_flow_and_failures(
     settings: Settings,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify agent validator flow and failures.
+
+    Args:
+        failure: Failure mode selected by the parametrized test.
+        opt_in_request: Opt in request fixture or parametrized input for this scenario.
+        banking_body: Banking body fixture or parametrized input for this scenario.
+        policy_evidence: Policy evidence fixture or parametrized input for this scenario.
+        settings: Validated application configuration for this operation.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     retrieval_calls, banking_calls = [], []
     body = opt_in_request.model_dump(mode="json")
     if failure == "missing_date":
@@ -307,6 +349,7 @@ def test_agent_validator_flow_and_failures(
 
 
 def test_validation_results_cannot_claim_unapproved_execution() -> None:
+    """Verify validation results cannot claim unapproved execution."""
     with pytest.raises(ValidationError):
         ValidationResult(decision="allowed", reason="ok")
     with pytest.raises(ValidationError):
@@ -324,6 +367,12 @@ def test_validation_results_cannot_claim_unapproved_execution() -> None:
     ],
 )
 def test_untrusted_action_details_are_rejected(opt_in_request: AgentRequest, changes: dict) -> None:
+    """Verify untrusted action details are rejected.
+
+    Args:
+        opt_in_request: Opt in request fixture or parametrized input for this scenario.
+        changes: Input mutations used to exercise validation boundaries.
+    """
     data = opt_in_request.model_dump(mode="json")
     data["action_details"].update(changes)
     with pytest.raises(ValidationError):
@@ -331,6 +380,8 @@ def test_untrusted_action_details_are_rejected(opt_in_request: AgentRequest, cha
 
 
 def test_banking_dependency_is_disabled_or_bounded() -> None:
+    """Verify banking dependency is disabled or bounded."""
+
     async def run() -> None:
         async for disabled in agent_api.banking_client(AgentSettings(_env_file=None)):
             assert disabled is None
@@ -366,6 +417,14 @@ def test_validator_reads_real_banking_mock_without_writes(
     opt_in_request: AgentRequest,
     policy_evidence: RetrieveResponse,
 ) -> None:
+    """Verify validator reads real banking mock without writes.
+
+    Args:
+        customer_id: Synthetic customer identifier within the authorized scope.
+        expected: Expected outcome for the selected scenario.
+        opt_in_request: Opt in request fixture or parametrized input for this scenario.
+        policy_evidence: Policy evidence fixture or parametrized input for this scenario.
+    """
     path = Path("nexa_synthetic_data/api/mock_server/server.py")
     spec = importlib.util.spec_from_file_location("validator_banking_mock", path)
     assert spec is not None and spec.loader is not None
@@ -402,6 +461,7 @@ def test_validator_reads_real_banking_mock_without_writes(
 
 
 def test_opt_in_request_has_typed_action_details() -> None:
+    """Verify opt in request has typed action details."""
     request = AgentRequest.model_validate(
         {
             "query": "Check my eligibility and prepare a prepayment opt-in request.",
@@ -427,6 +487,11 @@ SERVICE_CASES = [
 
 @pytest.fixture(scope="module")
 def operations_text() -> str:
+    """Provide operations text for the validation scenario.
+
+    Returns:
+        Text representation produced by the documented operation.
+    """
     path = (
         "nexa_synthetic_data/policies/"
         "POL-OPS-001_Customer_Due_Diligence_and_Advisor_Scope_Policy_v1.0.pdf"
@@ -439,6 +504,15 @@ def operations_text() -> str:
 def operations_evidence(
     policy_evidence: RetrieveResponse, operations_text: str
 ) -> RetrieveResponse:
+    """Provide operations evidence for the validation scenario.
+
+    Args:
+        policy_evidence: Policy evidence fixture or parametrized input for this scenario.
+        operations_text: Operations text fixture or parametrized input for this scenario.
+
+    Returns:
+        RetrieveResponse value produced by this operation.
+    """
     data = policy_evidence.model_dump(mode="json")
     hit = data["amendments"].pop()
     hit.update(text=operations_text, parent_text=operations_text)
@@ -456,6 +530,13 @@ def operations_evidence(
 def test_service_request_golden_cases(
     case: dict, banking_body: dict, operations_evidence: RetrieveResponse
 ) -> None:
+    """Verify service request golden cases.
+
+    Args:
+        case: One parametrized golden or contract scenario.
+        banking_body: Banking body fixture or parametrized input for this scenario.
+        operations_evidence: Operations evidence fixture or parametrized input for this scenario.
+    """
     from app.services.validation import validate_service_request
 
     request = AgentRequest.model_validate(case["input"])
@@ -505,6 +586,12 @@ def test_service_request_golden_cases(
 def test_direct_service_validator_requires_scope_before_reads(
     change: str, operations_evidence: RetrieveResponse
 ) -> None:
+    """Verify direct service validator requires scope before reads.
+
+    Args:
+        change: Configuration or payload mutation selected for the regression case.
+        operations_evidence: Operations evidence fixture or parametrized input for this scenario.
+    """
     from app.services.validation import validate_service_request
 
     data = json.loads(json.dumps(SERVICE_CASES[3]["input"]))
@@ -528,6 +615,11 @@ def test_direct_service_validator_requires_scope_before_reads(
 
 @pytest.mark.parametrize("request_type", ["OPT_IN_CIR_2026_07_PART_PREPAY", "INTEREST_CERTIFICATE"])
 def test_allowed_proposals_require_the_selected_loan(request_type: str) -> None:
+    """Verify allowed proposals require the selected loan.
+
+    Args:
+        request_type: Request type fixture or parametrized input for this scenario.
+    """
     with pytest.raises(ValidationError, match="requires a selected loan"):
         ServiceRequestProposal.model_validate(
             {"request_type": request_type, "customer_id": "NXC-0010"}
@@ -535,6 +627,7 @@ def test_allowed_proposals_require_the_selected_loan(request_type: str) -> None:
 
 
 def test_allowed_service_proposals_require_evidence() -> None:
+    """Verify allowed service proposals require evidence."""
     proposal = ServiceRequestProposal(customer_id="NXC-0010", request_type="CALLBACK")
     with pytest.raises(ValidationError, match="requires policy evidence"):
         ValidationResult(decision="allowed", reason="Permitted", proposal=proposal)
@@ -547,6 +640,14 @@ def test_retained_policy_date_is_checked_even_without_the_http_adapter(
     policy_evidence: RetrieveResponse,
     operations_evidence: RetrieveResponse,
 ) -> None:
+    """Verify retained policy date is checked even without the http adapter.
+
+    Args:
+        opt_in: Opt in fixture or parametrized input for this scenario.
+        opt_in_request: Opt in request fixture or parametrized input for this scenario.
+        policy_evidence: Policy evidence fixture or parametrized input for this scenario.
+        operations_evidence: Operations evidence fixture or parametrized input for this scenario.
+    """
     from datetime import date
 
     from app.services.validation import validate_service_request
@@ -573,6 +674,11 @@ def test_retained_policy_date_is_checked_even_without_the_http_adapter(
 def test_opt_in_handler_cannot_interpret_another_request_type(
     policy_evidence: RetrieveResponse,
 ) -> None:
+    """Verify opt in handler cannot interpret another request type.
+
+    Args:
+        policy_evidence: Policy evidence fixture or parametrized input for this scenario.
+    """
     request = AgentRequest.model_validate(SERVICE_CASES[0]["input"])
 
     async def run() -> None:
@@ -594,6 +700,12 @@ def test_opt_in_handler_cannot_interpret_another_request_type(
 def test_general_requests_read_real_banking_mock_without_writes(
     request_type: str, operations_evidence: RetrieveResponse
 ) -> None:
+    """Verify general requests read real banking mock without writes.
+
+    Args:
+        request_type: Request type fixture or parametrized input for this scenario.
+        operations_evidence: Operations evidence fixture or parametrized input for this scenario.
+    """
     from app.services.validation import validate_service_request
 
     spec = importlib.util.spec_from_file_location(
@@ -689,6 +801,16 @@ def test_agent_general_service_requests_and_safe_failures(
     settings: Settings,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify agent general service requests and safe failures.
+
+    Args:
+        request_type: Request type fixture or parametrized input for this scenario.
+        failure: Failure mode selected by the parametrized test.
+        operations_evidence: Operations evidence fixture or parametrized input for this scenario.
+        banking_body: Banking body fixture or parametrized input for this scenario.
+        settings: Validated application configuration for this operation.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     body = dict(SERVICE_CASES[3]["input"])
     body["action_details"] = {"request_type": request_type, "loan_account_id": "NXL-HL-0010"}
     body.update(jurisdiction="IN", top_k=7)
@@ -904,6 +1026,17 @@ def test_submit_endpoint_validates_then_writes_exact_payload(
     settings: Settings,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify submit endpoint validates then writes exact payload.
+
+    Args:
+        request_type: Request type fixture or parametrized input for this scenario.
+        failure: Failure mode selected by the parametrized test.
+        policy_evidence: Policy evidence fixture or parametrized input for this scenario.
+        operations_evidence: Operations evidence fixture or parametrized input for this scenario.
+        banking_body: Banking body fixture or parametrized input for this scenario.
+        settings: Validated application configuration for this operation.
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+    """
     body = dict(CASES[0]["input"])
     body["action_details"] = {
         "request_type": request_type,
@@ -1027,6 +1160,13 @@ def test_submission_rejects_unapproved_payload(
     opt_in_request: AgentRequest,
     policy_evidence: RetrieveResponse,
 ) -> None:
+    """Verify submission rejects unapproved payload.
+
+    Args:
+        failure: Failure mode selected by the parametrized test.
+        opt_in_request: Opt in request fixture or parametrized input for this scenario.
+        policy_evidence: Policy evidence fixture or parametrized input for this scenario.
+    """
     from app.models.validation import ValidationEvidence
 
     request = AgentSubmissionRequest.model_validate(opt_in_request.model_dump())
@@ -1084,6 +1224,15 @@ def test_submission_replay_against_banking_contract(
     policy_evidence: RetrieveResponse,
     operations_evidence: RetrieveResponse,
 ) -> None:
+    """Verify submission replay against banking contract.
+
+    Args:
+        request_type: Request type fixture or parametrized input for this scenario.
+        fault: Fault fixture or parametrized input for this scenario.
+        opt_in_request: Opt in request fixture or parametrized input for this scenario.
+        policy_evidence: Policy evidence fixture or parametrized input for this scenario.
+        operations_evidence: Operations evidence fixture or parametrized input for this scenario.
+    """
     from app.services.validation import validate_service_request
 
     spec = importlib.util.spec_from_file_location(

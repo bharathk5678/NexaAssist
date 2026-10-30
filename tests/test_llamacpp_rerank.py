@@ -1,3 +1,5 @@
+"""Regression tests for llamacpp rerank."""
+
 from __future__ import annotations
 
 import asyncio
@@ -15,6 +17,11 @@ from app.core.config import Settings
 @pytest.mark.parametrize("field", ["probs", "completion_probabilities"])
 def test_constrained_sampling_retains_original_yes_no_logit_ratio(field: str) -> None:
     # Other allowed prefixes change the common denominator, not the yes/no ratio.
+    """Verify constrained sampling retains original yes no logit ratio.
+
+    Args:
+        field: Field fixture or parametrized input for this scenario.
+    """
     values = completion_probabilities(
         {
             field: [
@@ -37,6 +44,11 @@ def test_constrained_sampling_retains_original_yes_no_logit_ratio(field: str) ->
 
 @pytest.mark.parametrize("value", [0, -0.1, 1.1, float("nan"), float("inf"), True, "0.5"])
 def test_invalid_target_probabilities_are_rejected(value) -> None:
+    """Verify invalid target probabilities are rejected.
+
+    Args:
+        value: Candidate value supplied by validation or the calling integration.
+    """
     with pytest.raises(ValueError):
         completion_probabilities({"probs": [{"top_probs": [{"token": "yes", "prob": value}]}]})
 
@@ -45,11 +57,21 @@ def test_invalid_target_probabilities_are_rejected(value) -> None:
     "tokens", [[], [{"token": "Yes", "prob": 0.9}, {"token": "no", "prob": 0.1}]]
 )
 def test_missing_exact_target_still_fails(tokens) -> None:
+    """Verify missing exact target still fails.
+
+    Args:
+        tokens: Tokens fixture or parametrized input for this scenario.
+    """
     with pytest.raises(ValueError, match="yes AND no"):
         relevance_probability(completion_probabilities({"probs": [{"top_probs": tokens}]}))
 
 
 def test_native_api_uses_unbiased_constrained_likelihoods(settings: Settings) -> None:
+    """Verify native api uses unbiased constrained likelihoods.
+
+    Args:
+        settings: Validated application configuration for this operation.
+    """
     bodies = []
 
     def respond(request: httpx.Request) -> httpx.Response:

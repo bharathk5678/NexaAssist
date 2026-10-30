@@ -1,3 +1,5 @@
+"""Regression tests for feedback."""
+
 from __future__ import annotations
 
 import asyncio
@@ -25,6 +27,12 @@ from app.services import feedback as service
 def test_feedback_review_is_closed_without_reviewer_credentials(
     monkeypatch: pytest.MonkeyPatch, settings: Settings
 ) -> None:
+    """Verify feedback review is closed without reviewer credentials.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+    """
     from unittest.mock import AsyncMock
 
     listing = AsyncMock(return_value=[])
@@ -49,6 +57,14 @@ def test_feedback_review_is_closed_without_reviewer_credentials(
 def test_feedback_persists_review_and_prevents_overwriting(
     monkeypatch: pytest.MonkeyPatch, settings: Settings, helpful: bool, delivery: str
 ) -> None:
+    """Verify feedback persists review and prevents overwriting.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+        helpful: Helpful fixture or parametrized input for this scenario.
+        delivery: Delivery fixture or parametrized input for this scenario.
+    """
     settings = settings.model_copy(
         update={"feedback_reviewer_token": SecretStr("reviewer-test-token-000000000000000000")}
     )
@@ -129,6 +145,12 @@ def test_feedback_persists_review_and_prevents_overwriting(
 def test_retire_document_removes_both_stores_only_in_current_scope(
     monkeypatch: pytest.MonkeyPatch, settings: Settings
 ) -> None:
+    """Verify retire document removes both stores only in current scope.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+    """
     storage: Any = mongomock.MongoClient().db
     monkeypatch.setattr(mongo, "_database", lambda _: storage)
     for name in (settings.mongodb_collection, settings.mongodb_parent_collection):
@@ -150,6 +172,12 @@ def test_retire_document_removes_both_stores_only_in_current_scope(
 def test_concurrent_feedback_retries_create_one_record(
     monkeypatch: pytest.MonkeyPatch, settings: Settings
 ) -> None:
+    """Verify concurrent feedback retries create one record.
+
+    Args:
+        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
+        settings: Validated application configuration for this operation.
+    """
     from unittest.mock import Mock
 
     storage: Any = mongomock.MongoClient().db
