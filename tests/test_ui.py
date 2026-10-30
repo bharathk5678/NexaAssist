@@ -16,6 +16,7 @@ from starlette.routing import compile_path
 pytest.importorskip("streamlit")
 from streamlit.testing.v1 import AppTest
 
+import app.core.lifespan as lifespan_module
 import app.main as main_module
 from app.api import answer as answer_api
 from app.api import retrieval as retrieval_api
@@ -69,7 +70,7 @@ def client(monkeypatch: pytest.MonkeyPatch, settings: Settings) -> Iterator[http
             "retrieval_timings": retrieved.timings.model_dump(),
         }
     )
-    monkeypatch.setattr(main_module, "get_settings", lambda: settings)
+    monkeypatch.setattr(lifespan_module, "get_settings", lambda: settings)
     monkeypatch.setattr(answer_api, "answer_policy", AsyncMock(return_value=answer))
     monkeypatch.setattr(
         answer_api,

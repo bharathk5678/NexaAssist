@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from app.api.agent import router
 from app.api.agent_runs import router as runs_router
-from app.main import lifespan
+from app.core.lifespan import lifespan
 
 
 def create_agent_app() -> FastAPI:
