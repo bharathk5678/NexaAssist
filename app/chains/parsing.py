@@ -1,3 +1,5 @@
+"""Extract policy text and tables from supported source documents."""
+
 from __future__ import annotations
 
 from collections import Counter
@@ -12,7 +14,14 @@ PAGE_MARGIN_PT = 50
 
 
 def parse_document(path: str) -> list[Element]:
-    """Parse a source document into ordered headings, paragraphs and whole tables."""
+    """Parse a source document into ordered headings, paragraphs and whole tables.
+
+    Args:
+        path: Input file or resource path for this operation.
+
+    Returns:
+        Ordered results produced by the documented operation.
+    """
     if path.lower().endswith(".pdf"):
         return _parse_pdf(path)
     return partition(filename=path)

@@ -1,3 +1,5 @@
+"""Build incremental policy ingestion using content checksums and parent identity."""
+
 from __future__ import annotations
 
 import hashlib
@@ -18,6 +20,14 @@ from app.models.ingestion import IngestRequest, IngestResponse
 
 
 def parent_key_prefix(doc_id: str) -> str:
+    """Return the stable document-scoped prefix for parent-section keys.
+
+    Args:
+        doc_id: Doc id identifying the scoped record.
+
+    Returns:
+        Text representation produced by the documented operation.
+    """
     return f"{doc_id}_s"
 
 
@@ -25,6 +35,13 @@ def chunk_checksum(text: str, metadata: dict[str, Any]) -> str:
     """Fingerprint text, metadata, embedding model and embedding dimensions.
 
     Enrichment includes both embedding settings, so either change invalidates chunks.
+
+    Args:
+        text: Text supplied by the caller.
+        metadata: Metadata supplied by the caller.
+
+    Returns:
+        Text representation produced by the documented operation.
     """
     payload = json.dumps({"text": text, "metadata": metadata}, sort_keys=True, ensure_ascii=False)
     return "sha256:" + hashlib.sha256(payload.encode()).hexdigest()
@@ -41,12 +58,39 @@ def build_ingestion_chain(
     `parent_store` under `parent_id` so the read path can return the section around a match.
     Only children whose checksum differs from the stored one are embedded.
     Input: {"request": IngestRequest}. Run with `ainvoke`.
+
+    Args:
+        vector_store: Vector store supplied by the caller.
+        parent_store: Parent store supplied by the caller.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        Composable runnable retaining the supplied inputs and configured integration behavior.
     """
 
     def parse(state: dict[str, Any]) -> list[Element]:
+        """Parse the supplied source document before building ingestion records.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            Ordered results produced by the documented operation.
+        """
         return parse_document(state["request"].source_path)
 
     def chunk(state: dict[str, Any]) -> list[Chunk]:
+        """Split parsed policy content into clause-aware chunks and complete parent sections.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            Ordered results produced by the documented operation.
+
+        Raises:
+            ValueError: Parsed document produced no chunks; refusing to replace stored content.
+        """
         chunks = chunk_by_clause(
             state["elements"], settings.chunk_max_characters, settings.chunk_overlap_characters
         )
@@ -57,11 +101,27 @@ def build_ingestion_chain(
         return chunks
 
     def enrich(state: dict[str, Any]) -> dict[str, list[Document]]:
+        """Stamp document identity, scope and embedding metadata on ingestion records.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            Named values describing the documented operation or diagnostic outcome.
+        """
         request: IngestRequest = state["request"]
         doc_metadata = request.model_dump(mode="json", exclude={"source_path"})
 
         def header(section: str) -> str:
             # Identity line: a chunk read on its own still says which document it is from.
+            """Render the identity metadata retained with the policy chunk text.
+
+            Args:
+                section: Section supplied by the caller.
+
+            Returns:
+                Text representation produced by the documented operation.
+            """
             return f"[{request.doc_id} | {request.title} v{request.policy_version} | {section}]"
 
         children: list[Document] = []
@@ -101,6 +161,14 @@ def build_ingestion_chain(
         return {"children": children, "parents": parents}
 
     async def compare(state: dict[str, Any]) -> list[Document]:
+        """Select chunks whose content or embedding checksum changed.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            Ordered results produced by the documented operation.
+        """
         children: list[Document] = state["enriched"]["children"]
         stored = {
             document.id: document.metadata.get("checksum")
@@ -112,6 +180,14 @@ def build_ingestion_chain(
 
     async def embed_and_upsert(state: dict[str, Any]) -> IngestResponse:
         # shortcut: writes span collections; add transactions before concurrent ingestion.
+        """Embed changed chunks and persist scoped chunk/parent updates safely.
+
+        Args:
+            state: Current graph values carried between workflow nodes.
+
+        Returns:
+            IngestResponse value produced by this operation.
+        """
         request: IngestRequest = state["request"]
         children: list[Document] = state["enriched"]["children"]
         parents: list[Document] = state["enriched"]["parents"]

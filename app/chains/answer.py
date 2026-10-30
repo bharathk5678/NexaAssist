@@ -1,3 +1,5 @@
+"""Generate structured answers with exact quote and citation validation."""
+
 from __future__ import annotations
 
 import re
@@ -26,12 +28,29 @@ def build_answer_chain(
     llm: BaseChatModel,
     settings: Settings,
 ) -> Runnable[RetrieveRequest, AnswerResponse]:
-    """Retrieve evidence, generate a draft, and validate its citation references."""
+    """Retrieve evidence, generate a draft, and validate its citation references.
+
+    Args:
+        retriever: Runnable returning scoped policy evidence for the request.
+        llm: Configured structured chat-model integration.
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        Composable runnable retaining the supplied inputs and configured integration behavior.
+    """
     generation = ANSWER_PROMPT | llm.with_structured_output(
         AnswerDraft, method="json_schema", strict=True
     )
 
     async def answer(request: RetrieveRequest) -> AnswerResponse:
+        """Generate a grounded answer using evidence retained for the request.
+
+        Args:
+            request: Validated request retaining the caller's explicit scope and action details.
+
+        Returns:
+            AnswerResponse value produced by this operation.
+        """
         retrieved = await retriever.ainvoke(request)
         sources = assemble_context(
             retrieved.evidence, settings.context_max_tokens, settings.token_encoding

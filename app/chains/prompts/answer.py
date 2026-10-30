@@ -1,3 +1,5 @@
+"""Define the versioned grounded-answer prompt and citation constraints."""
+
 from __future__ import annotations
 
 from langchain_core.prompts import ChatPromptTemplate

@@ -14,6 +14,12 @@ def read_rag_snapshot(settings: Settings) -> dict[str, Any]:
     """Read index definitions and chunk payloads, replacing vectors with their lengths.
 
     The lesson caller runs this synchronous database work in a worker thread.
+
+    Args:
+        settings: Validated application configuration for this operation.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
     """
     collection = _database(settings)[settings.mongodb_collection]
     with timeout(30):

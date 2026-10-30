@@ -1,3 +1,5 @@
+"""Split policy text by clauses while retaining complete tables and bounded overlap."""
+
 from __future__ import annotations
 
 import re
@@ -12,7 +14,16 @@ CLAUSE = re.compile(r"^(\d+\.\d+)\s+(.+?)\.(?:\s|$)")
 
 @dataclass(frozen=True)
 class Chunk:
-    """One citable child chunk: a numbered clause (or a piece of one) plus where it sits."""
+    """One citable child chunk: a numbered clause (or a piece of one) plus where it sits.
+
+    Attributes:
+        text: Retained source passage or bounded note content.
+        section_number: Stable section position used to construct parent keys.
+        section: Retained policy section heading associated with the chunk.
+        clause: Published clause identifier, or None for complete instruments/front matter.
+        clause_heading: Retained heading identifying the clause in the source policy.
+        has_table: Whether the chunk contains a table that must remain complete.
+    """
 
     text: str
     section_number: int
@@ -39,6 +50,14 @@ def chunk_by_clause(elements: list[Element], max_characters: int, overlap: int) 
     Size: only a clause longer than `max_characters` is split. Its tables become their own
     chunks and its narrative is split at sentence boundaries with `overlap` characters
     repeated. Text before section 1 is section 0, "Front matter".
+
+    Args:
+        elements: Elements supplied by the caller.
+        max_characters: Max characters supplied by the caller.
+        overlap: Overlap supplied by the caller.
+
+    Returns:
+        Ordered results produced by the documented operation.
     """
     section_number, section = 0, "Front matter"
     clauses: list[_Clause] = [_Clause(section_number, section, None, None)]

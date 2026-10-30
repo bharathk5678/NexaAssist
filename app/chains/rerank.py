@@ -1,3 +1,5 @@
+"""Rerank candidates using validated local yes/no token likelihoods."""
+
 from __future__ import annotations
 
 from math import exp, isfinite, log
@@ -14,7 +16,17 @@ from app.core.config import Settings
 
 
 def relevance_probability(logprobs: dict[str, float]) -> float:
-    """Normalize Qwen's exact lowercase yes/no tokens, without merging variants."""
+    """Normalize Qwen's exact lowercase yes/no tokens, without merging variants.
+
+    Args:
+        logprobs: Logprobs supplied by the caller.
+
+    Returns:
+        float value produced by this operation.
+
+    Raises:
+        ValueError: Reranker endpoint must return finite yes AND no token logprobs.
+    """
     if not all(token in logprobs and isfinite(logprobs[token]) for token in ("yes", "no")):
         raise ValueError("Reranker endpoint must return finite yes AND no token logprobs")
     largest = max(logprobs["yes"], logprobs["no"])
@@ -23,7 +35,17 @@ def relevance_probability(logprobs: dict[str, float]) -> float:
 
 
 def completion_probabilities(payload: dict[str, Any]) -> dict[str, float]:
-    """Accept verified llama.cpp, Ollama and OpenAI token-probability shapes."""
+    """Accept verified llama.cpp, Ollama and OpenAI token-probability shapes.
+
+    Args:
+        payload: Structured request or provider response to validate.
+
+    Returns:
+        Named values describing the documented operation or diagnostic outcome.
+
+    Raises:
+        ValueError: Reranker endpoint did not return alternative token logprobs.
+    """
     try:
         if "probs" in payload or "completion_probabilities" in payload:
             values = {}
@@ -64,9 +86,27 @@ def build_rerank_chain(
 
     The installed Ollama model determines its execution engine. This adapter
     does not convert GGUF weights to MLX or verify an MLX backend.
+
+    Args:
+        settings: Validated application configuration for this operation.
+        transport: Transport supplied by the caller.
+
+    Returns:
+        Composable runnable retaining the supplied inputs and configured integration behavior.
     """
 
     async def rerank(value: dict[str, Any]) -> list[tuple[Document, float]]:
+        """Score each candidate passage and order it by validated relevance probability.
+
+        Args:
+            value: Candidate value supplied by validation or the calling integration.
+
+        Returns:
+            Ordered results produced by the documented operation.
+
+        Raises:
+            ValueError: Rerank candidate exceeds the configured token budget.
+        """
         rows: list[tuple[Document, float]] = value["rows"]
         if not rows:
             return []

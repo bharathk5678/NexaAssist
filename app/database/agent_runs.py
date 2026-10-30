@@ -1,3 +1,5 @@
+"""Persist institution-scoped run records, atomic leases and typed graph checkpoints."""
+
 from __future__ import annotations
 
 import asyncio
@@ -45,7 +47,11 @@ def _agent_client(uri: str) -> MongoClient[Any]:
 
 
 class MongoRunStore:
-    """Durable workflow checkpoints plus an atomic lease for each run mutation."""
+    """Durable workflow checkpoints plus an atomic lease for each run mutation.
+
+    Args:
+        settings: Validated application configuration for this operation.
+    """
 
     def __init__(self, settings: Settings) -> None:
         self.institution = settings.institution
@@ -88,6 +94,11 @@ class MongoRunStore:
 
     async def _call[T](self, operation: Callable[[], T]) -> T:
         def bounded() -> T:
+            """Execute the synchronous store operation within its MongoDB deadline.
+
+            Returns:
+                T value produced by this operation.
+            """
             with timeout(5):
                 return operation()
 
@@ -97,6 +108,11 @@ class MongoRunStore:
         return {"_id": run_id, "institution": self.institution}
 
     async def create(self, record: dict[str, Any]) -> None:
+        """Insert an institution-scoped run with its retention deadline.
+
+        Args:
+            record: Retained evaluation case, generated answer and supporting source identities.
+        """
         await self._call(
             lambda: self.collection.insert_one(
                 {
@@ -108,9 +124,27 @@ class MongoRunStore:
         )
 
     async def get(self, run_id: str) -> dict[str, Any] | None:
+        """Read a run only within the configured institution.
+
+        Args:
+            run_id: Identifier of the saved workflow to read or resume.
+
+        Returns:
+            Scoped run record, or None when no matching run exists.
+        """
         return await self._call(lambda: self.collection.find_one(self._scope(run_id)))
 
     async def claim(self, run_id: str, lease: str, seconds: float) -> dict[str, Any] | None:
+        """Atomically acquire an available or expired execution lease.
+
+        Args:
+            run_id: Identifier of the saved workflow to read or resume.
+            lease: Lease supplied by the caller.
+            seconds: Seconds supplied by the caller.
+
+        Returns:
+            Claimed run record, or None if the lease is unavailable.
+        """
         now = datetime.now(UTC)
         return await self._call(
             lambda: self.collection.find_one_and_update(
@@ -124,6 +158,16 @@ class MongoRunStore:
         )
 
     async def update(self, run_id: str, lease: str, **changes: Any) -> bool:
+        """Update a run only while the caller owns its unexpired lease.
+
+        Args:
+            run_id: Identifier of the saved workflow to read or resume.
+            lease: Lease supplied by the caller.
+            changes: Input mutations used to exercise validation boundaries.
+
+        Returns:
+            Whether the matching owned run was updated.
+        """
         result = await self._call(
             lambda: self.collection.update_one(
                 {
@@ -137,6 +181,13 @@ class MongoRunStore:
         return result.matched_count == 1
 
     async def release(self, run_id: str, lease: str, status: str) -> None:
+        """Persist final status and release only the caller's execution lease.
+
+        Args:
+            run_id: Identifier of the saved workflow to read or resume.
+            lease: Lease supplied by the caller.
+            status: HTTP or workflow status used by the scenario.
+        """
         await self._call(
             lambda: self.collection.update_one(
                 {**self._scope(run_id), "lease_id": lease},
