@@ -32,6 +32,25 @@ from app.models.validation import (
     ValidationResult,
 )
 
+_CHECKPOINT_MODELS = (
+    AgentRequest,
+    AgentResponse,
+    IntentDecision,
+    AnswerResponse,
+    AnswerCitation,
+    RetrieveRequest,
+    RetrieveResponse,
+    RetrieveHit,
+    RetrieveTimings,
+    Citation,
+    ValidationResult,
+    ValidationEvidence,
+    ServiceRequestDetails,
+    ServiceRequestProposal,
+    ServiceRequestReceipt,
+    SubmittedServiceRequest,
+)
+
 
 @lru_cache
 def _agent_client(uri: str) -> MongoClient[Any]:
@@ -60,27 +79,7 @@ class MongoRunStore:
             database = _agent_client(settings.mongodb_uri.get_secret_value())[settings.mongodb_db]
             self.collection: Collection[Any] = database[settings.mongodb_agent_runs_collection]
             self.collection.create_index("purge_at", expireAfterSeconds=0)
-            allowed = [
-                (model.__module__, model.__name__)
-                for model in (
-                    AgentRequest,
-                    AgentResponse,
-                    IntentDecision,
-                    AnswerResponse,
-                    AnswerCitation,
-                    RetrieveRequest,
-                    RetrieveResponse,
-                    RetrieveHit,
-                    RetrieveTimings,
-                    Citation,
-                    ValidationResult,
-                    ValidationEvidence,
-                    ServiceRequestDetails,
-                    ServiceRequestProposal,
-                    ServiceRequestReceipt,
-                    SubmittedServiceRequest,
-                )
-            ]
+            allowed = [(model.__module__, model.__name__) for model in _CHECKPOINT_MODELS]
             self.checkpointer = MongoDBSaver(
                 database.client,
                 db_name=settings.mongodb_db,

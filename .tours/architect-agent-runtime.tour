@@ -107,7 +107,7 @@
     },
     {
       "file": "app/database/agent_runs.py",
-      "line": 49,
+      "line": 68,
       "title": "Preserve durable compatibility",
       "description": "The store uses institution-scoped records, atomic leases and typed checkpoints. Serialized model module/class paths and graph node names remain unchanged; recover uncertain writes through the same run."
     }
