@@ -38,3 +38,8 @@ logs/
 app/evaluation/reports/
 
 .cursor/
+
+# Local architecture artifacts and their artifact-only validation
+/C4-Documentation/
+/.tours/
+/tests/test_architecture_document.py

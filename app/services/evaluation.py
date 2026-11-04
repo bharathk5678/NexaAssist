@@ -1,3 +1,5 @@
+"""Evaluate one generated answer against its retained evidence and optional reference."""
+
 from __future__ import annotations
 
 from contextlib import nullcontext
@@ -27,6 +29,14 @@ GOLDEN_DATASET = Path(__file__).resolve().parents[2] / "evaluation/datasets/answ
 async def answer_with_quality(
     request: EvaluatedAnswerRequest, settings: Settings
 ) -> EvaluatedAnswerResponse:
+    """Generate once, score the exact retained evidence and return answer-quality metadata.
+
+    Returns:
+        The single generated answer and its explicit quality/telemetry statuses.
+
+    Raises:
+        ValueError: Datadog did not export a workflow span reference.
+    """
     policy_request = RetrieveRequest.model_validate(
         request.model_dump(exclude={"reference_answer"})
     )

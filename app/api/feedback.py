@@ -1,3 +1,5 @@
+"""Accept feedback and expose the authorized review lifecycle."""
+
 from __future__ import annotations
 
 from typing import Annotated
@@ -17,6 +19,11 @@ ConfiguredSettings = Annotated[Settings, Depends(get_settings)]
 
 @router.post("/feedback", status_code=201)
 async def submit(request: FeedbackRequest, settings: ConfiguredSettings) -> FeedbackRecord:
+    """Accept validated feedback through the application service.
+
+    Raises:
+        HTTPException: Feedback store unavailable.
+    """
     try:
         return await feedback.submit_feedback(request, settings)
     except ValueError:
@@ -29,6 +36,11 @@ async def submit(request: FeedbackRequest, settings: ConfiguredSettings) -> Feed
 async def list_recent(
     settings: ConfiguredSettings, limit: Annotated[int, Query(ge=1, le=100)] = 20
 ) -> list[FeedbackRecord]:
+    """Return feedback records only after reviewer authorization.
+
+    Raises:
+        HTTPException: Feedback store unavailable.
+    """
     try:
         return await feedback.list_recent(settings, limit)
     except PyMongoError:
@@ -39,6 +51,14 @@ async def list_recent(
 async def review(
     feedback_id: UUID, request: FeedbackReview, settings: ConfiguredSettings
 ) -> dict[str, str]:
+    """Record an authorized review decision for the selected feedback item.
+
+    Args:
+        feedback_id: Feedback id identifying the scoped record.
+
+    Raises:
+        HTTPException: Feedback is absent or already reviewed.
+    """
     try:
         updated = await feedback.review(feedback_id, request, settings)
     except PyMongoError:

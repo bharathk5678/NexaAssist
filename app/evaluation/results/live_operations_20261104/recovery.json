@@ -1,0 +1,50 @@
+{
+  "run_id": "4ac3657c-2aac-41cd-821e-2093776f1cc8",
+  "first_status": "unconfirmed",
+  "recovered_status": "submitted",
+  "bank_events": [
+    {
+      "http": 504,
+      "replayed": null,
+      "observed_in": "initial service harness RunError 503"
+    },
+    {
+      "http": 201,
+      "replayed": "true"
+    }
+  ],
+  "receipt": {
+    "status": "submitted",
+    "service_request": {
+      "service_request_id": "NXSR-000006",
+      "customer_id": "NXC-0010",
+      "request_type": "CALLBACK",
+      "loan_account_id": null,
+      "status": "RECEIVED",
+      "created_at": "2026-11-04T15:52:10Z"
+    },
+    "evidence": [
+      {
+        "citation": {
+          "doc_id": "POL-OPS-001",
+          "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+          "policy_version": "1.0",
+          "clause": "5.1",
+          "effective_date": "2025-01-01"
+        },
+        "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+      },
+      {
+        "citation": {
+          "doc_id": "POL-OPS-001",
+          "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+          "policy_version": "1.0",
+          "clause": "5.3",
+          "effective_date": "2025-01-01"
+        },
+        "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+      }
+    ]
+  },
+  "pass": true
+}

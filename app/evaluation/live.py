@@ -1,3 +1,5 @@
+"""Score retained answer evidence while isolating optional metric failures."""
+
 from __future__ import annotations
 
 import asyncio
@@ -21,7 +23,17 @@ async def score_answer(
     reference: str | None,
     settings: Settings,
 ) -> dict[MetricName, QualityScore]:
-    """Score the generated answer and its exact evidence; never retrieve or regenerate."""
+    """Score the generated answer and its exact evidence; never retrieve or regenerate.
+
+    Args:
+        query: User question or scoped retrieval query.
+        answer: Generated answer whose exact text and citations are being evaluated.
+        contexts: Exact policy passages retained for the evaluated generation.
+        reference: Optional expected answer used by reference-based metrics.
+
+    Returns:
+        Every configured metric with an explicit scored, unavailable or error status.
+    """
     scores: dict[MetricName, QualityScore] = {}
     for name in METRIC_NAMES:
         reason = None
@@ -55,6 +67,11 @@ async def score_answer(
         return scores
 
     async def measure(name: MetricName) -> None:
+        """Score one applicable metric with an explicit timeout and isolated failure result.
+
+        Args:
+            name: Configured tokenizer or metric identifier.
+        """
         inputs: dict[str, object] = {"user_input": query}
         if name != "answer_relevancy":
             inputs["retrieved_contexts"] = contexts

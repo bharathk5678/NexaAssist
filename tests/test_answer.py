@@ -243,3 +243,52 @@ def test_answer_api_validates_and_hides_provider_errors(
     assert response.status_code == 503
     assert "secret" not in response.text
     assert client.post("/answer", json={"query": "", "as_of": "2026-10-01"}).status_code == 422
+
+
+@pytest.mark.parametrize(
+    "path,service,event",
+    [
+        ("/answer", "answer_policy", "answer_failed"),
+        ("/answer/evaluated", "answer_with_quality", "evaluated_answer_failed"),
+    ],
+)
+@pytest.mark.parametrize(
+    "error_type",
+    [
+        answer_api.OpenAIError,
+        answer_api.OpenAIRefusalError,
+        answer_api.PyMongoError,
+        ValueError,
+        TimeoutError,
+        answer_api.OutputParserException,
+        answer_api.httpx.HTTPError,
+    ],
+)
+def test_answer_routes_hide_all_supported_upstream_errors(
+    settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
+    path: str,
+    service: str,
+    event: str,
+    error_type: type[Exception],
+) -> None:
+    """Both answer routes retain safe errors, separate events and input validation.
+
+    Args:
+        path: Answer endpoint under test.
+        service: Service called by that endpoint.
+        event: Expected endpoint-specific log event.
+        error_type: Upstream failure that must become a safe HTTP 503.
+    """
+    app = create_app()
+    app.dependency_overrides[get_settings] = lambda: settings
+    monkeypatch.setattr(answer_api, service, AsyncMock(side_effect=error_type("secret")))
+    logger = Mock()
+    monkeypatch.setattr(answer_api, "logger", logger)
+    client = TestClient(app)
+    response = client.post(path, json={"query": "fee", "as_of": "2026-10-01"})
+    assert response.status_code == 503
+    assert "secret" not in response.text
+    assert response.json() == {"detail": "Answer service unavailable"}
+    logger.error.assert_called_once_with(event, error_type=error_type.__name__)
+    assert client.post(path, json={"query": "", "as_of": "2026-10-01"}).status_code == 422

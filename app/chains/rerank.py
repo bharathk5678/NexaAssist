@@ -1,6 +1,8 @@
+"""Rerank candidates using validated local yes/no token likelihoods."""
+
 from __future__ import annotations
 
-from math import exp, isfinite
+from math import exp, isfinite, log
 from typing import Any
 
 import httpx
@@ -14,7 +16,11 @@ from app.core.config import Settings
 
 
 def relevance_probability(logprobs: dict[str, float]) -> float:
-    """Normalize Qwen's exact lowercase yes/no tokens, without merging variants."""
+    """Normalize Qwen's exact lowercase yes/no tokens, without merging variants.
+
+    Raises:
+        ValueError: Reranker endpoint must return finite yes AND no token logprobs.
+    """
     if not all(token in logprobs and isfinite(logprobs[token]) for token in ("yes", "no")):
         raise ValueError("Reranker endpoint must return finite yes AND no token logprobs")
     largest = max(logprobs["yes"], logprobs["no"])
@@ -23,8 +29,29 @@ def relevance_probability(logprobs: dict[str, float]) -> float:
 
 
 def completion_probabilities(payload: dict[str, Any]) -> dict[str, float]:
-    """Accept native Ollama, legacy OpenAI, and content-array logprob shapes."""
+    """Accept verified llama.cpp, Ollama and OpenAI token-probability shapes.
+
+    Args:
+        payload: Structured request or provider response to validate.
+
+    Raises:
+        ValueError: Reranker endpoint did not return alternative token logprobs.
+    """
     try:
+        if "probs" in payload or "completion_probabilities" in payload:
+            values = {}
+            entries = (
+                payload["probs"] if "probs" in payload else payload["completion_probabilities"]
+            )
+            for item in entries[0]["top_probs"]:
+                if item["token"] in ("yes", "no"):
+                    probability = item["prob"]
+                    if type(probability) not in (int, float) or not 0 < probability <= 1:
+                        raise ValueError(
+                            "Reranker scoring probabilities must be positive and finite"
+                        )
+                    values[item["token"]] = log(probability)
+            return values
         if "logprobs" in payload:
             values = {
                 item["token"]: item["logprob"] for item in payload["logprobs"][0]["top_logprobs"]
@@ -46,13 +73,18 @@ def completion_probabilities(payload: dict[str, Any]) -> dict[str, float]:
 def build_rerank_chain(
     settings: Settings, *, transport: httpx.AsyncBaseTransport | None = None
 ) -> Runnable[dict[str, Any], list[tuple[Document, float]]]:
-    """Qwen3 pair scoring through native Ollama or OpenAI-compatible completions.
+    """Qwen3 pair scoring through llama.cpp, Ollama or OpenAI-compatible completions.
 
     The installed Ollama model determines its execution engine. This adapter
     does not convert GGUF weights to MLX or verify an MLX backend.
     """
 
     async def rerank(value: dict[str, Any]) -> list[tuple[Document, float]]:
+        """Score each candidate passage and order it by validated relevance probability.
+
+        Raises:
+            ValueError: Rerank candidate exceeds the configured token budget.
+        """
         rows: list[tuple[Document, float]] = value["rows"]
         if not rows:
             return []
@@ -73,7 +105,28 @@ def build_rerank_chain(
                     > settings.rerank_max_tokens
                 ):
                     raise ValueError("Rerank candidate exceeds the configured token budget")
-                if settings.rerank_api == "ollama":
+                if settings.rerank_api == "llamacpp":
+                    path = "completion"
+                    # Equal target bias exposes both logits; normalization cancels the common bias.
+                    # https://github.com/ggml-org/llama.cpp/tree/master/tools/server#post-completion
+                    payload = {
+                        "model": settings.rerank_model,
+                        "prompt": prompt,
+                        "n_predict": 1,
+                        "stream": False,
+                        "grammar": 'root ::= "yes" | "no"',
+                        "logit_bias": [["yes", 100.0], ["no", 100.0]],
+                        "temperature": 1,
+                        "top_k": 0,
+                        "top_p": 1,
+                        "min_p": 0,
+                        "repeat_penalty": 1,
+                        "presence_penalty": 0,
+                        "frequency_penalty": 0,
+                        "post_sampling_probs": True,
+                        "n_probs": 20,
+                    }
+                elif settings.rerank_api == "ollama":
                     path = "api/generate"
                     payload = {
                         "model": settings.rerank_model,

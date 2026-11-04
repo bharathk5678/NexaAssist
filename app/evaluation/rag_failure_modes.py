@@ -15,6 +15,13 @@ from app.models.retrieval import RetrieveResponse
 
 
 class EvidenceRef(BaseModel):
+    """Validated evidence ref contract.
+
+    Attributes:
+        doc_id: Stable policy instrument identifier across stored records.
+        clause: Published clause identifier, or None for complete instruments/front matter.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
     doc_id: str = Field(min_length=1)
@@ -22,7 +29,14 @@ class EvidenceRef(BaseModel):
 
 
 class ChunkSnapshot(BaseModel):
-    """A source/index manifest entry; dimensions describe the stored vector."""
+    """A source/index manifest entry; dimensions describe the stored vector.
+
+    Attributes:
+        chunk_id: Stable identifier of one stored clause chunk.
+        checksum: Fingerprint of chunk content and its embedding metadata.
+        embedding_model: Configured embedding model identity used in chunk compatibility checks.
+        embedding_dimensions: Vector dimensions shared by ingestion, retrieval and Atlas indexing.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -35,7 +49,14 @@ class ChunkSnapshot(BaseModel):
 def diagnose_retrieval(
     response: RetrieveResponse, expected: Sequence[EvidenceRef]
 ) -> dict[str, object]:
-    """Check expected citation coverage, including nonempty but incorrect results."""
+    """Check expected citation coverage, including nonempty but incorrect results.
+
+    Args:
+        expected: Expected outcome for the selected scenario.
+
+    Raises:
+        ValueError: Expected evidence must contain at least one citation.
+    """
     if not expected:
         raise ValueError("Expected evidence must contain at least one citation")
     missing = [
@@ -68,6 +89,12 @@ def diagnose_expanded_context(
     """Check verbatim source-clause bodies in returned context, separately from citations.
 
     This measures text availability, not semantic correctness or answer attribution.
+
+    Args:
+        expected: Expected outcome for the selected scenario.
+
+    Raises:
+        ValueError: Expected evidence must contain at least one citation.
     """
     if not expected:
         raise ValueError("Expected evidence must contain at least one citation")
@@ -160,6 +187,9 @@ def diagnose_staleness(
     """Compare a freshly prepared source manifest to a complete stored manifest.
 
     This checks stored chunk freshness, not the Atlas Search index's readiness.
+
+    Raises:
+        ValueError: Source snapshot must be nonempty and contain checksums.
     """
     if not source or any(chunk.checksum is None for chunk in source):
         raise ValueError("Source snapshot must be nonempty and contain checksums")
@@ -183,7 +213,11 @@ def diagnose_staleness(
 def diagnose_embeddings(
     indexed: Sequence[ChunkSnapshot], expected_model: str, expected_dimensions: int
 ) -> dict[str, object]:
-    """Check embedding compatibility; statistical distribution drift is not measured."""
+    """Check embedding compatibility; statistical distribution drift is not measured.
+
+    Raises:
+        ValueError: Expected model and positive dimensions are required.
+    """
     if not expected_model.strip() or expected_dimensions < 1:
         raise ValueError("Expected model and positive dimensions are required")
     _by_id(indexed)
@@ -274,6 +308,7 @@ def demo_report() -> dict[str, object]:
 
 
 def main() -> None:
+    """Run the rag failure modes command with validated arguments and explicit outcomes."""
     configure_logging("INFO")
     structlog.get_logger().info("rag_failure_modes_demo", **demo_report())
 

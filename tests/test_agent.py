@@ -23,6 +23,7 @@ from app.main import create_app
 from app.models.agent import AgentRequest, IntentDecision
 from app.models.answer import AnswerDraft, AnswerResponse
 from app.models.retrieval import RetrieveRequest, RetrieveResponse
+from app.models.validation import ValidationAccess
 from app.services import agent as agent_service
 
 
@@ -54,6 +55,7 @@ def agent_request() -> AgentRequest:
 
 @pytest.fixture
 def evidence() -> RetrieveResponse:
+    """Combine complete amendments and results without duplicating document versions."""
     return RetrieveResponse.model_validate(
         {
             "as_of": "2026-10-01",
@@ -137,6 +139,56 @@ def test_policy_graph_runs_in_order_once(
         )
     )
     answer.assert_awaited_once_with(retrieve.call_args.args[0], evidence)
+
+
+@pytest.mark.parametrize(
+    "choice,changes,authorized,status",
+    [
+        ({"intent": "forbidden"}, {}, True, "forbidden"),
+        ({"intent": "customer_context"}, {}, False, "blocked"),
+        ({"intent": "customer_context"}, {"as_of": None}, True, "needs_clarification"),
+        ({"intent": "customer_context"}, {"action_details": None}, True, "unavailable"),
+        ({"intent": "customer_context"}, {"action": None}, True, "unavailable"),
+        (
+            {"intent": "customer_context", "customer_id": "NXC-0002"},
+            {},
+            True,
+            "needs_clarification",
+        ),
+        (
+            {"intent": "customer_context"},
+            {"action_details": {"request_type": "INTEREST_CERTIFICATE"}},
+            True,
+            "needs_clarification",
+        ),
+    ],
+)
+def test_explicit_service_request_routing_preserves_preflight_guards(
+    agent_request: AgentRequest, choice: dict, changes: dict, authorized: bool, status: str
+) -> None:
+    request = AgentRequest.model_validate(
+        {
+            **agent_request.model_dump(),
+            "query": "Prepare a callback service request.",
+            "customer_id": "NXC-0010",
+            "action": "createServiceRequest",
+            "action_details": {"request_type": "CALLBACK"},
+            **changes,
+        }
+    )
+    retrieve, validate, answer = AsyncMock(), AsyncMock(), AsyncMock()
+    graph = build_agent_graph(
+        RunnableLambda(lambda _: decision(**choice)),
+        RunnableLambda(retrieve),
+        answer,
+        validator=validate,
+        access=ValidationAccess(customer_ids={"NXC-0010"} if authorized else set()),
+    )
+    state = asyncio.run(graph.ainvoke({"request": request}))
+    assert state["response"].status == status
+    retrieve.assert_not_awaited()
+    validate.assert_not_awaited()
+    answer.assert_not_awaited()
 
 
 @pytest.mark.parametrize(
@@ -280,7 +332,9 @@ def test_agent_reuses_real_phase1_http_route_and_answer_chain(
             direct = await client.post(
                 "/retrieve",
                 json={
-                    **agent_request.model_dump(mode="json", exclude={"customer_id", "action"}),
+                    **agent_request.model_dump(
+                        mode="json", exclude={"customer_id", "action", "action_details"}
+                    ),
                 },
             )
             assert direct.json() == evidence.model_dump(mode="json")
@@ -299,7 +353,7 @@ def test_agent_reuses_real_phase1_http_route_and_answer_chain(
     retrieve.assert_awaited_once()
     assert retrieve.await_args is not None
     assert retrieve.await_args.args[0].model_dump() == agent_request.model_dump(
-        exclude={"customer_id", "action"}
+        exclude={"customer_id", "action", "action_details"}
     )
     assert len(prompts) == (2 if invalid_quote else 1)
     for prompt in prompts:
@@ -322,17 +376,25 @@ def test_agent_reuses_real_phase1_http_route_and_answer_chain(
 
 
 @pytest.mark.parametrize(
-    "failure",
+    "failure,field,number",
     [
-        "timeout",
-        "status",
-        "redirect",
-        "invalid_json",
-        "malformed",
-        "invalid_amendment",
-        "string_rank",
-        "string_timing",
-        "wrong_date",
+        (failure, None, None)
+        for failure in (
+            "timeout",
+            "status",
+            "redirect",
+            "invalid_json",
+            "malformed",
+            "invalid_amendment",
+            "string_rank",
+            "string_timing",
+            "wrong_date",
+        )
+    ]
+    + [
+        ("nonfinite", field, number)
+        for field in ("result_score", "amendment_score", "search_ms", "parent_ms", "total_ms")
+        for number in (float("nan"), float("inf"), float("-inf"))
     ],
 )
 def test_http_retrieval_fails_closed(
@@ -341,10 +403,18 @@ def test_http_retrieval_fails_closed(
     evidence: RetrieveResponse,
     monkeypatch: pytest.MonkeyPatch,
     failure: str,
+    field: str | None,
+    number: float | None,
 ) -> None:
     calls = []
     llm = Mock(spec=BaseChatModel)
-    llm.with_structured_output.return_value = RunnableLambda(lambda _: decision())
+    llm.with_structured_output.side_effect = lambda schema, **_: RunnableLambda(
+        lambda _: (
+            decision()
+            if schema is IntentDecision
+            else AnswerDraft(status="insufficient_evidence", answer="No answer", evidence=[])
+        )
+    )
     monkeypatch.setattr(agent_service, "get_chat_model", lambda _: llm)
 
     def handle(req: httpx.Request) -> httpx.Response:
@@ -368,6 +438,17 @@ def test_http_retrieval_fails_closed(
             body["amendments"][0]["rank"] = "1"
         if failure == "string_timing":
             body["timings"]["total_ms"] = "3"
+        if failure == "nonfinite":
+            assert field is not None and number is not None
+            if field == "result_score":
+                body["results"][0]["score"] = number
+            elif field == "amendment_score":
+                body["amendments"][0]["score"] = number
+            else:
+                body["timings"][field] = number
+            return httpx.Response(
+                200, content=json.dumps(body), headers={"content-type": "application/json"}
+            )
         return httpx.Response(200, json={} if failure == "malformed" else body)
 
     async def run() -> None:
@@ -483,6 +564,7 @@ def test_run_deadline_stops_classification(
     settings: Settings,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+
     async def slow(_: Any) -> IntentDecision:
         await asyncio.sleep(1)
         return decision()
@@ -512,7 +594,16 @@ def test_original_api_contracts_remain_separate() -> None:
         "/metrics",
     } <= paths.keys()
     assert "/agent" not in paths
-    assert set(create_agent_app().openapi()["paths"]) == {"/agent", "/health", "/metrics"}
+    assert set(create_agent_app().openapi()["paths"]) == {
+        "/agent",
+        "/health",
+        "/metrics",
+        "/agent/submit",
+        "/agent/runs",
+        "/agent/runs/{run_id}",
+        "/agent/runs/{run_id}/approval",
+        "/agent/runs/{run_id}/retry",
+    }
 
 
 def test_agent_config_and_classifier_schema() -> None:

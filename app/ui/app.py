@@ -1,3 +1,5 @@
+"""Render policy chat, answer evaluation and feedback review through HTTP clients."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -13,14 +15,17 @@ from app.core.config import get_ui_settings
 from app.models.answer import AnswerResponse
 from app.models.evaluation import EvaluatedAnswerResponse
 from app.models.retrieval import RetrieveRequest, RetrieveResponse
+from app.ui.agent import agent_workspace
 
 
 @st.cache_resource
 def api_client(base_url: str) -> httpx.Client:
+    """Return the shared cached HTTP client for the selected API base URL."""
     return httpx.Client(base_url=base_url, timeout=180)
 
 
 def show_answer(result: AnswerResponse) -> None:
+    """Render answer status and expand the exact cited policy evidence."""
     if result.status != "answered":
         st.warning(result.answer)
     else:
@@ -35,6 +40,7 @@ def show_answer(result: AnswerResponse) -> None:
 
 
 def feedback_form(client: httpx.Client, turn: dict[str, Any]) -> None:
+    """Submit feedback for the retained answer without replacing prior saved feedback."""
     if turn.get("feedback_saved"):
         st.caption("Feedback saved for review.")
         return
@@ -63,6 +69,7 @@ def feedback_form(client: httpx.Client, turn: dict[str, Any]) -> None:
 
 
 def review_feedback(client: httpx.Client) -> None:
+    """Load feedback records and submit reviewer-authorized review updates."""
     token = st.text_input(
         "Reviewer token",
         type="password",
@@ -117,6 +124,7 @@ def review_feedback(client: httpx.Client) -> None:
 
 
 def open_chat(identifier: str) -> None:
+    """Select the local conversation and return to the policy-chat workspace."""
     st.session_state["active_chat"] = identifier
     st.session_state["workspace"] = "Policy chat"
 
@@ -158,7 +166,11 @@ def send_question(client: httpx.Client, turn: dict[str, Any]) -> None:
 
 
 def show_turn(client: httpx.Client, turn: dict[str, Any]) -> bool:
-    """Render one question and its evidence, returning whether to retry it."""
+    """Render one question and its evidence, returning whether to retry it.
+
+    Returns:
+        True when the user requests a retry for this retained turn.
+    """
     request = turn["request"]
     with st.chat_message("user", avatar=":material/person:"):
         st.markdown(request["query"])
@@ -205,6 +217,7 @@ def show_turn(client: httpx.Client, turn: dict[str, Any]) -> bool:
 
 def main() -> None:
     # shortcut: restored open sidebars can shift at bootstrap; revisit after Streamlit layout fixes.
+    """Render the configured Streamlit policy and service-request workspaces."""
     st.set_page_config(
         page_title="NexaAssist · Policy chat",
         page_icon=":material/account_balance:",
@@ -242,7 +255,7 @@ def main() -> None:
         )
         st.radio(
             "Workspace",
-            ["Policy chat", "Review feedback"],
+            ["Policy chat", "Review feedback", "Service requests"],
             key="workspace",
             label_visibility="collapsed",
         )
@@ -298,6 +311,10 @@ def main() -> None:
             )
         st.caption("Synthetic NexaBank policies for training.")
         st.caption("Chats stay in this browser session and reset when it ends.")
+
+    if st.session_state["workspace"] == "Service requests":
+        agent_workspace(api_client(settings.agent_api_base_url), as_of, product_id.strip() or None)
+        return
 
     if st.session_state["workspace"] == "Review feedback":
         st.title("Review feedback", anchor=False)

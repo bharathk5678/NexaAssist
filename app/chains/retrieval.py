@@ -1,3 +1,5 @@
+"""Search scoped policy chunks and expand matching parents and amendments."""
+
 from __future__ import annotations
 
 from time import perf_counter
@@ -33,6 +35,7 @@ def build_retrieval_chain(
     """Search indexed policy chunks, then expand each hit to its parent section."""
 
     async def retrieve(request: RetrieveRequest) -> RetrieveResponse:
+        """Retrieve scoped policy evidence through the configured retrieval integration."""
         as_of = request.as_of.isoformat()
         filters: list[dict[str, object]] = [
             {"institution": settings.institution},

@@ -1,0 +1,59 @@
+{
+  "evaluation_status": "completed",
+  "case_count": 10,
+  "statuses_match": 9,
+  "status_mismatches": [
+    {
+      "index": 9,
+      "query": "What is the current NRLR?",
+      "expected_status": "insufficient_evidence",
+      "actual_status": "needs_clarification",
+      "response": "Which product and policy date should I use, and what specific rate or policy term do you want to check?",
+      "judge": {
+        "correctness": 0.5,
+        "groundedness": 1.0,
+        "rationale": "The response appropriately avoids inventing an NRLR value, but asks for clarification rather than explaining that the supplied evidence lacks the current rate. The question already identifies the requested rate; the evidence refers to a Rate Card that was not supplied. The response makes no unsupported factual claims.",
+        "status_matches": false
+      }
+    }
+  ],
+  "ragas_answerable_case_count": 8,
+  "means": {
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.7243091358201026,
+    "context_precision": 0.5861111110672916,
+    "context_recall": 0.9583333333333334,
+    "judge_correctness": 0.95,
+    "judge_groundedness": 1.0
+  },
+  "baseline_gate": {
+    "status": "invalid",
+    "reason": "Golden answer statuses failed"
+  },
+  "diagnostic_below_baseline": [
+    "judge_correctness"
+  ],
+  "baseline_minimum_means": {
+    "faithfulness": 0.9821428571428571,
+    "answer_relevancy": 0.7102596577966722,
+    "context_precision": 0.5861111110672916,
+    "context_recall": 0.9583333333333334,
+    "judge_correctness": 1.0,
+    "judge_groundedness": 1.0
+  },
+  "datadog": {
+    "status": "disabled"
+  },
+  "protocol": {
+    "model": "gpt-6-luna",
+    "judge_model": "gpt-6.1-sol",
+    "judge_prompt_version": "policy-judge-v2",
+    "ragas_version": "0.4.3",
+    "retrieval_mode": "dense",
+    "rerank_enabled": false,
+    "rerank_model": null
+  },
+  "captured_at": "2026-11-04T15:56:19.989064+00:00",
+  "baseline_changed": false,
+  "cli_limitation": "app/evaluation/run.py main does not call telemetry initialization; direct make check-ai run did not enable LLMObs, so scores were not exported to Datadog by this run."
+}

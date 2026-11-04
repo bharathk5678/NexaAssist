@@ -14,6 +14,7 @@ from app.core import observability
 
 
 def run_instrumented(script: str, *, llmobs_enabled: bool = False) -> list[dict[str, Any]]:
+    """Run an isolated instrumented script and parse its structured telemetry records."""
     result = subprocess.run(
         [str(Path(sys.executable).with_name("ddtrace-run")), sys.executable, "-c", script],
         cwd=Path(__file__).resolve().parents[1],

@@ -1,3 +1,5 @@
+"""Check that a local reranker returns valid discriminating scoring likelihoods."""
+
 from __future__ import annotations
 
 import argparse
@@ -17,6 +19,11 @@ from app.core.logging import configure_logging
 
 
 async def check() -> dict[str, object]:
+    """Verify local reranker likelihoods against the supplied scoring contract.
+
+    Raises:
+        ValueError: This smoke test only permits a local reranker endpoint.
+    """
     settings = get_settings()
     if urlparse(settings.rerank_base_url).hostname not in {"127.0.0.1", "localhost", "::1"}:
         raise ValueError("This smoke test only permits a local reranker endpoint")
@@ -51,6 +58,11 @@ async def check() -> dict[str, object]:
 
 
 def main() -> None:
+    """Run the check reranker command with validated arguments and explicit outcomes.
+
+    Raises:
+        SystemExit: The operation cannot satisfy its documented validation or execution contract.
+    """
     parser = argparse.ArgumentParser(description="Check local Qwen reranker API compatibility")
     parser.add_argument(
         "--output", type=Path, default=Path("app/evaluation/results/reranker_check.json")

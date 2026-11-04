@@ -202,6 +202,7 @@ def test_local_reranker_uses_openai_completions_and_likelihoods(settings: Settin
 
 
 def test_native_ollama_reranker_uses_raw_scoring_prompt(settings: Settings) -> None:
+
     def respond(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/api/generate"
         payload = json.loads(request.content)

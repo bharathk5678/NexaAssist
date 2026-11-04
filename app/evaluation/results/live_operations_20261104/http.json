@@ -1,0 +1,1648 @@
+{
+  "at": "2026-11-04T15:49:58.424075+00:00",
+  "checks": [
+    {
+      "name": "live_atlas_retrieval",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 4.75,
+      "body": {
+        "as_of": "2026-10-01",
+        "results": [
+          {
+            "rank": 1,
+            "score": 0.8842947483062744,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 4. Loan amount and tenure]\n4.1 Loan amount. Minimum loan amount is \u20b95,00,000. Maximum loan amount is \u20b97,50,00,000.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 4. Loan amount and tenure]\n4.1 Loan amount. Minimum loan amount is \u20b95,00,000. Maximum loan amount is \u20b97,50,00,000.\n4.2 Tenure. Minimum tenure is 60 months (5 years). Maximum tenure is 360 months (30 years), subject to the age at maturity limits in clause 3.1.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "4.1",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 2,
+            "score": 0.8524490594863892,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 7. Security and loan to value]\n7.2 Loan to value (LTV). The maximum LTV depends on the loan amount and is applied to the lower of the agreement value and NexaBank's technical valuation.\n<table><tr><td>Loan amount</td><td>Maximum LTV</td></tr><tr><td>Up to \u20b930,00,000</td><td>90%</td></tr><tr><td>Above \u20b930,00,000 and up to \u20b975,00,000</td><td>80%</td></tr><tr><td>Above \u20b975,00,000</td><td>75%</td></tr></table>",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 7. Security and loan to value]\n7.1 Security. The loan is secured by a first mortgage on the residential property being financed. The property must have a clear and marketable title.\n7.2 Loan to value (LTV). The maximum LTV depends on the loan amount and is applied to the lower of the agreement value and NexaBank's technical valuation.\n<table><tr><td>Loan amount</td><td>Maximum LTV</td></tr><tr><td>Up to \u20b930,00,000</td><td>90%</td></tr><tr><td>Above \u20b930,00,000 and up to \u20b975,00,000</td><td>80%</td></tr><tr><td>Above \u20b975,00,000</td><td>75%</td></tr></table>\n7.3 Property insurance. The borrower must keep the property insured against fire and allied perils for the loan tenure.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "7.2",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 3,
+            "score": 0.838194727897644,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 1. Purpose and scope]\n1.1 Purpose. This policy sets out the eligibility, pricing, fees, security and prepayment terms for NexaHome Loan, a loan for the purchase, construction, extension or improvement of a residential property, or the balance transfer of an existing home loan.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 1. Purpose and scope]\n1.1 Purpose. This policy sets out the eligibility, pricing, fees, security and prepayment terms for NexaHome Loan, a loan for the purchase, construction, extension or improvement of a residential property, or the balance transfer of an existing home loan.\n1.2 Applicability. The version of this policy in force on the sanction date of a loan governs that loan for its life, except where a later instrument expressly states otherwise. Applications received under an earlier version but sanctioned after the effective date are governed by this version.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "1.1",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 4,
+            "score": 0.8310227394104004,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 4. Loan amount and tenure]\n4.2 Tenure. Minimum tenure is 60 months (5 years). Maximum tenure is 360 months (30 years), subject to the age at maturity limits in clause 3.1.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 4. Loan amount and tenure]\n4.1 Loan amount. Minimum loan amount is \u20b95,00,000. Maximum loan amount is \u20b97,50,00,000.\n4.2 Tenure. Minimum tenure is 60 months (5 years). Maximum tenure is 360 months (30 years), subject to the age at maturity limits in clause 3.1.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "4.2",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 5,
+            "score": 0.816336989402771,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 3. Eligibility]\n3.2 Minimum income. Salaried applicants must have net monthly income of at least \u20b930,000. Self-employed applicants must have annual income of at least \u20b95,00,000 as shown in the latest income tax return.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 3. Eligibility]\n3.1 Age. Minimum age at application is 21 years. Maximum age at application is 62 years for salaried applicants and 65 years for self-employed applicants. Age at loan maturity must not exceed 70 years (salaried) or 75 years (self-employed).\n3.2 Minimum income. Salaried applicants must have net monthly income of at least \u20b930,000. Self-employed applicants must have annual income of at least \u20b95,00,000 as shown in the latest income tax return.\n3.3 Bureau score. The minimum Bureau Score for the standard rate card is 675. For scores below 675, applications below this score are referred to manual underwriting and no standard rate is quoted.\n3.4 FOIR limit. The maximum FOIR depends on net monthly income as shown below.\n<table><tr><td>Net monthly income</td><td>Maximum FOIR</td></tr><tr><td>Below \u20b91,00,000</td><td>50%</td></tr><tr><td>\u20b91,00,000 to \u20b92,49,999</td><td>55%</td></tr><tr><td>\u20b92,50,000 and above</td><td>60%</td></tr></table>\n3.5 Applicant categories. The standard criteria in this policy cover salaried and self-employed applicants only. Other categories, including pensioners and those with no regular income, are outside the standard criteria and are handled by the branch on an exception basis.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "3.2",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 6,
+            "score": 0.8096176385879517,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 6. Fees and charges]\n6.2 Processing fee. Processing fee is 0.35% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b915,000, plus GST.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 6. Fees and charges]\n6.1 General. All fees are exclusive of GST at 18%, which is charged additionally. Fees, once paid, are non-refundable except where this policy states otherwise.\n6.2 Processing fee. Processing fee is 0.35% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b915,000, plus GST.\n6.3 Legal and technical charges. A non-refundable charge of \u20b96,000 plus GST covers legal verification and technical valuation of the property.\n6.4 Penal charges. Overdue amounts attract a penal charge of 2.00% per annum over the contractual interest rate, calculated on the overdue amount only. Penal charges are not compounded.\n6.5 Other costs. Stamp duty, registration charges and insurance premiums are payable by the borrower at actuals and are not NexaBank fees.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "6.2",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 7,
+            "score": 0.8092429041862488,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 3. Eligibility]\n3.1 Age. Minimum age at application is 21 years. Maximum age at application is 62 years for salaried applicants and 65 years for self-employed applicants. Age at loan maturity must not exceed 70 years (salaried) or 75 years (self-employed).",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 3. Eligibility]\n3.1 Age. Minimum age at application is 21 years. Maximum age at application is 62 years for salaried applicants and 65 years for self-employed applicants. Age at loan maturity must not exceed 70 years (salaried) or 75 years (self-employed).\n3.2 Minimum income. Salaried applicants must have net monthly income of at least \u20b930,000. Self-employed applicants must have annual income of at least \u20b95,00,000 as shown in the latest income tax return.\n3.3 Bureau score. The minimum Bureau Score for the standard rate card is 675. For scores below 675, applications below this score are referred to manual underwriting and no standard rate is quoted.\n3.4 FOIR limit. The maximum FOIR depends on net monthly income as shown below.\n<table><tr><td>Net monthly income</td><td>Maximum FOIR</td></tr><tr><td>Below \u20b91,00,000</td><td>50%</td></tr><tr><td>\u20b91,00,000 to \u20b92,49,999</td><td>55%</td></tr><tr><td>\u20b92,50,000 and above</td><td>60%</td></tr></table>\n3.5 Applicant categories. The standard criteria in this policy cover salaried and self-employed applicants only. Other categories, including pensioners and those with no regular income, are outside the standard criteria and are handled by the branch on an exception basis.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "3.1",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 8,
+            "score": 0.8012712001800537,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 7. Security and loan to value]\n7.1 Security. The loan is secured by a first mortgage on the residential property being financed. The property must have a clear and marketable title.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 7. Security and loan to value]\n7.1 Security. The loan is secured by a first mortgage on the residential property being financed. The property must have a clear and marketable title.\n7.2 Loan to value (LTV). The maximum LTV depends on the loan amount and is applied to the lower of the agreement value and NexaBank's technical valuation.\n<table><tr><td>Loan amount</td><td>Maximum LTV</td></tr><tr><td>Up to \u20b930,00,000</td><td>90%</td></tr><tr><td>Above \u20b930,00,000 and up to \u20b975,00,000</td><td>80%</td></tr><tr><td>Above \u20b975,00,000</td><td>75%</td></tr></table>\n7.3 Property insurance. The borrower must keep the property insured against fire and allied perils for the loan tenure.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "7.1",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 9,
+            "score": 0.7979099154472351,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 6. Fees and charges]\n6.3 Legal and technical charges. A non-refundable charge of \u20b96,000 plus GST covers legal verification and technical valuation of the property.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 6. Fees and charges]\n6.1 General. All fees are exclusive of GST at 18%, which is charged additionally. Fees, once paid, are non-refundable except where this policy states otherwise.\n6.2 Processing fee. Processing fee is 0.35% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b915,000, plus GST.\n6.3 Legal and technical charges. A non-refundable charge of \u20b96,000 plus GST covers legal verification and technical valuation of the property.\n6.4 Penal charges. Overdue amounts attract a penal charge of 2.00% per annum over the contractual interest rate, calculated on the overdue amount only. Penal charges are not compounded.\n6.5 Other costs. Stamp duty, registration charges and insurance premiums are payable by the borrower at actuals and are not NexaBank fees.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "6.3",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 10,
+            "score": 0.7947551012039185,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 7. Security and loan to value]\n7.3 Property insurance. The borrower must keep the property insured against fire and allied perils for the loan tenure.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 7. Security and loan to value]\n7.1 Security. The loan is secured by a first mortgage on the residential property being financed. The property must have a clear and marketable title.\n7.2 Loan to value (LTV). The maximum LTV depends on the loan amount and is applied to the lower of the agreement value and NexaBank's technical valuation.\n<table><tr><td>Loan amount</td><td>Maximum LTV</td></tr><tr><td>Up to \u20b930,00,000</td><td>90%</td></tr><tr><td>Above \u20b930,00,000 and up to \u20b975,00,000</td><td>80%</td></tr><tr><td>Above \u20b975,00,000</td><td>75%</td></tr></table>\n7.3 Property insurance. The borrower must keep the property insured against fire and allied perils for the loan tenure.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "7.3",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 11,
+            "score": 0.7931680679321289,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 8. Prepayment and foreclosure]\n8.3 Part prepayment. Part prepayment is allowed at any time. The minimum part prepayment amount is \u20b925,000. No charge applies on a floating-rate loan.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 8. Prepayment and foreclosure]\n8.1 Foreclosure, floating rate. No foreclosure charge applies on a floating-rate loan, whether foreclosed from own funds or by balance transfer.\n8.2 Foreclosure of fixed-rate loans. New sanctions are floating-rate only. Loans sanctioned under an earlier version's fixed-rate option keep the foreclosure terms of that version.\n8.3 Part prepayment. Part prepayment is allowed at any time. The minimum part prepayment amount is \u20b925,000. No charge applies on a floating-rate loan.\n8.4 Notice. The borrower must give 3 working days notice for foreclosure or part prepayment.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "8.3",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 12,
+            "score": 0.7928058505058289,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | Front matter]\nNexaHome Loan Policy\nRetail Lending Policy | Home Loans | Product code NEXA-HL\n<table><tr><td>Document ID</td><td>POL-HL-V3</td></tr><tr><td>Version</td><td>3.0</td></tr><tr><td>Effective from</td><td>2025-10-01</td></tr><tr><td>Effective to (this version)</td><td>Open (see clause 10.3 for amendments)</td></tr><tr><td>Supersedes</td><td>POL-HL-V2</td></tr><tr><td>Owner</td><td>Head of Retail Credit Policy, NexaBank</td></tr></table>",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | Front matter]\nNexaHome Loan Policy\nRetail Lending Policy | Home Loans | Product code NEXA-HL\n<table><tr><td>Document ID</td><td>POL-HL-V3</td></tr><tr><td>Version</td><td>3.0</td></tr><tr><td>Effective from</td><td>2025-10-01</td></tr><tr><td>Effective to (this version)</td><td>Open (see clause 10.3 for amendments)</td></tr><tr><td>Supersedes</td><td>POL-HL-V2</td></tr><tr><td>Owner</td><td>Head of Retail Credit Policy, NexaBank</td></tr></table>",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": null,
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 13,
+            "score": 0.7927033305168152,
+            "text": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.2 Existing borrowers and part prepayment. Borrowers whose NexaHome loans were sanctioned under POL-HL-V3 before 2026-07-01 may opt in to the revised \u20b910,000 part prepayment minimum by written request to their branch or through a service request. There is no charge for opting in. Until a borrower opts in, the \u20b925,000 minimum continues to apply to that loan. Opting in does not change the processing fee already paid.",
+            "parent_text": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.1 Loans covered. The revised processing fee applies only to loans sanctioned on or after 2026-07-01. Loans sanctioned before that date keep the processing fee that applied at sanction, and no refund or adjustment is made.\n5.2 Existing borrowers and part prepayment. Borrowers whose NexaHome loans were sanctioned under POL-HL-V3 before 2026-07-01 may opt in to the revised \u20b910,000 part prepayment minimum by written request to their branch or through a service request. There is no charge for opting in. Until a borrower opts in, the \u20b925,000 minimum continues to apply to that loan. Opting in does not change the processing fee already paid.",
+            "citation": {
+              "doc_id": "CIR-2026-07",
+              "title": "Circular CIR-2026-07",
+              "policy_version": "1.0",
+              "clause": "5.2",
+              "effective_date": "2026-07-01"
+            }
+          },
+          {
+            "rank": 14,
+            "score": 0.7887959480285645,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 3. Eligibility]\n3.4 FOIR limit. The maximum FOIR depends on net monthly income as shown below.\n<table><tr><td>Net monthly income</td><td>Maximum FOIR</td></tr><tr><td>Below \u20b91,00,000</td><td>50%</td></tr><tr><td>\u20b91,00,000 to \u20b92,49,999</td><td>55%</td></tr><tr><td>\u20b92,50,000 and above</td><td>60%</td></tr></table>",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 3. Eligibility]\n3.1 Age. Minimum age at application is 21 years. Maximum age at application is 62 years for salaried applicants and 65 years for self-employed applicants. Age at loan maturity must not exceed 70 years (salaried) or 75 years (self-employed).\n3.2 Minimum income. Salaried applicants must have net monthly income of at least \u20b930,000. Self-employed applicants must have annual income of at least \u20b95,00,000 as shown in the latest income tax return.\n3.3 Bureau score. The minimum Bureau Score for the standard rate card is 675. For scores below 675, applications below this score are referred to manual underwriting and no standard rate is quoted.\n3.4 FOIR limit. The maximum FOIR depends on net monthly income as shown below.\n<table><tr><td>Net monthly income</td><td>Maximum FOIR</td></tr><tr><td>Below \u20b91,00,000</td><td>50%</td></tr><tr><td>\u20b91,00,000 to \u20b92,49,999</td><td>55%</td></tr><tr><td>\u20b92,50,000 and above</td><td>60%</td></tr></table>\n3.5 Applicant categories. The standard criteria in this policy cover salaried and self-employed applicants only. Other categories, including pensioners and those with no regular income, are outside the standard criteria and are handled by the branch on an exception basis.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "3.4",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 15,
+            "score": 0.7847951650619507,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 2. Definitions]\n2.1 Defined terms. NRLR means the NexaBank Repo-Linked Rate published on the Rate Card. Bureau Score means the credit bureau score on the 300 to 900 scale pulled at the time of sanction. FOIR (Fixed Obligation to Income Ratio) means total monthly fixed obligations including the proposed EMI divided by net monthly income. Net monthly income means verified monthly take-home income for salaried applicants. Sanction date means the date on the sanction letter. Outstanding principal means principal disbursed less principal repaid.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 2. Definitions]\n2.1 Defined terms. NRLR means the NexaBank Repo-Linked Rate published on the Rate Card. Bureau Score means the credit bureau score on the 300 to 900 scale pulled at the time of sanction. FOIR (Fixed Obligation to Income Ratio) means total monthly fixed obligations including the proposed EMI divided by net monthly income. Net monthly income means verified monthly take-home income for salaried applicants. Sanction date means the date on the sanction letter. Outstanding principal means principal disbursed less principal repaid.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "2.1",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 16,
+            "score": 0.7845941781997681,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 6. Fees and charges]\n6.5 Other costs. Stamp duty, registration charges and insurance premiums are payable by the borrower at actuals and are not NexaBank fees.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 6. Fees and charges]\n6.1 General. All fees are exclusive of GST at 18%, which is charged additionally. Fees, once paid, are non-refundable except where this policy states otherwise.\n6.2 Processing fee. Processing fee is 0.35% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b915,000, plus GST.\n6.3 Legal and technical charges. A non-refundable charge of \u20b96,000 plus GST covers legal verification and technical valuation of the property.\n6.4 Penal charges. Overdue amounts attract a penal charge of 2.00% per annum over the contractual interest rate, calculated on the overdue amount only. Penal charges are not compounded.\n6.5 Other costs. Stamp duty, registration charges and insurance premiums are payable by the borrower at actuals and are not NexaBank fees.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "6.5",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 17,
+            "score": 0.7791407704353333,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 3. Eligibility]\n3.3 Bureau score. The minimum Bureau Score for the standard rate card is 675. For scores below 675, applications below this score are referred to manual underwriting and no standard rate is quoted.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 3. Eligibility]\n3.1 Age. Minimum age at application is 21 years. Maximum age at application is 62 years for salaried applicants and 65 years for self-employed applicants. Age at loan maturity must not exceed 70 years (salaried) or 75 years (self-employed).\n3.2 Minimum income. Salaried applicants must have net monthly income of at least \u20b930,000. Self-employed applicants must have annual income of at least \u20b95,00,000 as shown in the latest income tax return.\n3.3 Bureau score. The minimum Bureau Score for the standard rate card is 675. For scores below 675, applications below this score are referred to manual underwriting and no standard rate is quoted.\n3.4 FOIR limit. The maximum FOIR depends on net monthly income as shown below.\n<table><tr><td>Net monthly income</td><td>Maximum FOIR</td></tr><tr><td>Below \u20b91,00,000</td><td>50%</td></tr><tr><td>\u20b91,00,000 to \u20b92,49,999</td><td>55%</td></tr><tr><td>\u20b92,50,000 and above</td><td>60%</td></tr></table>\n3.5 Applicant categories. The standard criteria in this policy cover salaried and self-employed applicants only. Other categories, including pensioners and those with no regular income, are outside the standard criteria and are handled by the branch on an exception basis.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "3.3",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 18,
+            "score": 0.7756439447402954,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 1. Purpose and scope]\n1.2 Applicability. The version of this policy in force on the sanction date of a loan governs that loan for its life, except where a later instrument expressly states otherwise. Applications received under an earlier version but sanctioned after the effective date are governed by this version.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 1. Purpose and scope]\n1.1 Purpose. This policy sets out the eligibility, pricing, fees, security and prepayment terms for NexaHome Loan, a loan for the purchase, construction, extension or improvement of a residential property, or the balance transfer of an existing home loan.\n1.2 Applicability. The version of this policy in force on the sanction date of a loan governs that loan for its life, except where a later instrument expressly states otherwise. Applications received under an earlier version but sanctioned after the effective date are governed by this version.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "1.2",
+              "effective_date": "2025-10-01"
+            }
+          },
+          {
+            "rank": 19,
+            "score": 0.7730305194854736,
+            "text": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | Front matter]\nCircular CIR-2026-07\nNexaHome Loan: Processing Fee Revision and Part-Prepayment Relaxation\n<table><tr><td>Document ID</td><td>CIR-2026-07</td></tr><tr><td>Issued on</td><td>2026-06-15</td></tr><tr><td>Effective from</td><td>2026-07-01</td></tr><tr><td>Amends</td><td>POL-HL-V3 (NexaHome Loan Policy v3.0), clauses 6.2 and 8.3 only</td></tr><tr><td>Issued by</td><td>Retail Credit Policy Committee, NexaBank</td></tr></table>",
+            "parent_text": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | Front matter]\nCircular CIR-2026-07\nNexaHome Loan: Processing Fee Revision and Part-Prepayment Relaxation\n<table><tr><td>Document ID</td><td>CIR-2026-07</td></tr><tr><td>Issued on</td><td>2026-06-15</td></tr><tr><td>Effective from</td><td>2026-07-01</td></tr><tr><td>Amends</td><td>POL-HL-V3 (NexaHome Loan Policy v3.0), clauses 6.2 and 8.3 only</td></tr><tr><td>Issued by</td><td>Retail Credit Policy Committee, NexaBank</td></tr></table>",
+            "citation": {
+              "doc_id": "CIR-2026-07",
+              "title": "Circular CIR-2026-07",
+              "policy_version": "1.0",
+              "clause": null,
+              "effective_date": "2026-07-01"
+            }
+          },
+          {
+            "rank": 20,
+            "score": 0.7661542892456055,
+            "text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 6. Fees and charges]\n6.1 General. All fees are exclusive of GST at 18%, which is charged additionally. Fees, once paid, are non-refundable except where this policy states otherwise.",
+            "parent_text": "[POL-HL-V3 | NexaHome Loan Policy v3.0 | 6. Fees and charges]\n6.1 General. All fees are exclusive of GST at 18%, which is charged additionally. Fees, once paid, are non-refundable except where this policy states otherwise.\n6.2 Processing fee. Processing fee is 0.35% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b915,000, plus GST.\n6.3 Legal and technical charges. A non-refundable charge of \u20b96,000 plus GST covers legal verification and technical valuation of the property.\n6.4 Penal charges. Overdue amounts attract a penal charge of 2.00% per annum over the contractual interest rate, calculated on the overdue amount only. Penal charges are not compounded.\n6.5 Other costs. Stamp duty, registration charges and insurance premiums are payable by the borrower at actuals and are not NexaBank fees.",
+            "citation": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "6.1",
+              "effective_date": "2025-10-01"
+            }
+          }
+        ],
+        "timings": {
+          "search_ms": 4502.07,
+          "parent_ms": 127.21,
+          "total_ms": 4629.77
+        },
+        "amendments": [
+          {
+            "rank": 1,
+            "score": 0.0,
+            "text": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | Front matter]\nCircular CIR-2026-07\nNexaHome Loan: Processing Fee Revision and Part-Prepayment Relaxation\n<table><tr><td>Document ID</td><td>CIR-2026-07</td></tr><tr><td>Issued on</td><td>2026-06-15</td></tr><tr><td>Effective from</td><td>2026-07-01</td></tr><tr><td>Amends</td><td>POL-HL-V3 (NexaHome Loan Policy v3.0), clauses 6.2 and 8.3 only</td></tr><tr><td>Issued by</td><td>Retail Credit Policy Committee, NexaBank</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 1. Background]\n1.1 Background. The Retail Credit Policy Committee has revised the processing fee and the minimum part prepayment amount for NexaHome Loan. This circular amends two clauses of POL-HL-V3. All other clauses of POL-HL-V3 are unchanged.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 2. Instrument and precedence]\n2.1 Precedence. For the clauses named in this circular, this circular prevails over POL-HL-V3 from the effective date for the loans covered by clause 5.1 of this circular.\n<table><tr><td>Clause of POL-HL-V3</td><td>Subject</td><td>Status from 2026-07-01</td></tr><tr><td>6.2</td><td>Processing fee</td><td>Replaced by clause 3.1 of this circular</td></tr><tr><td>8.3</td><td>Part prepayment minimum</td><td>Replaced by clause 4.1 of this circular</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 3. Revised processing fee]\n3.1 Revised clause 6.2. Processing fee is 0.30% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b910,000, plus GST. The earlier terms were 0.35%, minimum \u20b95,000 and maximum \u20b915,000.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 4. Revised part prepayment minimum]\n4.1 Revised clause 8.3. The minimum part prepayment amount is \u20b910,000. The earlier minimum was \u20b925,000. No charge applies on a floating-rate loan.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.1 Loans covered. The revised processing fee applies only to loans sanctioned on or after 2026-07-01. Loans sanctioned before that date keep the processing fee that applied at sanction, and no refund or adjustment is made.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.2 Existing borrowers and part prepayment. Borrowers whose NexaHome loans were sanctioned under POL-HL-V3 before 2026-07-01 may opt in to the revised \u20b910,000 part prepayment minimum by written request to their branch or through a service request. There is no charge for opting in. Until a borrower opts in, the \u20b925,000 minimum continues to apply to that loan. Opting in does not change the processing fee already paid.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 6. Unchanged terms]\n6.1 Terms not affected. Eligibility, interest rate spreads, FOIR limits, LTV, legal and technical charges, penal charges and foreclosure terms in POL-HL-V3 are not affected by this circular.",
+            "parent_text": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | Front matter]\nCircular CIR-2026-07\nNexaHome Loan: Processing Fee Revision and Part-Prepayment Relaxation\n<table><tr><td>Document ID</td><td>CIR-2026-07</td></tr><tr><td>Issued on</td><td>2026-06-15</td></tr><tr><td>Effective from</td><td>2026-07-01</td></tr><tr><td>Amends</td><td>POL-HL-V3 (NexaHome Loan Policy v3.0), clauses 6.2 and 8.3 only</td></tr><tr><td>Issued by</td><td>Retail Credit Policy Committee, NexaBank</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 1. Background]\n1.1 Background. The Retail Credit Policy Committee has revised the processing fee and the minimum part prepayment amount for NexaHome Loan. This circular amends two clauses of POL-HL-V3. All other clauses of POL-HL-V3 are unchanged.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 2. Instrument and precedence]\n2.1 Precedence. For the clauses named in this circular, this circular prevails over POL-HL-V3 from the effective date for the loans covered by clause 5.1 of this circular.\n<table><tr><td>Clause of POL-HL-V3</td><td>Subject</td><td>Status from 2026-07-01</td></tr><tr><td>6.2</td><td>Processing fee</td><td>Replaced by clause 3.1 of this circular</td></tr><tr><td>8.3</td><td>Part prepayment minimum</td><td>Replaced by clause 4.1 of this circular</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 3. Revised processing fee]\n3.1 Revised clause 6.2. Processing fee is 0.30% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b910,000, plus GST. The earlier terms were 0.35%, minimum \u20b95,000 and maximum \u20b915,000.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 4. Revised part prepayment minimum]\n4.1 Revised clause 8.3. The minimum part prepayment amount is \u20b910,000. The earlier minimum was \u20b925,000. No charge applies on a floating-rate loan.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.1 Loans covered. The revised processing fee applies only to loans sanctioned on or after 2026-07-01. Loans sanctioned before that date keep the processing fee that applied at sanction, and no refund or adjustment is made.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.2 Existing borrowers and part prepayment. Borrowers whose NexaHome loans were sanctioned under POL-HL-V3 before 2026-07-01 may opt in to the revised \u20b910,000 part prepayment minimum by written request to their branch or through a service request. There is no charge for opting in. Until a borrower opts in, the \u20b925,000 minimum continues to apply to that loan. Opting in does not change the processing fee already paid.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 6. Unchanged terms]\n6.1 Terms not affected. Eligibility, interest rate spreads, FOIR limits, LTV, legal and technical charges, penal charges and foreclosure terms in POL-HL-V3 are not affected by this circular.",
+            "citation": {
+              "doc_id": "CIR-2026-07",
+              "title": "Circular CIR-2026-07",
+              "policy_version": "1.0",
+              "clause": null,
+              "effective_date": "2026-07-01"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "live_model_answer",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 4.42,
+      "body": {
+        "as_of": "2026-10-01",
+        "status": "answered",
+        "answer": "The maximum NexaHome Loan amount is \u20b97,50,00,000 [2].",
+        "citations": [
+          {
+            "evidence_id": 2,
+            "quote": "Minimum loan amount is \u20b95,00,000. Maximum loan amount is \u20b97,50,00,000.",
+            "matched_child": {
+              "doc_id": "POL-HL-V3",
+              "title": "NexaHome Loan Policy",
+              "policy_version": "3.0",
+              "clause": "4.1",
+              "effective_date": "2025-10-01"
+            }
+          }
+        ],
+        "retrieval_timings": {
+          "search_ms": 508.23,
+          "parent_ms": 131.44,
+          "total_ms": 639.83
+        },
+        "generation_ms": 3754.86,
+        "datadog_span_id": "10726189032419372977"
+      }
+    },
+    {
+      "name": "unauthenticated_denied",
+      "http": 403,
+      "expected": 403,
+      "pass": true,
+      "seconds": 0.02,
+      "body": {
+        "detail": "Named agent credentials are required"
+      }
+    },
+    {
+      "name": "foreign_customer_denied",
+      "http": 403,
+      "expected": 403,
+      "pass": true,
+      "seconds": 0.75,
+      "body": {
+        "detail": "Customer access is not authorized"
+      }
+    },
+    {
+      "name": "unsafe_input_denied",
+      "http": 422,
+      "expected": 422,
+      "pass": true,
+      "seconds": 0.28,
+      "body": {
+        "detail": "Remove sensitive identifiers or instruction overrides before starting a run"
+      }
+    },
+    {
+      "name": "prepare_rejection",
+      "http": 201,
+      "expected": 201,
+      "pass": true,
+      "seconds": 4.86,
+      "body": {
+        "run_id": "d571e74c-ef59-4430-b8be-5b4f3d0d3849",
+        "status": "pending_approval",
+        "created_at": "2026-11-04T15:50:08.952000Z",
+        "expires_at": "2026-11-04T16:05:08.952000Z",
+        "proposal_hash": "ef39d0b91aaee76b82e6a9f296ccbce0188e288dd8402a4d9c6234ee1d74b173",
+        "response": {
+          "intent": "supported_action",
+          "status": "validated",
+          "message": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "CALLBACK",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": null
+        }
+      }
+    },
+    {
+      "name": "load_saved_run",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 0.42,
+      "body": {
+        "run_id": "d571e74c-ef59-4430-b8be-5b4f3d0d3849",
+        "status": "pending_approval",
+        "created_at": "2026-11-04T15:50:08.952000Z",
+        "expires_at": "2026-11-04T16:05:08.952000Z",
+        "proposal_hash": "ef39d0b91aaee76b82e6a9f296ccbce0188e288dd8402a4d9c6234ee1d74b173",
+        "response": {
+          "intent": "supported_action",
+          "status": "validated",
+          "message": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "CALLBACK",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": null
+        }
+      }
+    },
+    {
+      "name": "self_approval_denied",
+      "http": 403,
+      "expected": 403,
+      "pass": true,
+      "seconds": 0.28,
+      "body": {
+        "detail": "Reviewer authorization is required"
+      }
+    },
+    {
+      "name": "stale_hash_denied",
+      "http": 409,
+      "expected": 409,
+      "pass": true,
+      "seconds": 0.46,
+      "body": {
+        "detail": "Approval is expired, stale or does not match the pending proposal"
+      }
+    },
+    {
+      "name": "reviewer_rejection",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 0.91,
+      "body": {
+        "run_id": "d571e74c-ef59-4430-b8be-5b4f3d0d3849",
+        "status": "rejected",
+        "created_at": "2026-11-04T15:50:08.952000Z",
+        "expires_at": "2026-11-04T16:05:08.952000Z",
+        "proposal_hash": "ef39d0b91aaee76b82e6a9f296ccbce0188e288dd8402a4d9c6234ee1d74b173",
+        "response": {
+          "intent": "supported_action",
+          "status": "rejected",
+          "message": "The proposal was rejected. No action was performed.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "CALLBACK",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": null
+        }
+      }
+    },
+    {
+      "name": "prepare_STATEMENT_COPY",
+      "http": 201,
+      "expected": 201,
+      "pass": true,
+      "seconds": 4.19,
+      "body": {
+        "run_id": "925f35fd-decb-4275-8c82-b6cefe77c259",
+        "status": "pending_approval",
+        "created_at": "2026-11-04T15:50:15.879000Z",
+        "expires_at": "2026-11-04T16:05:15.879000Z",
+        "proposal_hash": "b1a903a22cf4c7e39d06c6e7b965f7ca650920121b6ef97e76a15db2e89b29fb",
+        "response": {
+          "intent": "supported_action",
+          "status": "validated",
+          "message": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "STATEMENT_COPY",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": null
+        }
+      }
+    },
+    {
+      "name": "approve_STATEMENT_COPY",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 1.66,
+      "body": {
+        "run_id": "925f35fd-decb-4275-8c82-b6cefe77c259",
+        "status": "submitted",
+        "created_at": "2026-11-04T15:50:15.879000Z",
+        "expires_at": "2026-11-04T16:05:15.879000Z",
+        "proposal_hash": "b1a903a22cf4c7e39d06c6e7b965f7ca650920121b6ef97e76a15db2e89b29fb",
+        "response": {
+          "intent": "supported_action",
+          "status": "submitted",
+          "message": "The bank accepted the service request. It has not necessarily completed it.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "STATEMENT_COPY",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": {
+            "status": "submitted",
+            "service_request": {
+              "service_request_id": "NXSR-000001",
+              "customer_id": "NXC-0010",
+              "request_type": "STATEMENT_COPY",
+              "loan_account_id": null,
+              "status": "RECEIVED",
+              "created_at": "2026-11-04T15:50:21Z"
+            },
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "replay_STATEMENT_COPY",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 0.5,
+      "body": {
+        "run_id": "925f35fd-decb-4275-8c82-b6cefe77c259",
+        "status": "submitted",
+        "created_at": "2026-11-04T15:50:15.879000Z",
+        "expires_at": "2026-11-04T16:05:15.879000Z",
+        "proposal_hash": "b1a903a22cf4c7e39d06c6e7b965f7ca650920121b6ef97e76a15db2e89b29fb",
+        "response": {
+          "intent": "supported_action",
+          "status": "submitted",
+          "message": "The bank accepted the service request. It has not necessarily completed it.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "STATEMENT_COPY",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": {
+            "status": "submitted",
+            "service_request": {
+              "service_request_id": "NXSR-000001",
+              "customer_id": "NXC-0010",
+              "request_type": "STATEMENT_COPY",
+              "loan_account_id": null,
+              "status": "RECEIVED",
+              "created_at": "2026-11-04T15:50:21Z"
+            },
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "prepare_CALLBACK",
+      "http": 201,
+      "expected": 201,
+      "pass": true,
+      "seconds": 4.3,
+      "body": {
+        "run_id": "ba0c5bd0-98dc-4b60-97ba-cb3b723eeb5d",
+        "status": "pending_approval",
+        "created_at": "2026-11-04T15:50:22.230000Z",
+        "expires_at": "2026-11-04T16:05:22.230000Z",
+        "proposal_hash": "ef39d0b91aaee76b82e6a9f296ccbce0188e288dd8402a4d9c6234ee1d74b173",
+        "response": {
+          "intent": "supported_action",
+          "status": "validated",
+          "message": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "CALLBACK",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": null
+        }
+      }
+    },
+    {
+      "name": "approve_CALLBACK",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 1.82,
+      "body": {
+        "run_id": "ba0c5bd0-98dc-4b60-97ba-cb3b723eeb5d",
+        "status": "submitted",
+        "created_at": "2026-11-04T15:50:22.230000Z",
+        "expires_at": "2026-11-04T16:05:22.230000Z",
+        "proposal_hash": "ef39d0b91aaee76b82e6a9f296ccbce0188e288dd8402a4d9c6234ee1d74b173",
+        "response": {
+          "intent": "supported_action",
+          "status": "submitted",
+          "message": "The bank accepted the service request. It has not necessarily completed it.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "CALLBACK",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": {
+            "status": "submitted",
+            "service_request": {
+              "service_request_id": "NXSR-000002",
+              "customer_id": "NXC-0010",
+              "request_type": "CALLBACK",
+              "loan_account_id": null,
+              "status": "RECEIVED",
+              "created_at": "2026-11-04T15:50:27Z"
+            },
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "replay_CALLBACK",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 0.55,
+      "body": {
+        "run_id": "ba0c5bd0-98dc-4b60-97ba-cb3b723eeb5d",
+        "status": "submitted",
+        "created_at": "2026-11-04T15:50:22.230000Z",
+        "expires_at": "2026-11-04T16:05:22.230000Z",
+        "proposal_hash": "ef39d0b91aaee76b82e6a9f296ccbce0188e288dd8402a4d9c6234ee1d74b173",
+        "response": {
+          "intent": "supported_action",
+          "status": "submitted",
+          "message": "The bank accepted the service request. It has not necessarily completed it.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "CALLBACK",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": {
+            "status": "submitted",
+            "service_request": {
+              "service_request_id": "NXSR-000002",
+              "customer_id": "NXC-0010",
+              "request_type": "CALLBACK",
+              "loan_account_id": null,
+              "status": "RECEIVED",
+              "created_at": "2026-11-04T15:50:27Z"
+            },
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "prepare_RE_KYC_REMINDER",
+      "http": 201,
+      "expected": 201,
+      "pass": true,
+      "seconds": 5.14,
+      "body": {
+        "run_id": "69773932-1aee-48d1-b4d4-cdeb639a870f",
+        "status": "pending_approval",
+        "created_at": "2026-11-04T15:50:28.922000Z",
+        "expires_at": "2026-11-04T16:05:28.922000Z",
+        "proposal_hash": "06304424d3db8d1b3de5861a4c795d417cbafca28ea604b9e3cc240c0c6b3504",
+        "response": {
+          "intent": "supported_action",
+          "status": "validated",
+          "message": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "RE_KYC_REMINDER",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": null
+        }
+      }
+    },
+    {
+      "name": "approve_RE_KYC_REMINDER",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 1.96,
+      "body": {
+        "run_id": "69773932-1aee-48d1-b4d4-cdeb639a870f",
+        "status": "submitted",
+        "created_at": "2026-11-04T15:50:28.922000Z",
+        "expires_at": "2026-11-04T16:05:28.922000Z",
+        "proposal_hash": "06304424d3db8d1b3de5861a4c795d417cbafca28ea604b9e3cc240c0c6b3504",
+        "response": {
+          "intent": "supported_action",
+          "status": "submitted",
+          "message": "The bank accepted the service request. It has not necessarily completed it.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "RE_KYC_REMINDER",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": {
+            "status": "submitted",
+            "service_request": {
+              "service_request_id": "NXSR-000003",
+              "customer_id": "NXC-0010",
+              "request_type": "RE_KYC_REMINDER",
+              "loan_account_id": null,
+              "status": "RECEIVED",
+              "created_at": "2026-11-04T15:50:35Z"
+            },
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "replay_RE_KYC_REMINDER",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 0.55,
+      "body": {
+        "run_id": "69773932-1aee-48d1-b4d4-cdeb639a870f",
+        "status": "submitted",
+        "created_at": "2026-11-04T15:50:28.922000Z",
+        "expires_at": "2026-11-04T16:05:28.922000Z",
+        "proposal_hash": "06304424d3db8d1b3de5861a4c795d417cbafca28ea604b9e3cc240c0c6b3504",
+        "response": {
+          "intent": "supported_action",
+          "status": "submitted",
+          "message": "The bank accepted the service request. It has not necessarily completed it.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "RE_KYC_REMINDER",
+              "loan_account_id": null,
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": {
+            "status": "submitted",
+            "service_request": {
+              "service_request_id": "NXSR-000003",
+              "customer_id": "NXC-0010",
+              "request_type": "RE_KYC_REMINDER",
+              "loan_account_id": null,
+              "status": "RECEIVED",
+              "created_at": "2026-11-04T15:50:35Z"
+            },
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "prepare_INTEREST_CERTIFICATE",
+      "http": 201,
+      "expected": 201,
+      "pass": true,
+      "seconds": 4.19,
+      "body": {
+        "run_id": "1fe1dc22-34d3-4074-bd87-064339047edb",
+        "status": "pending_approval",
+        "created_at": "2026-11-04T15:50:36.559000Z",
+        "expires_at": "2026-11-04T16:05:36.559000Z",
+        "proposal_hash": "963a5080c673f46cf558160c9f58f0c5a553165527872062e888aa01ee7ff58c",
+        "response": {
+          "intent": "supported_action",
+          "status": "validated",
+          "message": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "INTEREST_CERTIFICATE",
+              "loan_account_id": "NXL-HL-0010",
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": null
+        }
+      }
+    },
+    {
+      "name": "approve_INTEREST_CERTIFICATE",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 2.31,
+      "body": {
+        "run_id": "1fe1dc22-34d3-4074-bd87-064339047edb",
+        "status": "submitted",
+        "created_at": "2026-11-04T15:50:36.559000Z",
+        "expires_at": "2026-11-04T16:05:36.559000Z",
+        "proposal_hash": "963a5080c673f46cf558160c9f58f0c5a553165527872062e888aa01ee7ff58c",
+        "response": {
+          "intent": "supported_action",
+          "status": "submitted",
+          "message": "The bank accepted the service request. It has not necessarily completed it.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "INTEREST_CERTIFICATE",
+              "loan_account_id": "NXL-HL-0010",
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": {
+            "status": "submitted",
+            "service_request": {
+              "service_request_id": "NXSR-000004",
+              "customer_id": "NXC-0010",
+              "request_type": "INTEREST_CERTIFICATE",
+              "loan_account_id": "NXL-HL-0010",
+              "status": "RECEIVED",
+              "created_at": "2026-11-04T15:50:41Z"
+            },
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "replay_INTEREST_CERTIFICATE",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 0.94,
+      "body": {
+        "run_id": "1fe1dc22-34d3-4074-bd87-064339047edb",
+        "status": "submitted",
+        "created_at": "2026-11-04T15:50:36.559000Z",
+        "expires_at": "2026-11-04T16:05:36.559000Z",
+        "proposal_hash": "963a5080c673f46cf558160c9f58f0c5a553165527872062e888aa01ee7ff58c",
+        "response": {
+          "intent": "supported_action",
+          "status": "submitted",
+          "message": "The bank accepted the service request. It has not necessarily completed it.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The service-request proposal is permitted by the advisory scope using current customer records. Human approval and execution are still required; no request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ],
+            "proposal": {
+              "request_type": "INTEREST_CERTIFICATE",
+              "loan_account_id": "NXL-HL-0010",
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": {
+            "status": "submitted",
+            "service_request": {
+              "service_request_id": "NXSR-000004",
+              "customer_id": "NXC-0010",
+              "request_type": "INTEREST_CERTIFICATE",
+              "loan_account_id": "NXL-HL-0010",
+              "status": "RECEIVED",
+              "created_at": "2026-11-04T15:50:41Z"
+            },
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.1",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              },
+              {
+                "citation": {
+                  "doc_id": "POL-OPS-001",
+                  "title": "Customer Due Diligence, Disclosure and Advisor Scope Policy",
+                  "policy_version": "1.0",
+                  "clause": "5.3",
+                  "effective_date": "2025-01-01"
+                },
+                "quote": "[POL-OPS-001 | Customer Due Diligence, Disclosure and Advisor Scope Policy v1.0 | 5. Scope of the advisory assistant]\n5.1 Permitted. Explain published products, fees, limits and policy by date; compute EMIs and fees from published terms; give indicative eligibility against published criteria; show the customer's own data; show application stage; raise service requests and cases.\n5.2 Prohibited. The assistant must not make, imply or pre-announce a credit decision (approve, decline, pre-approve, 'you will get it'); give investment, tax or legal advice; quote rates or fee waivers that are not published; or commit NexaBank to anything.\n5.3 Indicative eligibility wording. Indicative statements must say that they are based on published criteria and the information provided, that they are not a credit decision, and that sanction is subject to verification and credit assessment."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "prepare_OPT_IN_CIR_2026_07_PART_PREPAY",
+      "http": 201,
+      "expected": 201,
+      "pass": true,
+      "seconds": 4.98,
+      "body": {
+        "run_id": "3c568179-e2e0-410b-af91-006f83d1b38f",
+        "status": "pending_approval",
+        "created_at": "2026-11-04T15:50:44.088000Z",
+        "expires_at": "2026-11-04T16:05:44.088000Z",
+        "proposal_hash": "b88bc75da5b5439397bb5e56766f4be101f8a3ef4fe51f32d11ea830b0b6d07d",
+        "response": {
+          "intent": "supported_action",
+          "status": "validated",
+          "message": "The proposal meets circular 5.2 using current banking facts. Human approval and execution are still required; no service request was created.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The proposal meets circular 5.2 using current banking facts. Human approval and execution are still required; no service request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "CIR-2026-07",
+                  "title": "Circular CIR-2026-07",
+                  "policy_version": "1.0",
+                  "clause": null,
+                  "effective_date": "2026-07-01"
+                },
+                "quote": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | Front matter]\nCircular CIR-2026-07\nNexaHome Loan: Processing Fee Revision and Part-Prepayment Relaxation\n<table><tr><td>Document ID</td><td>CIR-2026-07</td></tr><tr><td>Issued on</td><td>2026-06-15</td></tr><tr><td>Effective from</td><td>2026-07-01</td></tr><tr><td>Amends</td><td>POL-HL-V3 (NexaHome Loan Policy v3.0), clauses 6.2 and 8.3 only</td></tr><tr><td>Issued by</td><td>Retail Credit Policy Committee, NexaBank</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 1. Background]\n1.1 Background. The Retail Credit Policy Committee has revised the processing fee and the minimum part prepayment amount for NexaHome Loan. This circular amends two clauses of POL-HL-V3. All other clauses of POL-HL-V3 are unchanged.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 2. Instrument and precedence]\n2.1 Precedence. For the clauses named in this circular, this circular prevails over POL-HL-V3 from the effective date for the loans covered by clause 5.1 of this circular.\n<table><tr><td>Clause of POL-HL-V3</td><td>Subject</td><td>Status from 2026-07-01</td></tr><tr><td>6.2</td><td>Processing fee</td><td>Replaced by clause 3.1 of this circular</td></tr><tr><td>8.3</td><td>Part prepayment minimum</td><td>Replaced by clause 4.1 of this circular</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 3. Revised processing fee]\n3.1 Revised clause 6.2. Processing fee is 0.30% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b910,000, plus GST. The earlier terms were 0.35%, minimum \u20b95,000 and maximum \u20b915,000.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 4. Revised part prepayment minimum]\n4.1 Revised clause 8.3. The minimum part prepayment amount is \u20b910,000. The earlier minimum was \u20b925,000. No charge applies on a floating-rate loan.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.1 Loans covered. The revised processing fee applies only to loans sanctioned on or after 2026-07-01. Loans sanctioned before that date keep the processing fee that applied at sanction, and no refund or adjustment is made.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.2 Existing borrowers and part prepayment. Borrowers whose NexaHome loans were sanctioned under POL-HL-V3 before 2026-07-01 may opt in to the revised \u20b910,000 part prepayment minimum by written request to their branch or through a service request. There is no charge for opting in. Until a borrower opts in, the \u20b925,000 minimum continues to apply to that loan. Opting in does not change the processing fee already paid.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 6. Unchanged terms]\n6.1 Terms not affected. Eligibility, interest rate spreads, FOIR limits, LTV, legal and technical charges, penal charges and foreclosure terms in POL-HL-V3 are not affected by this circular."
+              }
+            ],
+            "proposal": {
+              "request_type": "OPT_IN_CIR_2026_07_PART_PREPAY",
+              "loan_account_id": "NXL-HL-0010",
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": null
+        }
+      }
+    },
+    {
+      "name": "approve_OPT_IN_CIR_2026_07_PART_PREPAY",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 2.22,
+      "body": {
+        "run_id": "3c568179-e2e0-410b-af91-006f83d1b38f",
+        "status": "submitted",
+        "created_at": "2026-11-04T15:50:44.088000Z",
+        "expires_at": "2026-11-04T16:05:44.088000Z",
+        "proposal_hash": "b88bc75da5b5439397bb5e56766f4be101f8a3ef4fe51f32d11ea830b0b6d07d",
+        "response": {
+          "intent": "supported_action",
+          "status": "submitted",
+          "message": "The bank accepted the service request. It has not necessarily completed it.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The proposal meets circular 5.2 using current banking facts. Human approval and execution are still required; no service request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "CIR-2026-07",
+                  "title": "Circular CIR-2026-07",
+                  "policy_version": "1.0",
+                  "clause": null,
+                  "effective_date": "2026-07-01"
+                },
+                "quote": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | Front matter]\nCircular CIR-2026-07\nNexaHome Loan: Processing Fee Revision and Part-Prepayment Relaxation\n<table><tr><td>Document ID</td><td>CIR-2026-07</td></tr><tr><td>Issued on</td><td>2026-06-15</td></tr><tr><td>Effective from</td><td>2026-07-01</td></tr><tr><td>Amends</td><td>POL-HL-V3 (NexaHome Loan Policy v3.0), clauses 6.2 and 8.3 only</td></tr><tr><td>Issued by</td><td>Retail Credit Policy Committee, NexaBank</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 1. Background]\n1.1 Background. The Retail Credit Policy Committee has revised the processing fee and the minimum part prepayment amount for NexaHome Loan. This circular amends two clauses of POL-HL-V3. All other clauses of POL-HL-V3 are unchanged.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 2. Instrument and precedence]\n2.1 Precedence. For the clauses named in this circular, this circular prevails over POL-HL-V3 from the effective date for the loans covered by clause 5.1 of this circular.\n<table><tr><td>Clause of POL-HL-V3</td><td>Subject</td><td>Status from 2026-07-01</td></tr><tr><td>6.2</td><td>Processing fee</td><td>Replaced by clause 3.1 of this circular</td></tr><tr><td>8.3</td><td>Part prepayment minimum</td><td>Replaced by clause 4.1 of this circular</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 3. Revised processing fee]\n3.1 Revised clause 6.2. Processing fee is 0.30% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b910,000, plus GST. The earlier terms were 0.35%, minimum \u20b95,000 and maximum \u20b915,000.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 4. Revised part prepayment minimum]\n4.1 Revised clause 8.3. The minimum part prepayment amount is \u20b910,000. The earlier minimum was \u20b925,000. No charge applies on a floating-rate loan.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.1 Loans covered. The revised processing fee applies only to loans sanctioned on or after 2026-07-01. Loans sanctioned before that date keep the processing fee that applied at sanction, and no refund or adjustment is made.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.2 Existing borrowers and part prepayment. Borrowers whose NexaHome loans were sanctioned under POL-HL-V3 before 2026-07-01 may opt in to the revised \u20b910,000 part prepayment minimum by written request to their branch or through a service request. There is no charge for opting in. Until a borrower opts in, the \u20b925,000 minimum continues to apply to that loan. Opting in does not change the processing fee already paid.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 6. Unchanged terms]\n6.1 Terms not affected. Eligibility, interest rate spreads, FOIR limits, LTV, legal and technical charges, penal charges and foreclosure terms in POL-HL-V3 are not affected by this circular."
+              }
+            ],
+            "proposal": {
+              "request_type": "OPT_IN_CIR_2026_07_PART_PREPAY",
+              "loan_account_id": "NXL-HL-0010",
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": {
+            "status": "submitted",
+            "service_request": {
+              "service_request_id": "NXSR-000005",
+              "customer_id": "NXC-0010",
+              "request_type": "OPT_IN_CIR_2026_07_PART_PREPAY",
+              "loan_account_id": "NXL-HL-0010",
+              "status": "RECEIVED",
+              "created_at": "2026-11-04T15:50:50Z"
+            },
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "CIR-2026-07",
+                  "title": "Circular CIR-2026-07",
+                  "policy_version": "1.0",
+                  "clause": null,
+                  "effective_date": "2026-07-01"
+                },
+                "quote": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | Front matter]\nCircular CIR-2026-07\nNexaHome Loan: Processing Fee Revision and Part-Prepayment Relaxation\n<table><tr><td>Document ID</td><td>CIR-2026-07</td></tr><tr><td>Issued on</td><td>2026-06-15</td></tr><tr><td>Effective from</td><td>2026-07-01</td></tr><tr><td>Amends</td><td>POL-HL-V3 (NexaHome Loan Policy v3.0), clauses 6.2 and 8.3 only</td></tr><tr><td>Issued by</td><td>Retail Credit Policy Committee, NexaBank</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 1. Background]\n1.1 Background. The Retail Credit Policy Committee has revised the processing fee and the minimum part prepayment amount for NexaHome Loan. This circular amends two clauses of POL-HL-V3. All other clauses of POL-HL-V3 are unchanged.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 2. Instrument and precedence]\n2.1 Precedence. For the clauses named in this circular, this circular prevails over POL-HL-V3 from the effective date for the loans covered by clause 5.1 of this circular.\n<table><tr><td>Clause of POL-HL-V3</td><td>Subject</td><td>Status from 2026-07-01</td></tr><tr><td>6.2</td><td>Processing fee</td><td>Replaced by clause 3.1 of this circular</td></tr><tr><td>8.3</td><td>Part prepayment minimum</td><td>Replaced by clause 4.1 of this circular</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 3. Revised processing fee]\n3.1 Revised clause 6.2. Processing fee is 0.30% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b910,000, plus GST. The earlier terms were 0.35%, minimum \u20b95,000 and maximum \u20b915,000.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 4. Revised part prepayment minimum]\n4.1 Revised clause 8.3. The minimum part prepayment amount is \u20b910,000. The earlier minimum was \u20b925,000. No charge applies on a floating-rate loan.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.1 Loans covered. The revised processing fee applies only to loans sanctioned on or after 2026-07-01. Loans sanctioned before that date keep the processing fee that applied at sanction, and no refund or adjustment is made.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.2 Existing borrowers and part prepayment. Borrowers whose NexaHome loans were sanctioned under POL-HL-V3 before 2026-07-01 may opt in to the revised \u20b910,000 part prepayment minimum by written request to their branch or through a service request. There is no charge for opting in. Until a borrower opts in, the \u20b925,000 minimum continues to apply to that loan. Opting in does not change the processing fee already paid.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 6. Unchanged terms]\n6.1 Terms not affected. Eligibility, interest rate spreads, FOIR limits, LTV, legal and technical charges, penal charges and foreclosure terms in POL-HL-V3 are not affected by this circular."
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "replay_OPT_IN_CIR_2026_07_PART_PREPAY",
+      "http": 200,
+      "expected": 200,
+      "pass": true,
+      "seconds": 0.68,
+      "body": {
+        "run_id": "3c568179-e2e0-410b-af91-006f83d1b38f",
+        "status": "submitted",
+        "created_at": "2026-11-04T15:50:44.088000Z",
+        "expires_at": "2026-11-04T16:05:44.088000Z",
+        "proposal_hash": "b88bc75da5b5439397bb5e56766f4be101f8a3ef4fe51f32d11ea830b0b6d07d",
+        "response": {
+          "intent": "supported_action",
+          "status": "submitted",
+          "message": "The bank accepted the service request. It has not necessarily completed it.",
+          "missing_fields": [],
+          "answer": null,
+          "validation": {
+            "decision": "allowed",
+            "reason": "The proposal meets circular 5.2 using current banking facts. Human approval and execution are still required; no service request was created.",
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "CIR-2026-07",
+                  "title": "Circular CIR-2026-07",
+                  "policy_version": "1.0",
+                  "clause": null,
+                  "effective_date": "2026-07-01"
+                },
+                "quote": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | Front matter]\nCircular CIR-2026-07\nNexaHome Loan: Processing Fee Revision and Part-Prepayment Relaxation\n<table><tr><td>Document ID</td><td>CIR-2026-07</td></tr><tr><td>Issued on</td><td>2026-06-15</td></tr><tr><td>Effective from</td><td>2026-07-01</td></tr><tr><td>Amends</td><td>POL-HL-V3 (NexaHome Loan Policy v3.0), clauses 6.2 and 8.3 only</td></tr><tr><td>Issued by</td><td>Retail Credit Policy Committee, NexaBank</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 1. Background]\n1.1 Background. The Retail Credit Policy Committee has revised the processing fee and the minimum part prepayment amount for NexaHome Loan. This circular amends two clauses of POL-HL-V3. All other clauses of POL-HL-V3 are unchanged.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 2. Instrument and precedence]\n2.1 Precedence. For the clauses named in this circular, this circular prevails over POL-HL-V3 from the effective date for the loans covered by clause 5.1 of this circular.\n<table><tr><td>Clause of POL-HL-V3</td><td>Subject</td><td>Status from 2026-07-01</td></tr><tr><td>6.2</td><td>Processing fee</td><td>Replaced by clause 3.1 of this circular</td></tr><tr><td>8.3</td><td>Part prepayment minimum</td><td>Replaced by clause 4.1 of this circular</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 3. Revised processing fee]\n3.1 Revised clause 6.2. Processing fee is 0.30% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b910,000, plus GST. The earlier terms were 0.35%, minimum \u20b95,000 and maximum \u20b915,000.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 4. Revised part prepayment minimum]\n4.1 Revised clause 8.3. The minimum part prepayment amount is \u20b910,000. The earlier minimum was \u20b925,000. No charge applies on a floating-rate loan.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.1 Loans covered. The revised processing fee applies only to loans sanctioned on or after 2026-07-01. Loans sanctioned before that date keep the processing fee that applied at sanction, and no refund or adjustment is made.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.2 Existing borrowers and part prepayment. Borrowers whose NexaHome loans were sanctioned under POL-HL-V3 before 2026-07-01 may opt in to the revised \u20b910,000 part prepayment minimum by written request to their branch or through a service request. There is no charge for opting in. Until a borrower opts in, the \u20b925,000 minimum continues to apply to that loan. Opting in does not change the processing fee already paid.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 6. Unchanged terms]\n6.1 Terms not affected. Eligibility, interest rate spreads, FOIR limits, LTV, legal and technical charges, penal charges and foreclosure terms in POL-HL-V3 are not affected by this circular."
+              }
+            ],
+            "proposal": {
+              "request_type": "OPT_IN_CIR_2026_07_PART_PREPAY",
+              "loan_account_id": "NXL-HL-0010",
+              "notes": "Synthetic live verification 2026-11-04",
+              "customer_id": "NXC-0010"
+            },
+            "requires_approval": true
+          },
+          "submission": {
+            "status": "submitted",
+            "service_request": {
+              "service_request_id": "NXSR-000005",
+              "customer_id": "NXC-0010",
+              "request_type": "OPT_IN_CIR_2026_07_PART_PREPAY",
+              "loan_account_id": "NXL-HL-0010",
+              "status": "RECEIVED",
+              "created_at": "2026-11-04T15:50:50Z"
+            },
+            "evidence": [
+              {
+                "citation": {
+                  "doc_id": "CIR-2026-07",
+                  "title": "Circular CIR-2026-07",
+                  "policy_version": "1.0",
+                  "clause": null,
+                  "effective_date": "2026-07-01"
+                },
+                "quote": "[CIR-2026-07 | Circular CIR-2026-07 v1.0 | Front matter]\nCircular CIR-2026-07\nNexaHome Loan: Processing Fee Revision and Part-Prepayment Relaxation\n<table><tr><td>Document ID</td><td>CIR-2026-07</td></tr><tr><td>Issued on</td><td>2026-06-15</td></tr><tr><td>Effective from</td><td>2026-07-01</td></tr><tr><td>Amends</td><td>POL-HL-V3 (NexaHome Loan Policy v3.0), clauses 6.2 and 8.3 only</td></tr><tr><td>Issued by</td><td>Retail Credit Policy Committee, NexaBank</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 1. Background]\n1.1 Background. The Retail Credit Policy Committee has revised the processing fee and the minimum part prepayment amount for NexaHome Loan. This circular amends two clauses of POL-HL-V3. All other clauses of POL-HL-V3 are unchanged.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 2. Instrument and precedence]\n2.1 Precedence. For the clauses named in this circular, this circular prevails over POL-HL-V3 from the effective date for the loans covered by clause 5.1 of this circular.\n<table><tr><td>Clause of POL-HL-V3</td><td>Subject</td><td>Status from 2026-07-01</td></tr><tr><td>6.2</td><td>Processing fee</td><td>Replaced by clause 3.1 of this circular</td></tr><tr><td>8.3</td><td>Part prepayment minimum</td><td>Replaced by clause 4.1 of this circular</td></tr></table>\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 3. Revised processing fee]\n3.1 Revised clause 6.2. Processing fee is 0.30% of the sanctioned loan amount, subject to a minimum of \u20b95,000 and a maximum of \u20b910,000, plus GST. The earlier terms were 0.35%, minimum \u20b95,000 and maximum \u20b915,000.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 4. Revised part prepayment minimum]\n4.1 Revised clause 8.3. The minimum part prepayment amount is \u20b910,000. The earlier minimum was \u20b925,000. No charge applies on a floating-rate loan.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.1 Loans covered. The revised processing fee applies only to loans sanctioned on or after 2026-07-01. Loans sanctioned before that date keep the processing fee that applied at sanction, and no refund or adjustment is made.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 5. Applicability and grandfathering]\n5.2 Existing borrowers and part prepayment. Borrowers whose NexaHome loans were sanctioned under POL-HL-V3 before 2026-07-01 may opt in to the revised \u20b910,000 part prepayment minimum by written request to their branch or through a service request. There is no charge for opting in. Until a borrower opts in, the \u20b925,000 minimum continues to apply to that loan. Opting in does not change the processing fee already paid.\n[CIR-2026-07 | Circular CIR-2026-07 v1.0 | 6. Unchanged terms]\n6.1 Terms not affected. Eligibility, interest rate spreads, FOIR limits, LTV, legal and technical charges, penal charges and foreclosure terms in POL-HL-V3 are not affected by this circular."
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "runs": [
+    "d571e74c-ef59-4430-b8be-5b4f3d0d3849",
+    "925f35fd-decb-4275-8c82-b6cefe77c259",
+    "ba0c5bd0-98dc-4b60-97ba-cb3b723eeb5d",
+    "69773932-1aee-48d1-b4d4-cdeb639a870f",
+    "1fe1dc22-34d3-4074-bd87-064339047edb",
+    "3c568179-e2e0-410b-af91-006f83d1b38f"
+  ],
+  "completed": true
+}

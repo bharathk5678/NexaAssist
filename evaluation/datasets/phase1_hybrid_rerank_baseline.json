@@ -1,0 +1,21 @@
+{
+  "dataset_sha256": "69a0b957e445f5beaf8122a1d435da27286022fddf2da396922d58c49d64199e",
+  "case_count": 10,
+  "protocol": {
+    "model": "gpt-6-luna",
+    "judge_model": "gpt-6.1-sol",
+    "judge_prompt_version": "policy-judge-v2",
+    "ragas_version": "0.4.3",
+    "retrieval_mode": "hybrid",
+    "rerank_enabled": true,
+    "rerank_model": "qwen3-reranker"
+  },
+  "minimum_means": {
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.7374109511032598,
+    "context_precision": 0.6428571428130291,
+    "context_recall": 0.9583333333333334,
+    "judge_correctness": 1.0,
+    "judge_groundedness": 1.0
+  }
+}

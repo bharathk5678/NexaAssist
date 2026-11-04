@@ -1,0 +1,32 @@
+[
+  {
+    "rule": "typescript.react.security.react-insecure-request.react-insecure-request",
+    "path": "app/evaluation/results/system_uat_20261021/browser_finish.cjs",
+    "fingerprint": "8ad20814f5d550ffec51244c4be09e7207b608f92b911046e29eabac9ce3f1b5"
+  },
+  {
+    "rule": "typescript.react.security.react-insecure-request.react-insecure-request",
+    "path": "app/evaluation/results/system_uat_20261021/browser_journeys.cjs",
+    "fingerprint": "5f435a7a44b5e9b9ac8ee6aa3b757982d4d1919eee9ae7bc15be07d04e86f981"
+  },
+  {
+    "rule": "typescript.react.security.react-insecure-request.react-insecure-request",
+    "path": "app/evaluation/results/system_uat_20261021/browser_journeys.cjs",
+    "fingerprint": "5f435a7a44b5e9b9ac8ee6aa3b757982d4d1919eee9ae7bc15be07d04e86f981"
+  },
+  {
+    "rule": "typescript.react.security.react-insecure-request.react-insecure-request",
+    "path": "app/evaluation/results/system_uat_20261021/browser_journeys.cjs",
+    "fingerprint": "5f435a7a44b5e9b9ac8ee6aa3b757982d4d1919eee9ae7bc15be07d04e86f981"
+  },
+  {
+    "rule": "typescript.react.security.react-insecure-request.react-insecure-request",
+    "path": "app/evaluation/results/system_uat_20261021/browser_journeys.cjs",
+    "fingerprint": "5f435a7a44b5e9b9ac8ee6aa3b757982d4d1919eee9ae7bc15be07d04e86f981"
+  },
+  {
+    "rule": "typescript.react.security.react-insecure-request.react-insecure-request",
+    "path": "app/evaluation/results/system_uat_20261021/browser_journeys.cjs",
+    "fingerprint": "5f435a7a44b5e9b9ac8ee6aa3b757982d4d1919eee9ae7bc15be07d04e86f981"
+  }
+]

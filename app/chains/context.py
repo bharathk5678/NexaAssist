@@ -1,3 +1,5 @@
+"""Pack and render complete retrieved passages within a serialized token budget."""
+
 from __future__ import annotations
 
 import json
@@ -10,10 +12,20 @@ from app.models.retrieval import RetrieveHit
 
 @lru_cache
 def token_encoder(name: str) -> tiktoken.Encoding:
+    """Return the cached tokenizer for the configured encoding.
+
+    Args:
+        name: Configured tokenizer or metric identifier.
+    """
     return tiktoken.get_encoding(name)
 
 
 def render_context(sources: dict[int, RetrieveHit]) -> str:
+    """Render numbered evidence with its matched citation metadata as JSON.
+
+    Args:
+        sources: Numbered policy passages and citation metadata retained for generation.
+    """
     return json.dumps(
         [
             {
@@ -34,6 +46,11 @@ def assemble_context(
 
     The budget covers the serialized evidence payload, excluding prompt and output.
     Reorder selected evidence so the two best-ranked passages sit at the edges.
+
+    Args:
+        hits: Ranked policy passages supplied by retrieval.
+        max_tokens: Maximum serialized evidence tokens retained in the context.
+        encoding: Tokenizer encoding used for bounded context or model-work estimates.
     """
     encoder = token_encoder(encoding)
     sources: dict[int, RetrieveHit] = {}

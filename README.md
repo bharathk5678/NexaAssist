@@ -1,5 +1,12 @@
 # NexaAssist
 
+The [agent architecture and structural refactor report](C4-Documentation/AGENT_REFACTOR_REPORT.md)
+includes the worked request flow, code tours, before/after checks and release blockers.
+The [release fixes report](C4-Documentation/RELEASE_FIXES_REPORT.md) records the
+subsequent checker/packaging repairs and passing full local quality gate.
+The [core fixes report](C4-Documentation/CORE_FIXES_REPORT.md) covers the subsequent
+LangGraph/FastAPI cleanup, MongoDB ingestion safeguards and their verification.
+
 A policy, product and lending advisor for the staff of NexaBank (a fictional bank), built as the hands-on codebase for the **Enterprise Agentic RAG** training program. Everything is synthetic.
 
 NexaAssist turns policy PDFs into versioned clause chunks and parent sections in
@@ -8,7 +15,46 @@ inspect quoted sources, and submit feedback. FastAPI serves retrieval, answers,
 live RAGAS evaluation and feedback review. LangChain runs the underlying logic;
 the default answer model is `gpt-6-luna`.
 
-### Current status — 21 October 2026
+### Phase 1 and Phase 2 training implementation — 27 October 2026
+
+The [session and future-development map](C4-Documentation/phase1-phase2-development-map.md)
+maps all twenty sessions to their code, tests, demonstrations and extension
+points. Phase 1 has a fresh full-dataset RAGAS/judge baseline and a fail-closed
+comparison gate; the documented Atlas text index is now provisioned for live
+hybrid retrieval. The trained local reranker has a pinned, non-root runtime in
+[compose.reranker.yaml](app/compose.reranker.yaml).
+
+The separate Agent Service now integrates **Orchestrator → HTTP Retriever →
+Validator → durable approval → Action** for all five service-request types.
+`POST /agent` remains validation-only. Start a durable workflow with
+`POST /agent/runs`; a different authorized reviewer approves or rejects its
+exact proposal before a bank write. MongoDB stores checkpoints and operation
+keys; retries preserve the original operation and banking identity.
+
+Direct `/agent/submit` is disabled by default and retained behind
+`AGENT_ALLOW_DIRECT_SUBMIT=true` for compatibility only. The ordinary RAG API
+and Streamlit policy workflow remain available. Streamlit's **Service requests**
+workspace now prepares, loads, approves/rejects and recovers durable runs through
+the Agent API. Input screening runs before model/tool calls; model-call, output
+and conservative token-work limits bound each workflow. Case tools, MCP and
+production deployment remain separate extensions.
+
+See the [workflow guide](app/agents/README.md),
+[syllabus gap analysis](.planning/phase2-four-agent-integration.md) and
+[current action sequence](C4-Documentation/c4-dynamic-approved-service-request.md).
+The [four-agent component and protocol guide](C4-Documentation/FOUR_AGENT_WORKFLOW_README.md)
+maps methods, payloads, REST/HTTP calls, local graph handoffs, persistence,
+approval and retry behavior. Its [editable training presentation](C4-Documentation/presentations/NexaAssist_Four_Agent_Workflow_ppt169_20261027/README.md)
+covers the complete implemented workflow and API boundaries.
+The [latest Phase 1/2 verification report](app/evaluation/results/phase12_completion_20261027/REPORT.md)
+records 525 tests, real MongoDB/UI checks, both live golden baselines and the
+remaining production boundaries.
+Run `make check-full` for the blocking quality contract; CI also tests the
+workflow with real MongoDB and the supplied bank OpenAPI contract.
+`make check-ai` explicitly calls configured providers/Atlas and holds the
+reviewed full-dataset baseline; see the development map before running it.
+
+### Historical Phase 1 status — 21 October 2026
 
 | Area | Available now |
 |---|---|
@@ -62,7 +108,7 @@ server are future layers.
 10. [Roadmap](#10-roadmap)
 
 For a file-by-file walkthrough, use [APP_COMPONENT_GUIDE.md](APP_COMPONENT_GUIDE.md).
-Start the chat with [Streamlit and endpoint coverage](#streamlit-and-endpoint-coverage);
+Start all four services with [Streamlit and endpoint coverage](#streamlit-and-endpoint-coverage);
 use [DATADOG_README.md](DATADOG_README.md) for tracing and scores.
 
 Open the [Datadog Field Guide](DATADOG_FIELD_GUIDE.html) locally for diagrams,
@@ -572,13 +618,17 @@ sequenceDiagram
     CLI->>CLI: requests_from_register filters authoritative entries and builds IngestRequests
     loop for each IngestRequest
         CLI->>CH: ainvoke(request)
+        CH->>CH: reject request scope that differs from configuration
         CH->>PDF: parse
         PDF-->>CH: Title, NarrativeText, Table elements
         CH->>UNS: chunk
         UNS-->>CH: one chunk per clause (tables kept with their clause)
         CH->>CH: enrich: header line, metadata, chunk_id, parent_id, checksum
-        CH->>DB: compare: read stored checksums by chunk_id
-        DB-->>CH: checksums
+        CH->>DB: compare: read stored chunks by chunk_id
+        DB-->>CH: chunks with metadata and checksums
+        CH->>PSEC: read existing exact-document parent sections
+        PSEC-->>CH: parents with scope metadata
+        CH->>CH: reject conflicting or missing stored scope before writing
         alt changed chunks exist
             CH->>OAI: embed changed chunks
             OAI-->>CH: vectors
@@ -588,7 +638,7 @@ sequenceDiagram
         end
         CH->>PSEC: upsert current parents, then remove obsolete section keys
         CH-->>CLI: IngestResponse
-        CLI->>DB: delete_stale_chunks: retire chunks the source no longer has
+        CLI->>DB: delete_stale_chunks: retire obsolete chunks in the configured corpus
         CLI->>CLI: log document_ingested
     end
 ```
@@ -601,9 +651,15 @@ sequenceDiagram
 | 2 | Parse | `parse_document` | Ordered `Title`, `NarrativeText` and `Table` elements. Tables are extracted whole as HTML; page headers and footers are dropped. |
 | 3 | Chunk | `chunk_by_clause` | One chunk per numbered clause. A table or footnote stays with the clause that introduces it, and a table is never split. Only a clause over `CHUNK_MAX_CHARACTERS` is split, at sentence boundaries, with `CHUNK_OVERLAP_CHARACTERS` of overlap. |
 | 4 | Enrich + hash | `enrich` (inside the chain) | A LangChain `Document` per child chunk: identity header line, deterministic `chunk_id`, `parent_id`, clause fields, metadata and a `checksum`. Also one parent `Document` per section. |
-| 5 | Compare | `compare` (inside the chain) | The children whose checksum differs from the one stored under the same `chunk_id`. |
+| 5 | Compare | `compare` (inside the chain) | Rejects colliding chunks and existing exact-document parents with conflicting or missing identity/scope metadata, then selects children whose checksum changed. |
 | 6 | Embed + upsert | `embed_and_upsert` (inside the chain) | Changed child vectors are written first, then parents are upserted and obsolete sections removed. Embedding failure preserves previous parents. |
-| 7 | Retire | `delete_stale_chunks` (called by the service) | Chunks of this document that the latest ingest no longer produced are deleted. |
+| 7 | Retire | `delete_stale_chunks` (called by the service) | Deletes obsolete chunks of this document only when institution, jurisdiction and confidentiality match the configured corpus. |
+
+Run one ingestion job at a time: chunk and parent writes span collections without
+a transaction. Stored IDs remain unchanged. An identity collision or missing scope
+stops ingestion before embedding or writing; inspect and back up those records
+before correcting their provenance or choosing a distinct document ID. This guard
+does not turn shared collections into a concurrent multi-tenant write service.
 
 ---
 
@@ -715,7 +771,7 @@ Both models use `extra="forbid"`, so an unknown or misspelled field raises a val
 |---|---|---|
 | `get_vector_store` | `(settings, embedding) -> MongoDBAtlasVectorSearch` | Returns the chunk store with collection, embedding and index name passed explicitly. It never creates the index; that is manual (see [Section 6](#6-getting-started)). |
 | `get_parent_store` | `(settings) -> MongoDBDocStore` | Key-value store of whole sections, keyed by `parent_id`, in the `MONGODB_PARENT_COLLECTION` collection. Not embedded, no search index. |
-| `delete_stale_chunks` | `(collection, doc_id, keep_ids) -> int` | Deletes chunks of a document whose IDs the latest ingest did not produce. Returns how many were removed. |
+| `delete_stale_chunks` | `(collection, doc_id, keep_ids, *, settings) -> int` | Deletes obsolete chunks only within the corpus configured by `settings`. Returns how many were removed. |
 
 ### `app/services/ingestion.py`
 
@@ -807,16 +863,120 @@ flowchart LR
 
 ### Prerequisites
 
-- [`uv`](https://docs.astral.sh/uv/) and Python 3.14+ installed.
-- An **OpenAI API key**.
-- A **MongoDB Atlas** cluster on a tier that supports Vector Search.
+- **GNU Make and a POSIX shell** on macOS/Linux (or WSL on Windows). On macOS,
+  install the Xcode Command Line Tools if `make` is missing.
+- [`uv`](https://docs.astral.sh/uv/) installed. `make setup` selects Python 3.14
+  and installs the locked application, UI, evaluation and development dependencies.
+- An **OpenAI API key** with access to the configured embedding/chat/evaluation models.
+- A reachable **MongoDB Atlas** cluster that supports Vector Search, a database
+  user with permissions for the policy and workflow collections/indexes, and your
+  machine's IP allowed by Atlas network access. Create the search indexes in
+  [app/database/indexes.md](app/database/indexes.md) and ingest the corpus before use.
+- **Service requests:** a nonempty `BANKING_API_TOKEN` plus distinct named owner
+  and reviewer credentials in `AGENT_PRINCIPALS`, with the required customer access.
+  The reviewer needs `can_approve=true`. See the
+  [credential guide](C4-Documentation/SERVICE_REQUESTS_GUIDE.md).
+- **Docker with Compose v2** and a running daemon for Datadog or the optional
+  reranker. Datadog needs `DD_API_KEY`/`DD_SITE`; the reranker needs the verified
+  GGUF file specified by `RERANKER_MODEL_FILE`.
+- **curl** for `make health`, and free local ports **8000, 8080, 8001 and 8501**.
+
+### Run the services with Make
+
+Run these commands from the repository root. If the directory is synced by
+Google Drive, set `UV_PROJECT_ENVIRONMENT` to a local virtual-environment
+directory before setup, as described in the installation note below.
+
+```bash
+make help
+make setup
+# Edit .env with your credentials, corpus scope and owner/reviewer configuration.
+# Create the Atlas search indexes using app/database/indexes.md.
+make prereqs
+```
+
+`make setup` creates `.env` from `.env.example` only when it is missing; an
+existing file is preserved. Shell activation of `.venv` is unnecessary.
+
+`make prereqs` checks local runtime imports, Python version and the existing
+Pydantic settings schemas. Credential values are hidden on validation failure.
+It does not contact Atlas or OpenAI, confirm search-index readiness, or grant
+customer/reviewer permissions. Replace template credentials and configure the
+four service URLs shown in [Streamlit and endpoint coverage](#streamlit-and-endpoint-coverage).
+
+For tracing (`DD_TRACE_ENABLED=true`, as in `.env.example`), start Docker and the
+Datadog Agent first:
+
+```bash
+make datadog-up
+```
+
+For a local session without Datadog, set `DD_TRACE_ENABLED=false`,
+`DD_LLMOBS_ENABLED=false` and `DD_RUNTIME_METRICS_ENABLED=false` in your local
+configuration. If reranking is enabled, start its configured runtime before
+retrieval. `make reranker-up` uses the existing llama.cpp compose profile; it
+requires `RERANKER_MODEL_FILE` plus the matching `RERANK_API=llamacpp`,
+`RERANK_BASE_URL=http://127.0.0.1:18516` and `RERANK_MODEL=qwen3-reranker` settings.
+It does not start an Ollama runtime.
+
+After the Atlas indexes are queryable, ingest the registered policies once:
+
+```bash
+make ingest       # Calls OpenAI embeddings and writes to Atlas; run one job at a time.
+make run          # Or: make run-all
+```
+
+`make run` launches the banking mock, RAG API, Agent API and Streamlit together
+in the foreground with interleaved logs. Leave this terminal open while they
+start. In another terminal, check liveness and open the UI:
+
+```bash
+make health
+# Open http://127.0.0.1:8501
+```
+
+Health checks cover the RAG/Agent `/health` endpoints, the bank's OpenAPI endpoint,
+and Streamlit's documented [`/_stcore/health`](https://docs.streamlit.io/deploy/tutorials/docker)
+endpoint. A healthy HTTP process still needs working Atlas/provider connections
+and indexed policy evidence for requests to succeed.
+
+Press **Ctrl+C** in the `make run` terminal to stop its four processes. If any
+required service exits, the launcher stops its siblings and returns failure.
+It signals only the processes started by that invocation, using
+[uv's Unix signal forwarding](https://docs.astral.sh/uv/concepts/projects/run/#signal-handling).
+Datadog and reranker containers stay running until you stop them explicitly.
+The synthetic bank's data and idempotency cache are process-local: stopping or
+restarting it resets them. Reconcile uncertain submissions before restarting
+the bank; MongoDB saved runs alone do not preserve its replay cache.
+
+| Command | Purpose |
+|---|---|
+| `make setup` | Install locked prerequisites and create missing dotenv configuration |
+| `make prereqs` | Check local runtime dependencies and settings schemas |
+| `make run` / `make run-all` | Run all four application services; Ctrl+C stops them |
+| `make run-rag` | RAG FastAPI on port 8000, Datadog service `nexaassist-api` |
+| `make run-bank` | Synthetic bank on port 8080, Datadog service `nexaassist-bank` |
+| `make run-agent` | LangGraph FastAPI on port 8001, Datadog service `nexaassist-agent` |
+| `make run-ui` | Streamlit on port 8501, Datadog service `nexaassist-ui` |
+| `make health` | Check all four HTTP services; nonzero exit if any is unavailable |
+| `make ingest` | Embed/index the authoritative register; explicit Atlas write |
+| `make datadog-up` / `make datadog-down` | Start/stop the existing Datadog compose service |
+| `make reranker-up` / `make reranker-down` | Start/stop the optional verified GGUF reranker |
+| `make check-fast` / `make check-task` / `make check-full` | Existing local quality gates |
+| `make check-ai` | Existing live scored evaluation gate; configured providers/Atlas required |
+
+All new runtime/container targets accept `ENV_FILE`, for example
+`make run ENV_FILE=".env.local"`. Existing quality-gate targets keep their current
+configuration behavior. Bare `make` still runs `check-fast`.
+If a port is occupied, inspect the existing listener or stop its own terminal
+before launching a second stack. For the Datadog sampling-rule JSON error,
+remove empty `DD_TRACE_SAMPLING_RULES`/`DD_SPAN_SAMPLING_RULES` values or set them
+to the valid JSON array `[]`.
 
 ### Step 1: install
 
 ```bash
-uv sync --python 3.14 --locked --extra ui --extra evaluation
-source .venv/bin/activate  # macOS
-.venv\Scripts\activate     # Windows
+make setup
 ```
 
 > **Heads-up:** `uv sync` creates `.venv` inside the project folder. If the folder is synced by Google Drive, point it elsewhere first:
@@ -824,11 +984,8 @@ source .venv/bin/activate  # macOS
 
 ### Step 2: configure
 
-```bash
-cp .env.example .env
-```
-
-Edit `.env`. These are required:
+`make setup` creates the template only when `.env` is missing. Edit `.env`.
+These are required:
 
 | Variable | Example | Meaning |
 |---|---|---|
@@ -884,7 +1041,7 @@ Set `DD_API_KEY` and the correct `DD_SITE` in `.env`. On this Mac, start Docker
 Desktop and wait for `docker info` to succeed, then run:
 
 ```bash
-docker compose --env-file .env -f app/compose.datadog.yaml up -d
+make datadog-up
 docker compose --env-file .env -f app/compose.datadog.yaml ps
 ```
 
@@ -1390,7 +1547,7 @@ or model responses. The following table focuses on the ingestion teaching cases:
 | `test_reingesting_replaces_parent_sections` | A second ingest leaves the same parent keys, with no duplicate-key error |
 | `test_only_new_or_changed_chunks_are_embedded` | A re-run sends nothing to the embedding model; one stale checksum re-embeds exactly one chunk |
 | `test_changing_the_embedding_model_re_embeds_everything` | A different `embedding_model` changes every checksum |
-| `test_stale_chunks_are_deleted_and_current_ones_kept` | `delete_stale_chunks` removes only the named document's leftover IDs |
+| `test_stale_chunks_are_deleted_and_current_ones_kept` | Cleanup removes only obsolete IDs in the configured corpus and preserves foreign/unscoped records |
 
 Controlled tests do not establish real embedding quality, Atlas ranking or
 live ingestion correctness. They use local/mocked stores; selected live API
@@ -1466,15 +1623,83 @@ Phases 2 to 4 (agents, MCP, production) wrap this service without rewriting it, 
 
 ## Streamlit and endpoint coverage
 
-Install the UI and evaluation extras, then run the API and UI in separate terminals
-from the project root. Load `.env` before `ddtrace-run` so the tracer receives the
-Datadog settings before application imports:
+For the owner/reviewer handoff, approval errors, and prerequisites for every
+customer and request type, see the [Service requests operator guide](C4-Documentation/SERVICE_REQUESTS_GUIDE.md).
+
+For the **Service requests** workspace, all four services must be up and running
+together. Use `make run` from the repository root and keep its terminal open;
+see [Run the services with Make](#run-the-services-with-make) for prerequisites.
+Policy chat uses the RAG API; service requests also
+need the Agent API and banking API.
+
+| Service | Port | Check or open |
+|---|---|---|
+| RAG FastAPI | 8000 | [Health](http://127.0.0.1:8000/health) |
+| Banking mock API | 8080 | [API docs](http://127.0.0.1:8080/docs) |
+| Agent FastAPI | 8001 | [Health](http://127.0.0.1:8001/health) |
+| Streamlit UI | 8501 | [NexaAssist](http://127.0.0.1:8501) |
+
+Complete [Getting started](#6-getting-started) first, including Atlas setup and
+policy ingestion. In `.env`, configure `OPENAI_API_KEY`, MongoDB settings, a
+nonempty `BANKING_API_TOKEN`, and distinct named owner/reviewer credentials in
+`AGENT_PRINCIPALS` with the required customer access. The legacy
+`AGENT_VALIDATION_TOKEN` cannot own or approve durable runs. See the
+[workflow credential example](app/agents/README.md#integrated-flow--27-october-2026).
+
+The local service URLs are:
+
+```dotenv
+API_BASE_URL=http://127.0.0.1:8000
+RAG_BASE_URL=http://127.0.0.1:8000/
+AGENT_API_BASE_URL=http://127.0.0.1:8001
+BANKING_BASE_URL=http://127.0.0.1:8080/
+```
+
+Install dependencies once:
 
 ```bash
-uv sync --locked --extra ui --extra evaluation
-uv run --no-sync --env-file .env ddtrace-run python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
-uv run --no-sync --env-file .env env DD_SERVICE=nexaassist-ui ddtrace-run python -m streamlit run app/streamlit_app.py --server.address 127.0.0.1 --server.port 8501
+make setup
 ```
+
+The Make targets load `.env` before `ddtrace-run` and set a separate Datadog
+service name per process. Start all four together:
+
+```bash
+make run
+```
+
+Alternatively, start each service in its own terminal:
+
+```bash
+# Terminal 1: RAG FastAPI
+make run-rag
+
+# Terminal 2: synthetic banking API (run from the repository root)
+make run-bank
+
+# Terminal 3: Agent FastAPI
+make run-agent
+
+# Terminal 4: Streamlit
+make run-ui
+```
+
+Open Streamlit, select **Service requests**, and enter the configured owner
+credential to prepare a proposal. A different authorized reviewer must load the
+saved run and approve its exact proposal before submission.
+
+Use **Customer ID `NXC-0010`** for the demo and include it in both the owner's
+and reviewer's `AGENT_PRINCIPALS[].customer_ids`. For an `INTEREST_CERTIFICATE`
+request, use its loan account **`NXL-HL-0010`**. A customer outside the configured
+credential's scope is rejected with HTTP 403, even when it exists in the banking
+mock.
+
+If **Prepare for approval** fails, check that the banking API on port 8080 is
+still running as well as both FastAPI services. The `/health` endpoints report
+liveness only; they do not verify MongoDB, model or banking connectivity. For an
+uncertain bank submission, load and retry the same saved run rather than starting
+a new request. An "address already in use" startup error means the selected port
+is occupied; check the existing service before starting another instance.
 
 To find question traces, open [Datadog Trace Explorer](https://app.datadoghq.com/apm/traces?query=service%3Anexaassist-api%20env%3Adev),
 select **Live Search** / **Past 15 minutes**, and send a new question. Start with
@@ -1615,7 +1840,10 @@ introduced. Routing scope is sourced from `POL-OPS-001` clauses 2, 4–6, the pr
 catalog's names/IDs, and the supplied mock banking OpenAPI operations. The graph
 never calls those customer/action APIs in this stage.
 
-Start the two services from the repository root in separate terminals:
+For this routing-only example, start the two FastAPI services from the repository
+root in separate terminals. For the complete service-request UI, follow the
+[four-service startup instructions](#streamlit-and-endpoint-coverage), including
+the banking API and Streamlit:
 
 ```bash
 uv sync --locked --all-extras
@@ -1716,3 +1944,61 @@ component guide and `.env.example` retained their prior content verbatim with
 appended sections; config gained AgentSettings and an import; compatibility
 requirements gained LangGraph. Historical prompts and synthetic source data
 were untouched. No commit, stash, reset or existing-service restart was performed.
+
+## Phase 2: service-request Validator
+
+Explicit submission is available through `POST /agent/submit`, using the same
+body as `/agent` with complete customer/date/action details and an
+`Idempotency-Key` header (16–64 letters, digits, underscores or hyphens). The
+existing validator bearer token and customer allowlist apply. Successful validation
+posts the exact proposal to the banking API and returns `status: "submitted"`,
+the bank's receipt and policy evidence. `/agent` remains validation-only.
+See [submission behavior and retry limits](app/agents/README.md#explicit-service-request-submission).
+On an unconfirmed submission, retry with the same key and unchanged body; a timeout
+can follow a committed write. A received service request does not establish KYC
+completion, certificate issuance or an effective prepayment opt-in.
+
+The selected Phase 2 Sessions 1–3 decks now carry forward into the Validator
+lesson (syllabus Session 6). See the [session walkthrough and code map](app/agents/README.md)
+for the source-backed eligibility rule, setup, request example, teaching sequence,
+deck corrections and deferred Action/approval stages.
+
+`POST /agent` additionally accepts typed `action_details` for all five service
+request types in the supplied OpenAPI contract. With configured caller authorization and a
+server-controlled customer allowlist, this route retrieves policy evidence once,
+reads the customer's loan through the banking mock API, and returns a deterministic
+validation decision plus an eligible service-request proposal. Successful proposals
+use outer status `validated`; `validation.requires_approval` remains true.
+No banking write is executed and no opt-in is claimed to have occurred.
+
+| Request type | Validation performed before proposing |
+| --- | --- |
+| `OPT_IN_CIR_2026_07_PART_PREPAY` | Existing circular/version/sanction/opt-in checks; requires `NEXA-HL` and selected loan |
+| `INTEREST_CERTIFICATE` | Operations-policy permission and ownership of a required selected loan; supplied product must match |
+| `STATEMENT_COPY` | Operations-policy permission and authorized customer; any supplied loan must belong to that customer |
+| `CALLBACK` | Operations-policy permission and authorized customer; any supplied loan must belong to that customer |
+| `RE_KYC_REMINDER` | Operations-policy permission and authorized customer; this does not complete KYC or assert that re-KYC is due |
+
+All proposals require `as_of`, customer, action and request type. The Orchestrator
+clarifies missing details or a required loan before retrieval. General requests
+use one fixed bank-wide `POL-OPS-001` query with no product filter; an explicitly
+selected product stays in `AgentRequest` and is checked against the selected loan.
+The prepayment path keeps its existing product-scoped circular query. Both paths
+retain full source quotes/citations and read customer records only through HTTP.
+`createCase`, `addCaseNote` and `escalateCase` remain unavailable integrations.
+
+Configuration is disabled by default. The new variables are
+`AGENT_VALIDATION_TOKEN`, `AGENT_ALLOWED_CUSTOMER_IDS`, `BANKING_BASE_URL` and
+`BANKING_API_TOKEN`; `.env.example` contains placeholders only. The scoped token
+is a training authentication mechanism, not production identity management.
+Existing RAG endpoints and policy-only answers retain their behavior.
+
+Run `uv run --locked --no-sync pytest tests/test_validation.py tests/test_agent.py -q`
+for the original ten prepayment golden cases, ten additional service-request
+goldens, authorization and failure tests, and
+existing orchestrator/retriever regression coverage. The session guide distinguishes
+these mocked tests from live model classification and actual provider connectivity.
+
+The blocking quality contract is [CONSTRAINTS.md](CONSTRAINTS.md). Run
+`make check-fast`, `make check-task`, or `make check-full`; full security checks
+use external Semgrep source/secret rules and a fingerprinted pre-existing baseline.

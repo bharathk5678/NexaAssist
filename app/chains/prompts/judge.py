@@ -1,3 +1,5 @@
+"""Define the versioned structured correctness and grounding judge prompt."""
+
 from __future__ import annotations
 
 from langchain_core.prompts import ChatPromptTemplate

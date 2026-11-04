@@ -1,3 +1,5 @@
+"""Extract policy text and tables from supported source documents."""
+
 from __future__ import annotations
 
 from collections import Counter

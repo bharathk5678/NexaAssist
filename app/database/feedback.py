@@ -1,3 +1,5 @@
+"""Persist idempotent feedback and protected review updates."""
+
 from __future__ import annotations
 
 from uuid import UUID
@@ -10,6 +12,11 @@ from app.models.feedback import FeedbackRecord, FeedbackReview
 
 
 def save_feedback(record: FeedbackRecord, settings: Settings) -> FeedbackRecord | None:
+    """Persist feedback idempotently without overwriting a prior submission.
+
+    Args:
+        record: Retained evaluation case, generated answer and supporting source identities.
+    """
     collection = _database(settings)[settings.mongodb_feedback_collection]
     query = {"_id": str(record.feedback_id), "institution": settings.institution}
     try:
@@ -36,6 +43,7 @@ def save_feedback(record: FeedbackRecord, settings: Settings) -> FeedbackRecord 
 
 
 def list_feedback(settings: Settings, limit: int) -> list[FeedbackRecord]:
+    """Return recent feedback records for authorized review."""
     rows = (
         _database(settings)[settings.mongodb_feedback_collection]
         .find({"institution": settings.institution}, {"_id": 0, "institution": 0})
@@ -46,6 +54,11 @@ def list_feedback(settings: Settings, limit: int) -> list[FeedbackRecord]:
 
 
 def review_feedback(feedback_id: UUID, review: FeedbackReview, settings: Settings) -> bool:
+    """Update the selected feedback review within the configured institution.
+
+    Args:
+        feedback_id: Feedback id identifying the scoped record.
+    """
     result = _database(settings)[settings.mongodb_feedback_collection].update_one(
         {"_id": str(feedback_id), "institution": settings.institution, "status": "pending"},
         {"$set": review.model_dump(mode="json")},

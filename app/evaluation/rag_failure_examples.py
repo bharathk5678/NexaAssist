@@ -58,6 +58,7 @@ async def _source_manifests(settings: Settings) -> tuple[list[ChunkSnapshot], li
     children: list[Document] = []
 
     async def capture(documents: list[Document], **kwargs: Any) -> list[str]:
+        """Retain the generated source observations for the current diagnostic."""
         children.extend(documents)
         return cast(list[str], kwargs["ids"])
 
@@ -85,6 +86,11 @@ async def _source_manifests(settings: Settings) -> tuple[list[ChunkSnapshot], li
 
 
 async def example_report(selected: str | None = None) -> dict[str, Any]:
+    """Run the selected retrieval-failure example using explicitly labeled observations.
+
+    Raises:
+        ValueError: S5 requires the circular applicability parent in the baseline.
+    """
     settings = get_settings()
     storage = await asyncio.to_thread(read_rag_snapshot, settings)
     chunks = storage["chunks"]
@@ -155,6 +161,12 @@ async def example_report(selected: str | None = None) -> dict[str, Any]:
     cache: dict[str, RetrieveResponse] = {}
 
     async def retrieve(query: str, refs: list[EvidenceRef], **changes: Any) -> dict[str, Any]:
+        """Retrieve scoped policy evidence through the configured retrieval integration.
+
+        Args:
+            query: User question or scoped retrieval query.
+            changes: Input mutations used to exercise validation boundaries.
+        """
         request = RetrieveRequest.model_validate(
             {"query": query, "as_of": "2026-10-01", "product_id": "NEXA-HL", **changes}
         )
@@ -401,6 +413,11 @@ async def example_report(selected: str | None = None) -> dict[str, Any]:
 
 
 def main() -> None:
+    """Run the rag failure examples command with validated arguments and explicit outcomes.
+
+    Raises:
+        SystemExit: The operation cannot satisfy its documented validation or execution contract.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("case", nargs="?", choices=CASE_IDS)
     selected = parser.parse_args().case

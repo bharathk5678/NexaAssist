@@ -60,6 +60,7 @@ def test_cosine_roundoff_is_normalized_but_invalid_scores_are_rejected() -> None
 
 @pytest.fixture
 def evidence() -> RetrieveResponse:
+    """Combine complete amendments and results without duplicating document versions."""
     hit = {
         "rank": 1,
         "score": 0.9,
@@ -84,6 +85,11 @@ def evidence() -> RetrieveResponse:
 
 @pytest.fixture
 def answer(evidence: RetrieveResponse) -> AnswerResponse:
+    """Generate a grounded answer using evidence retained for the request.
+
+    Args:
+        evidence: Retained retrieval results and complete applicable amendments.
+    """
     return AnswerResponse(
         as_of=evidence.as_of,
         status="answered",

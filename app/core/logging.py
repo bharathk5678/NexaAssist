@@ -1,3 +1,5 @@
+"""Configure structured JSON logging with Datadog trace correlation."""
+
 from __future__ import annotations
 
 import logging
@@ -6,7 +8,11 @@ import structlog
 
 
 def configure_logging(level: str) -> None:
-    """JSON logs on stdout, ready for Datadog ingestion."""
+    """JSON logs on stdout, ready for Datadog ingestion.
+
+    Args:
+        level: Structured logging level to configure.
+    """
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,

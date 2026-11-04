@@ -1,3 +1,5 @@
+"""Expose grounded answers and optional live answer-quality evaluation."""
+
 from __future__ import annotations
 
 from typing import Annotated
@@ -20,22 +22,29 @@ from app.services.evaluation import answer_with_quality
 router = APIRouter()
 logger = structlog.get_logger()
 
+_ANSWER_ERRORS = (
+    OpenAIError,
+    OpenAIRefusalError,
+    PyMongoError,
+    ValueError,
+    TimeoutError,
+    OutputParserException,
+    httpx.HTTPError,
+)
+
 
 @router.post("/answer/evaluated")
 async def evaluated_answer(
     request: EvaluatedAnswerRequest, settings: Annotated[Settings, Depends(get_settings)]
 ) -> EvaluatedAnswerResponse:
+    """Serve one generated answer with optional live quality evaluation.
+
+    Raises:
+        HTTPException: Answer service unavailable.
+    """
     try:
         return await answer_with_quality(request, settings)
-    except (
-        OpenAIError,
-        OpenAIRefusalError,
-        PyMongoError,
-        ValueError,
-        TimeoutError,
-        OutputParserException,
-        httpx.HTTPError,
-    ) as exc:
+    except _ANSWER_ERRORS as exc:
         logger.error("evaluated_answer_failed", error_type=type(exc).__name__)
         raise HTTPException(status_code=503, detail="Answer service unavailable") from None
 
@@ -44,16 +53,13 @@ async def evaluated_answer(
 async def answer(
     request: RetrieveRequest, settings: Annotated[Settings, Depends(get_settings)]
 ) -> AnswerResponse:
+    """Serve a grounded policy answer through the thin HTTP boundary.
+
+    Raises:
+        HTTPException: Answer service unavailable.
+    """
     try:
         return await answer_policy(request, settings)
-    except (
-        OpenAIError,
-        OpenAIRefusalError,
-        PyMongoError,
-        ValueError,
-        TimeoutError,
-        OutputParserException,
-        httpx.HTTPError,
-    ) as exc:
+    except _ANSWER_ERRORS as exc:
         logger.error("answer_failed", error_type=type(exc).__name__)
         raise HTTPException(status_code=503, detail="Answer service unavailable") from None

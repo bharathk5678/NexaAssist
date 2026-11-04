@@ -1,3 +1,5 @@
+"""Build incremental policy ingestion using content checksums and parent identity."""
+
 from __future__ import annotations
 
 import hashlib
@@ -16,8 +18,15 @@ from app.chains.parsing import parse_document
 from app.core.config import Settings
 from app.models.ingestion import IngestRequest, IngestResponse
 
+_CORPUS_FIELDS = ("institution", "jurisdiction", "confidentiality_level")
+
 
 def parent_key_prefix(doc_id: str) -> str:
+    """Return the stable document-scoped prefix for parent-section keys.
+
+    Args:
+        doc_id: Doc id identifying the scoped record.
+    """
     return f"{doc_id}_s"
 
 
@@ -40,13 +49,31 @@ def build_ingestion_chain(
     Children are clause chunks (embedded, searched). Parents are whole sections, kept in
     `parent_store` under `parent_id` so the read path can return the section around a match.
     Only children whose checksum differs from the stored one are embedded.
+    Requests must match the configured corpus. Existing chunk and parent identities
+    with different or missing scope are rejected before any embedding or write.
     Input: {"request": IngestRequest}. Run with `ainvoke`.
+
+    Raises:
+        ValueError: Invocation has conflicting corpus scope or produces no chunks.
     """
 
     def parse(state: dict[str, Any]) -> list[Element]:
-        return parse_document(state["request"].source_path)
+        """Parse the supplied source document before building ingestion records.
+
+        Raises:
+            ValueError: Request scope differs from the configured corpus.
+        """
+        request: IngestRequest = state["request"]
+        if any(getattr(request, field) != getattr(settings, field) for field in _CORPUS_FIELDS):
+            raise ValueError("Ingestion scope must match the configured corpus")
+        return parse_document(request.source_path)
 
     def chunk(state: dict[str, Any]) -> list[Chunk]:
+        """Split parsed policy content into clause-aware chunks and complete parent sections.
+
+        Raises:
+            ValueError: Parsed document produced no chunks; refusing to replace stored content.
+        """
         chunks = chunk_by_clause(
             state["elements"], settings.chunk_max_characters, settings.chunk_overlap_characters
         )
@@ -57,11 +84,13 @@ def build_ingestion_chain(
         return chunks
 
     def enrich(state: dict[str, Any]) -> dict[str, list[Document]]:
+        """Stamp document identity, scope and embedding metadata on ingestion records."""
         request: IngestRequest = state["request"]
         doc_metadata = request.model_dump(mode="json", exclude={"source_path"})
 
         def header(section: str) -> str:
             # Identity line: a chunk read on its own still says which document it is from.
+            """Render the identity metadata retained with the policy chunk text."""
             return f"[{request.doc_id} | {request.title} v{request.policy_version} | {section}]"
 
         children: list[Document] = []
@@ -101,17 +130,31 @@ def build_ingestion_chain(
         return {"children": children, "parents": parents}
 
     async def compare(state: dict[str, Any]) -> list[Document]:
+        """Check stored identities before selecting chunks whose checksum changed.
+
+        Raises:
+            ValueError: An existing identity belongs to a different or unscoped corpus.
+        """
+        request: IngestRequest = state["request"]
         children: list[Document] = state["enriched"]["children"]
-        stored = {
-            document.id: document.metadata.get("checksum")
-            for document in await vector_store.aget_by_ids(
-                [child.id for child in children if child.id]
-            )
-        }
+        documents = await vector_store.aget_by_ids([child.id for child in children if child.id])
+        parent_keys = [
+            key
+            async for key in parent_store.ayield_keys(prefix=parent_key_prefix(request.doc_id))
+            if key.rsplit("_s", 1)[0] == request.doc_id
+        ]
+        for document in [*documents, *await parent_store.amget(parent_keys)]:
+            if document is not None and any(
+                document.metadata.get(field) != getattr(request, field)
+                for field in ("doc_id", *_CORPUS_FIELDS)
+            ):
+                raise ValueError("Stored document identity has conflicting or missing corpus scope")
+        stored = {document.id: document.metadata.get("checksum") for document in documents}
         return [child for child in children if stored.get(child.id) != child.metadata["checksum"]]
 
     async def embed_and_upsert(state: dict[str, Any]) -> IngestResponse:
         # shortcut: writes span collections; add transactions before concurrent ingestion.
+        """Embed changed chunks and persist scoped chunk/parent updates safely."""
         request: IngestRequest = state["request"]
         children: list[Document] = state["enriched"]["children"]
         parents: list[Document] = state["enriched"]["parents"]

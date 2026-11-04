@@ -1,3 +1,5 @@
+"""Ingest registered policies or retire documents through scoped database operations."""
+
 from __future__ import annotations
 
 import argparse
@@ -48,7 +50,11 @@ def requests_from_register(register_path: Path, settings: Settings) -> list[Inge
 
 
 async def ingest(requests: list[IngestRequest]) -> list[IngestResponse]:
-    """Embed only new or changed chunks, then retire chunks the source no longer has."""
+    """Embed only new or changed chunks, then retire chunks the source no longer has.
+
+    Raises:
+        ValueError: A request or stored document conflicts with the configured corpus.
+    """
     settings = get_settings()
     vector_store = get_vector_store(settings, get_embeddings(settings))
     chain = build_ingestion_chain(vector_store, get_parent_store(settings), settings)
@@ -56,7 +62,11 @@ async def ingest(requests: list[IngestRequest]) -> list[IngestResponse]:
     for request in requests:
         response = await chain.ainvoke({"request": request})
         removed = await asyncio.to_thread(
-            delete_stale_chunks, vector_store.collection, request.doc_id, response.chunk_ids
+            delete_stale_chunks,
+            vector_store.collection,
+            request.doc_id,
+            response.chunk_ids,
+            settings=settings,
         )
         logger.info(
             "document_ingested",

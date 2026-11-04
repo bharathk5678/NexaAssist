@@ -1,3 +1,5 @@
+"""Manage Atlas vector chunks and upserting parent documents within the configured scope."""
+
 from __future__ import annotations
 
 import re
@@ -46,6 +48,7 @@ class UpsertingParentStore(MongoDBDocStore):
     def insert_many(
         self, texts: Iterable[str], metadatas: Iterable[dict[str, Any]], ids: list[str]
     ) -> None:
+        """Upsert parent documents while preserving the surrounding store interface."""
         operations = [
             ReplaceOne(
                 {"_id": key},
@@ -59,6 +62,7 @@ class UpsertingParentStore(MongoDBDocStore):
 
     def yield_keys(self, *, prefix: str | None = None) -> Iterator[str]:
         # The integration treats prefixes as regex; BaseStore callers expect literals.
+        """Yield keys matching the optional literal prefix."""
         return super().yield_keys(prefix=re.escape(prefix) if prefix is not None else None)
 
 
@@ -67,14 +71,39 @@ def get_parent_store(settings: Settings) -> MongoDBDocStore:
     return UpsertingParentStore(_database(settings)[settings.mongodb_parent_collection])
 
 
-def delete_stale_chunks(collection: Collection[Any], doc_id: str, keep_ids: list[str]) -> int:
-    """Retire chunks of `doc_id` that the latest ingest no longer produced."""
-    result = collection.delete_many({"doc_id": doc_id, "_id": {"$nin": keep_ids}})
+def delete_stale_chunks(
+    collection: Collection[Any], doc_id: str, keep_ids: list[str], *, settings: Settings
+) -> int:
+    """Retire obsolete chunks of `doc_id` within the configured corpus only.
+
+    Args:
+        doc_id: Doc id identifying the scoped record.
+        settings: Corpus scope shared with ingestion and retrieval.
+
+    Returns:
+        Number of obsolete chunks removed from this corpus.
+
+    Raises:
+        PyMongoError: MongoDB cannot complete the scoped deletion.
+    """
+    result = collection.delete_many(
+        {
+            "doc_id": doc_id,
+            "institution": settings.institution,
+            "jurisdiction": settings.jurisdiction,
+            "confidentiality_level": settings.confidentiality_level,
+            "_id": {"$nin": keep_ids},
+        }
+    )
     return result.deleted_count
 
 
 def retire_document(settings: Settings, doc_id: str) -> dict[str, int]:
-    """Explicitly retire one withdrawn document from both stores, scoped to this corpus."""
+    """Explicitly retire one withdrawn document from both stores, scoped to this corpus.
+
+    Args:
+        doc_id: Doc id identifying the scoped record.
+    """
     scope = {
         "doc_id": doc_id,
         "institution": settings.institution,

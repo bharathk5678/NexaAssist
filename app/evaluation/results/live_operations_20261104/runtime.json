@@ -1,0 +1,49 @@
+{
+  "rag_health": {
+    "http": 200,
+    "body": {
+      "status": "ok"
+    }
+  },
+  "agent_health": {
+    "http": 200,
+    "body": {
+      "status": "ok"
+    }
+  },
+  "ui_health": {
+    "http": 200,
+    "body": "ok"
+  },
+  "rag_metrics": {
+    "http": 200,
+    "body": {
+      "retrieval_requests_total": 17,
+      "retrieval_errors_total": 0,
+      "retrieval_empty_total": 0,
+      "retrieval_latency_ms_total": 15474.21
+    }
+  },
+  "latency": {
+    "http": 200,
+    "body": {
+      "sample_count": 17,
+      "p50_ms": 655.6,
+      "p95_ms": 4629.77,
+      "p99_ms": 4629.77
+    }
+  },
+  "agent_metrics": {
+    "http": 200,
+    "body": {
+      "agent_requests_total": 12,
+      "agent_completed_total": 12
+    }
+  },
+  "datadog_agent": {
+    "http": 200,
+    "body": {
+      "version": "7.84.4"
+    }
+  }
+}

@@ -1,3 +1,5 @@
+"""Render the local reranker scoring prompt for a query and policy passage."""
+
 from __future__ import annotations
 
 
@@ -5,6 +7,9 @@ def rerank_prompt(query: str, document: str, as_of: str) -> str:
     """Qwen3's official yes/no scoring format, with policy-specific instructions.
 
     https://huggingface.co/Qwen/Qwen3-Reranker-0.6B
+
+    Args:
+        query: User question or scoped retrieval query.
     """
     return (
         "<|im_start|>system\nJudge whether the Document meets the requirements based on "

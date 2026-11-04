@@ -1,3 +1,5 @@
+"""Construct the shared embedding integration for ingestion and retrieval."""
+
 from __future__ import annotations
 
 from langchain_openai import OpenAIEmbeddings
@@ -6,7 +8,11 @@ from app.core.config import Settings
 
 
 def get_embeddings(settings: Settings) -> OpenAIEmbeddings:
-    """Ingestion and retrieval must share this model and dimension."""
+    """Ingestion and retrieval must share this model and dimension.
+
+    Returns:
+        Configured OpenAIEmbeddings integration with the shared model and dimensions.
+    """
     return OpenAIEmbeddings(
         model=settings.embedding_model,
         dimensions=settings.embedding_dimensions,

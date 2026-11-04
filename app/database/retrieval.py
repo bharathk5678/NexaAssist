@@ -1,3 +1,5 @@
+"""Resolve amendments, hybrid search candidates and golden reference contexts in Atlas."""
+
 from __future__ import annotations
 
 import asyncio
@@ -17,6 +19,11 @@ def build_amendment_search(settings: Settings) -> Runnable[dict[str, Any], list[
     """Load complete, in-scope circulars linked to the retrieved policy IDs."""
 
     def load(value: dict[str, Any]) -> list[Document]:
+        """Load complete applicable amendment evidence from the configured corpus.
+
+        Raises:
+            ValueError: Inconsistent amendment metadata.
+        """
         if not value["doc_ids"]:
             return []
         collection = _database(settings)[settings.mongodb_collection]
@@ -77,6 +84,7 @@ def build_amendment_search(settings: Settings) -> Runnable[dict[str, Any], list[
         ]
 
     async def search(value: dict[str, Any]) -> list[Document]:
+        """Execute the configured scoped candidate search and return ranked documents."""
         return await asyncio.to_thread(load, value)
 
     return RunnableLambda(search).with_config(run_name="linked_policy_amendments")
@@ -88,6 +96,7 @@ def build_hybrid_search(
     """Atlas BM25 + vector search fused by RRF, with no automatic index creation."""
 
     async def search(value: dict[str, Any]) -> list[tuple[Document, float]]:
+        """Execute the configured scoped candidate search and return ranked documents."""
         retriever = MongoDBAtlasHybridSearchRetriever(
             vectorstore=vector_store,
             search_index_name=settings.text_index_name,
@@ -102,7 +111,14 @@ def build_hybrid_search(
 
 
 def resolve_reference_contexts(settings: Settings, references: list[dict[str, Any]]) -> list[str]:
-    """Resolve golden source references to actual indexed text, in reference order."""
+    """Resolve golden source references to actual indexed text, in reference order.
+
+    Args:
+        references: Golden document/clause references to resolve in the configured corpus.
+
+    Raises:
+        ValueError: The operation cannot satisfy its documented validation or execution contract.
+    """
     collection = _database(settings)[settings.mongodb_collection]
     texts = []
     for reference in references:

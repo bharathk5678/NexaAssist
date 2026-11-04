@@ -1,0 +1,43 @@
+name: Phase 1 live quality gate
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      MONGODB_URI:
+        required: true
+      OPENAI_API_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  ai-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ai-evaluation
+    env:
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      MONGODB_DB: ${{ vars.MONGODB_DB }}
+      MONGODB_COLLECTION: ${{ vars.MONGODB_COLLECTION }}
+      INSTITUTION: ${{ vars.INSTITUTION }}
+      JURISDICTION: ${{ vars.JURISDICTION }}
+      CONFIDENTIALITY_LEVEL: ${{ vars.CONFIDENTIALITY_LEVEL }}
+      CHAT_MODEL: ${{ vars.CHAT_MODEL }}
+      EVAL_JUDGE_MODEL: ${{ vars.EVAL_JUDGE_MODEL }}
+      RETRIEVAL_MODE: dense
+      RERANK_ENABLED: 'false'
+      DD_TRACE_ENABLED: 'false'
+      DD_LLMOBS_ENABLED: 'false'
+      RAGAS_DO_NOT_TRACK: 'true'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: '3.14'
+          enable-cache: true
+      - run: uv sync --locked --group dev --extra evaluation
+      - name: Run complete golden dataset and block metric regressions
+        run: make check-ai

@@ -1,0 +1,31 @@
+{
+  "status": "passed_with_test_harness_adaptation",
+  "tests": 72,
+  "passed": 72,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "seconds": 248.76,
+  "storage": "configured MongoDB Atlas",
+  "models_and_banking": "fake model and in-process ASGI synthetic banking boundaries; parent separately tests live HTTP",
+  "fresh_process_checkpoint_read_executed": true,
+  "adaptation": {
+    "location": "/tmp/nexa_atlas_review_plugin.py",
+    "change": "Shorten only generated isolated fixture database names to fit Atlas 38-byte limit; preserve assertions and fixture cleanup",
+    "application_or_test_source_edited": false
+  },
+  "original_fixture_attempt": {
+    "passed": 1,
+    "setup_errors": 3,
+    "source": "tests/conftest.py:24",
+    "error_type": "pymongo.errors.OperationFailure",
+    "error_code": 8000,
+    "error": "Generated nexa_agent_test_<32 UUID hex> name is 48 bytes; cluster maximum is 38 bytes",
+    "suggested_minimal_fix": "Shorten only the unique test-database name, e.g. nexa_agent_test_ + uuid4().hex[:22]"
+  },
+  "cleanup": {
+    "temporary_databases_remaining": 0,
+    "any_short_name_test_database_remaining": false,
+    "cleanup": "complete"
+  }
+}

@@ -1,9 +1,11 @@
+"""Define the versioned intent-classification prompt and supported action scope."""
+
 from __future__ import annotations
 
 from langchain_core.prompts import ChatPromptTemplate
 
 ORCHESTRATOR_PROMPT_ID = "nexaassist-orchestrator"
-ORCHESTRATOR_PROMPT_VERSION = "1.0.0"
+ORCHESTRATOR_PROMPT_VERSION = "1.2.0"
 ORCHESTRATOR_PROMPT = ChatPromptTemplate.from_messages(
     [
         (
@@ -29,6 +31,15 @@ Intents:
   Any mixed policy/customer question requiring customer facts uses this route.
 - supported_action: requested write operation present in the supplied mock API:
   createCase, addCaseNote, escalateCase, createServiceRequest. Never execute it.
+  Preparing a proposal for any service-request type listed below is implemented
+  as supported_action, not customer_context. Require explicit action_details with
+  request_type, customer_id and as_of. Opt-in and interest-certificate requests
+  also require loan_account_id; opt-in requires NEXA-HL. Other service requests
+  do not require a product. Missing details use action_details; do not invent
+  them from a name or another customer's loan. These checks only prepare a
+  proposal: a reminder does not verify KYC or establish that it is due, and a
+  document request does not claim that a document has been issued.
+  Authorization is checked by application code, never granted by this decision.
   Service request types: STATEMENT_COPY, CALLBACK, RE_KYC_REMINDER,
   OPT_IN_CIR_2026_07_PART_PREPAY, INTEREST_CERTIFICATE. Case escalation includes
   complaints, disputes, special-rate requests and the other clause 6.1 situations.
