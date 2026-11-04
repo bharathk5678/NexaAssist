@@ -22,7 +22,6 @@ class IngestRequest(BaseModel):
         policy_version: Published version of the cited policy instrument.
         effective_date: First policy date on which the document/version applies.
         effective_to: Optional final applicable date of the document/version.
-        supersedes: Supersedes retained by this contract.
         jurisdiction: Jurisdiction boundary retained in the policy lookup scope.
         doc_type: Registered policy document category.
         confidentiality_level: Corpus confidentiality scope applied to ingestion and retrieval.

@@ -40,12 +40,7 @@ def test_agent_import_does_not_construct_the_rag_application() -> None:
 def test_shared_startup_preserves_initialization_order(
     monkeypatch: pytest.MonkeyPatch, settings: Settings
 ) -> None:
-    """Initialize telemetry, logging, and the tokenizer before yielding control.
-
-    Args:
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-        settings: Validated application configuration for this operation.
-    """
+    """Initialize telemetry, logging, and the tokenizer before yielding control."""
     events: list[str] = []
     monkeypatch.setattr(startup, "get_settings", lambda: settings)
     telemetry = Mock(side_effect=lambda _: events.append("telemetry"))

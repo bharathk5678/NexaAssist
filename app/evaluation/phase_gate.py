@@ -33,9 +33,6 @@ def measured_baseline(report: dict[str, Any], dataset: Path) -> dict[str, Any]:
         report: Measured quality or security report to validate.
         dataset: Golden dataset file used by this evaluation.
 
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-
     Raises:
         ValueError: RAGAS means do not match the measured case scores.
     """
@@ -100,9 +97,6 @@ def compare(report: dict[str, Any], baseline: dict[str, Any], dataset: Path) -> 
         report: Measured quality or security report to validate.
         baseline: Previously reviewed measured values or finding fingerprints.
         dataset: Golden dataset file used by this evaluation.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
 
     Raises:
         ValueError: The evaluation baseline is invalid.

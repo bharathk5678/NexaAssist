@@ -39,13 +39,6 @@ async def evaluated_answer(
 ) -> EvaluatedAnswerResponse:
     """Serve one generated answer with optional live quality evaluation.
 
-    Args:
-        request: Validated request retaining the caller's explicit scope and action details.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        EvaluatedAnswerResponse value produced by this operation.
-
     Raises:
         HTTPException: Answer service unavailable.
     """
@@ -61,13 +54,6 @@ async def answer(
     request: RetrieveRequest, settings: Annotated[Settings, Depends(get_settings)]
 ) -> AnswerResponse:
     """Serve a grounded policy answer through the thin HTTP boundary.
-
-    Args:
-        request: Validated request retaining the caller's explicit scope and action details.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        AnswerResponse value produced by this operation.
 
     Raises:
         HTTPException: Answer service unavailable.

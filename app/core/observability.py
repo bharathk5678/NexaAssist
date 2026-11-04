@@ -27,13 +27,7 @@ def prompt_annotation_context(
     """Track the existing text prompt without maintaining a second template.
 
     Args:
-        prompt: Prompt supplied by the caller.
-        variables: Variables supplied by the caller.
         prompt_id: Prompt id identifying the scoped record.
-        version: Version supplied by the caller.
-
-    Returns:
-        AbstractContextManager[None] value produced by this operation.
     """
     if not LLMObs.enabled:
         return nullcontext()
@@ -73,12 +67,7 @@ class TokenUsageLogger(AsyncCallbackHandler):
     """Record provider-reported token usage through the LangChain callback interface."""
 
     async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
-        """Log provider-reported token use for completed chat generations.
-
-        Args:
-            response: Response supplied by the caller.
-            kwargs: Additional keyword arguments accepted by the adapted interface.
-        """
+        """Log provider-reported token use for completed chat generations."""
         for generations in response.generations:
             for generation in generations:
                 message = getattr(generation, "message", None)

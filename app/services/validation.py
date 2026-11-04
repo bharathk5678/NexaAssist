@@ -62,9 +62,7 @@ async def validate_service_request(
     """Check authorized service details against operations policy and owned loan facts.
 
     Args:
-        request: Validated request retaining the caller's explicit scope and action details.
         evidence: Retained retrieval results and complete applicable amendments.
-        client: HTTP client configured for the required upstream service.
         access: Server-issued principal identity, customer entitlements and review permission.
 
     Returns:
@@ -135,9 +133,7 @@ async def validate_opt_in(
     """Check the circular opt-in rule against current owned home-loan facts.
 
     Args:
-        request: Validated request retaining the caller's explicit scope and action details.
         evidence: Retained retrieval results and complete applicable amendments.
-        client: HTTP client configured for the required upstream service.
         access: Server-issued principal identity, customer entitlements and review permission.
 
     Returns:

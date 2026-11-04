@@ -16,7 +16,6 @@ class FeedbackRequest(BaseModel):
     """Validated feedback request contract.
 
     Attributes:
-        request: Validated request retaining the caller's explicit scope and action details.
         response: Validated answer or workflow result retained for rendering.
         helpful: User assessment of whether the retained answer was helpful.
         submitter_id: Local submitter identity used to scope feedback idempotency.
@@ -36,9 +35,6 @@ class FeedbackRequest(BaseModel):
     @model_validator(mode="after")
     def matching_dates(self) -> FeedbackRequest:
         """Require feedback request and answer policy dates to agree.
-
-        Returns:
-            FeedbackRequest value produced by this operation.
 
         Raises:
             ValueError: Feedback request and response must have the same as_of date.

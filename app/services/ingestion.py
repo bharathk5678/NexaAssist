@@ -28,15 +28,7 @@ DOC_TYPES = {"POL": "policy", "CIR": "circular"}
 
 
 def requests_from_register(register_path: Path, settings: Settings) -> list[IngestRequest]:
-    """One IngestRequest per authoritative document in document_register.json.
-
-    Args:
-        register_path: Register path supplied by the caller.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        Ordered results produced by the documented operation.
-    """
+    """One IngestRequest per authoritative document in document_register.json."""
     return [
         IngestRequest(
             source_path=str(register_path.parent / entry["file"]),
@@ -59,12 +51,6 @@ def requests_from_register(register_path: Path, settings: Settings) -> list[Inge
 
 async def ingest(requests: list[IngestRequest]) -> list[IngestResponse]:
     """Embed only new or changed chunks, then retire chunks the source no longer has.
-
-    Args:
-        requests: Requests supplied by the caller.
-
-    Returns:
-        Ordered results produced by the documented operation.
 
     Raises:
         ValueError: A request or stored document conflicts with the configured corpus.

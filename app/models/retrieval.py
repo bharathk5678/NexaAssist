@@ -102,11 +102,7 @@ class RetrieveResponse(BaseModel):
 
     @property
     def evidence(self) -> list[RetrieveHit]:
-        """Combine complete amendments and results without duplicating document versions.
-
-        Returns:
-            Ordered results produced by the documented operation.
-        """
+        """Combine complete amendments and results without duplicating document versions."""
         complete = {(hit.citation.doc_id, hit.citation.policy_version) for hit in self.amendments}
         return self.amendments + [
             hit

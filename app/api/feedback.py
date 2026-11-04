@@ -21,13 +21,6 @@ ConfiguredSettings = Annotated[Settings, Depends(get_settings)]
 async def submit(request: FeedbackRequest, settings: ConfiguredSettings) -> FeedbackRecord:
     """Accept validated feedback through the application service.
 
-    Args:
-        request: Validated request retaining the caller's explicit scope and action details.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        FeedbackRecord value produced by this operation.
-
     Raises:
         HTTPException: Feedback store unavailable.
     """
@@ -44,13 +37,6 @@ async def list_recent(
     settings: ConfiguredSettings, limit: Annotated[int, Query(ge=1, le=100)] = 20
 ) -> list[FeedbackRecord]:
     """Return feedback records only after reviewer authorization.
-
-    Args:
-        settings: Validated application configuration for this operation.
-        limit: Limit supplied by the caller.
-
-    Returns:
-        Ordered results produced by the documented operation.
 
     Raises:
         HTTPException: Feedback store unavailable.
@@ -69,11 +55,6 @@ async def review(
 
     Args:
         feedback_id: Feedback id identifying the scoped record.
-        request: Validated request retaining the caller's explicit scope and action details.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
 
     Raises:
         HTTPException: Feedback is absent or already reviewed.

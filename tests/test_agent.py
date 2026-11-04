@@ -1,5 +1,3 @@
-"""Regression tests for agent."""
-
 from __future__ import annotations
 
 import asyncio
@@ -30,14 +28,6 @@ from app.services import agent as agent_service
 
 
 def decision(**updates: Any) -> IntentDecision:
-    """Provide decision for the agent scenario.
-
-    Args:
-        updates: Updates fixture or parametrized input for this scenario.
-
-    Returns:
-        IntentDecision value produced by this operation.
-    """
     return IntentDecision.model_validate(
         {
             "intent": "policy_question",
@@ -54,11 +44,6 @@ def decision(**updates: Any) -> IntentDecision:
 
 @pytest.fixture
 def agent_request() -> AgentRequest:
-    """Provide agent request for the agent scenario.
-
-    Returns:
-        AgentRequest value produced by this operation.
-    """
     return AgentRequest(
         query="What is the home loan fee?",
         as_of="2026-10-01",
@@ -70,11 +55,7 @@ def agent_request() -> AgentRequest:
 
 @pytest.fixture
 def evidence() -> RetrieveResponse:
-    """Combine complete amendments and results without duplicating document versions.
-
-    Returns:
-        RetrieveResponse value produced by this operation.
-    """
+    """Combine complete amendments and results without duplicating document versions."""
     return RetrieveResponse.model_validate(
         {
             "as_of": "2026-10-01",
@@ -129,12 +110,6 @@ def evidence() -> RetrieveResponse:
 def test_policy_graph_runs_in_order_once(
     agent_request: AgentRequest, evidence: RetrieveResponse
 ) -> None:
-    """Verify policy graph runs in order once.
-
-    Args:
-        agent_request: Agent request fixture or parametrized input for this scenario.
-        evidence: Retained retrieval results and complete applicable amendments.
-    """
     retrieve = AsyncMock(return_value=evidence)
     answer = AsyncMock(
         return_value=AnswerResponse(
@@ -191,15 +166,6 @@ def test_policy_graph_runs_in_order_once(
 def test_explicit_service_request_routing_preserves_preflight_guards(
     agent_request: AgentRequest, choice: dict, changes: dict, authorized: bool, status: str
 ) -> None:
-    """Verify explicit service request routing preserves preflight guards.
-
-    Args:
-        agent_request: Agent request fixture or parametrized input for this scenario.
-        choice: Choice fixture or parametrized input for this scenario.
-        changes: Input mutations used to exercise validation boundaries.
-        authorized: Authorized fixture or parametrized input for this scenario.
-        status: HTTP or workflow status used by the scenario.
-    """
     request = AgentRequest.model_validate(
         {
             **agent_request.model_dump(),
@@ -260,15 +226,6 @@ def test_explicit_service_request_routing_preserves_preflight_guards(
 def test_terminal_routes_never_retrieve_or_generate(
     agent_request: AgentRequest, choice: dict, fields: dict, status: str, missing: list
 ) -> None:
-    """Verify terminal routes never retrieve or generate.
-
-    Args:
-        agent_request: Agent request fixture or parametrized input for this scenario.
-        choice: Choice fixture or parametrized input for this scenario.
-        fields: Fields fixture or parametrized input for this scenario.
-        status: HTTP or workflow status used by the scenario.
-        missing: Missing fixture or parametrized input for this scenario.
-    """
     retrieve, answer = AsyncMock(), AsyncMock()
     graph = build_agent_graph(
         RunnableLambda(lambda _: decision(**choice)), RunnableLambda(retrieve), answer
@@ -282,11 +239,6 @@ def test_terminal_routes_never_retrieve_or_generate(
 
 
 def test_explicit_text_scope_is_extracted(evidence: RetrieveResponse) -> None:
-    """Verify explicit text scope is extracted.
-
-    Args:
-        evidence: Retained retrieval results and complete applicable amendments.
-    """
     retrieve = AsyncMock(return_value=evidence)
     answer = AsyncMock(
         return_value=AnswerResponse(
@@ -340,16 +292,6 @@ def test_agent_reuses_real_phase1_http_route_and_answer_chain(
     draft_status: str,
     invalid_quote: bool,
 ) -> None:
-    """Verify agent reuses real phase1 http route and answer chain.
-
-    Args:
-        settings: Validated application configuration for this operation.
-        agent_request: Agent request fixture or parametrized input for this scenario.
-        evidence: Retained retrieval results and complete applicable amendments.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-        draft_status: Draft status fixture or parametrized input for this scenario.
-        invalid_quote: Invalid quote fixture or parametrized input for this scenario.
-    """
     retrieve = AsyncMock(return_value=evidence)
     monkeypatch.setattr(retrieval_api, "retrieve_policy", retrieve)
     llm = Mock(spec=BaseChatModel)
@@ -464,17 +406,6 @@ def test_http_retrieval_fails_closed(
     field: str | None,
     number: float | None,
 ) -> None:
-    """Verify http retrieval fails closed.
-
-    Args:
-        agent_app: Agent app fixture or parametrized input for this scenario.
-        agent_request: Agent request fixture or parametrized input for this scenario.
-        evidence: Retained retrieval results and complete applicable amendments.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-        failure: Failure mode selected by the parametrized test.
-        field: Field fixture or parametrized input for this scenario.
-        number: Number fixture or parametrized input for this scenario.
-    """
     calls = []
     llm = Mock(spec=BaseChatModel)
     llm.with_structured_output.side_effect = lambda schema, **_: RunnableLambda(
@@ -543,14 +474,6 @@ def test_http_retrieval_fails_closed(
 
 @pytest.fixture
 def agent_app(settings: Settings) -> Any:
-    """Provide agent app for the agent scenario.
-
-    Args:
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        Any value produced by this operation.
-    """
     app = create_agent_app()
     app.dependency_overrides[get_settings] = lambda: settings
     app.dependency_overrides[get_agent_settings] = lambda: AgentSettings(_env_file=None)
@@ -570,12 +493,6 @@ def agent_app(settings: Settings) -> Any:
     ],
 )
 def test_agent_api_validates_boundary(agent_app: Any, payload: dict) -> None:
-    """Verify agent api validates boundary.
-
-    Args:
-        agent_app: Agent app fixture or parametrized input for this scenario.
-        payload: Structured request or provider response to validate.
-    """
     assert TestClient(agent_app).post("/agent", json=payload).status_code == 422
 
 
@@ -587,13 +504,6 @@ def test_agent_api_sanitizes_upstream_failures(
     monkeypatch: pytest.MonkeyPatch,
     error: Exception,
 ) -> None:
-    """Verify agent api sanitizes upstream failures.
-
-    Args:
-        agent_app: Agent app fixture or parametrized input for this scenario.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-        error: Error fixture or parametrized input for this scenario.
-    """
     monkeypatch.setattr(agent_api, "orchestrate", AsyncMock(side_effect=error))
     response = TestClient(agent_app).post("/agent", json={"query": "policy"})
     assert response.status_code == 503
@@ -618,16 +528,6 @@ def test_agent_api_terminal_routes_do_not_call_rag(
     fields: dict,
     status: str,
 ) -> None:
-    """Verify agent api terminal routes do not call rag.
-
-    Args:
-        agent_app: Agent app fixture or parametrized input for this scenario.
-        agent_request: Agent request fixture or parametrized input for this scenario.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-        choice: Choice fixture or parametrized input for this scenario.
-        fields: Fields fixture or parametrized input for this scenario.
-        status: HTTP or workflow status used by the scenario.
-    """
     llm = Mock(spec=BaseChatModel)
     llm.with_structured_output.return_value = RunnableLambda(lambda _: decision(**choice))
     monkeypatch.setattr(agent_service, "get_chat_model", lambda _: llm)
@@ -646,7 +546,6 @@ def test_agent_api_terminal_routes_do_not_call_rag(
 
 
 def test_rag_client_bounds_http_calls_and_closes() -> None:
-    """Verify rag client bounds http calls and closes."""
     config = AgentSettings(
         _env_file=None, rag_base_url="http://rag/prefix", agent_http_timeout_seconds=2
     )
@@ -665,12 +564,6 @@ def test_run_deadline_stops_classification(
     settings: Settings,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Verify run deadline stops classification.
-
-    Args:
-        settings: Validated application configuration for this operation.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-    """
 
     async def slow(_: Any) -> IntentDecision:
         await asyncio.sleep(1)
@@ -691,7 +584,6 @@ def test_run_deadline_stops_classification(
 
 
 def test_original_api_contracts_remain_separate() -> None:
-    """Verify original api contracts remain separate."""
     paths = create_app().openapi()["paths"]
     assert {
         "/retrieve",
@@ -715,7 +607,6 @@ def test_original_api_contracts_remain_separate() -> None:
 
 
 def test_agent_config_and_classifier_schema() -> None:
-    """Verify agent config and classifier schema."""
     with pytest.raises(ValidationError):
         AgentSettings(_env_file=None, rag_base_url="file:///etc/passwd")
     with pytest.raises(ValidationError):
@@ -725,7 +616,6 @@ def test_agent_config_and_classifier_schema() -> None:
 
 
 def test_ten_routing_golden_cases_have_valid_contracts() -> None:
-    """Verify ten routing golden cases have valid contracts."""
     cases = [
         json.loads(line)
         for line in Path("evaluation/datasets/agent.jsonl").read_text().splitlines()

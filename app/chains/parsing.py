@@ -14,14 +14,7 @@ PAGE_MARGIN_PT = 50
 
 
 def parse_document(path: str) -> list[Element]:
-    """Parse a source document into ordered headings, paragraphs and whole tables.
-
-    Args:
-        path: Input file or resource path for this operation.
-
-    Returns:
-        Ordered results produced by the documented operation.
-    """
+    """Parse a source document into ordered headings, paragraphs and whole tables."""
     if path.lower().endswith(".pdf"):
         return _parse_pdf(path)
     return partition(filename=path)

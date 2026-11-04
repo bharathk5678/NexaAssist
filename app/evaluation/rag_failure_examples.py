@@ -58,15 +58,7 @@ async def _source_manifests(settings: Settings) -> tuple[list[ChunkSnapshot], li
     children: list[Document] = []
 
     async def capture(documents: list[Document], **kwargs: Any) -> list[str]:
-        """Retain the generated source observations for the current diagnostic.
-
-        Args:
-            documents: Documents supplied by the caller.
-            kwargs: Additional keyword arguments accepted by the adapted interface.
-
-        Returns:
-            Ordered results produced by the documented operation.
-        """
+        """Retain the generated source observations for the current diagnostic."""
         children.extend(documents)
         return cast(list[str], kwargs["ids"])
 
@@ -95,12 +87,6 @@ async def _source_manifests(settings: Settings) -> tuple[list[ChunkSnapshot], li
 
 async def example_report(selected: str | None = None) -> dict[str, Any]:
     """Run the selected retrieval-failure example using explicitly labeled observations.
-
-    Args:
-        selected: Selected supplied by the caller.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
 
     Raises:
         ValueError: S5 requires the circular applicability parent in the baseline.
@@ -179,11 +165,7 @@ async def example_report(selected: str | None = None) -> dict[str, Any]:
 
         Args:
             query: User question or scoped retrieval query.
-            refs: Refs supplied by the caller.
             changes: Input mutations used to exercise validation boundaries.
-
-        Returns:
-            Named values describing the documented operation or diagnostic outcome.
         """
         request = RetrieveRequest.model_validate(
             {"query": query, "as_of": "2026-10-01", "product_id": "NEXA-HL", **changes}

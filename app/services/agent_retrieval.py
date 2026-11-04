@@ -12,10 +12,6 @@ async def retrieve_over_http(
 ) -> RetrieveResponse:
     """Use the unchanged Phase 1 contract, including complete amendments.
 
-    Args:
-        request: Validated request retaining the caller's explicit scope and action details.
-        client: HTTP client configured for the required upstream service.
-
     Returns:
         Validated policy evidence matching the requested date.
 

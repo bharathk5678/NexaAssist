@@ -82,9 +82,6 @@ class EvaluationRecord(BaseModel):
 def load_golden(path: Path) -> list[GoldenAnswer]:
     """Load and validate the mechanical-check golden dataset, rejecting an empty file.
 
-    Args:
-        path: Input file or resource path for this operation.
-
     Returns:
         Nonempty sequence of validated mechanical-check golden cases.
 
@@ -103,9 +100,6 @@ def load_golden(path: Path) -> list[GoldenAnswer]:
 
 def capture_sources(retrieved: RetrieveResponse) -> list[EvidenceContext]:
     """Mirror the answer chain's document/version/parent deduplication, in order.
-
-    Args:
-        retrieved: Retrieved supplied by the caller.
 
     Returns:
         Ordered unique evidence identities for mechanical fixture checks.

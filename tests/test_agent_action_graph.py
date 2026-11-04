@@ -1,5 +1,3 @@
-"""Regression tests for agent action graph."""
-
 from __future__ import annotations
 
 import asyncio
@@ -36,13 +34,6 @@ TYPES = [
 def test_four_agent_path_pauses_then_executes_once(
     request_type: str, failure: str | None, classified_intent: str
 ) -> None:
-    """Verify four agent path pauses then executes once.
-
-    Args:
-        request_type: Request type fixture or parametrized input for this scenario.
-        failure: Failure mode selected by the parametrized test.
-        classified_intent: Classified intent fixture or parametrized input for this scenario.
-    """
     request = AgentRequest.model_validate(
         {
             "query": "Prepare the requested service.",
@@ -177,11 +168,6 @@ def test_four_agent_path_pauses_then_executes_once(
 
 @pytest.mark.parametrize("validator", [None, AsyncMock()])
 def test_action_cannot_be_configured_without_validation_and_checkpointing(validator) -> None:
-    """Verify action cannot be configured without validation and checkpointing.
-
-    Args:
-        validator: Optional coroutine checking policy and current customer facts.
-    """
     with pytest.raises(ValueError, match="checkpointing"):
         build_agent_graph(
             Mock(spec=Runnable),

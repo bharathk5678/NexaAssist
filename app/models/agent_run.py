@@ -54,7 +54,6 @@ def proposal_digest(request: AgentRequest, validation: ValidationResult) -> str:
     """Bind approval to the exact request, proposal and retained policy evidence.
 
     Args:
-        request: Validated request retaining the caller's explicit scope and action details.
         validation: Retained policy and banking validation for the exact proposed action.
 
     Returns:

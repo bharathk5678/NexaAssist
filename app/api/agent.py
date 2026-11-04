@@ -27,11 +27,7 @@ router.add_api_route("/health", health, methods=["GET"])
 
 @router.get("/metrics")
 async def metrics() -> dict[str, int]:
-    """Return process-local agent workflow counters.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-    """
+    """Return process-local agent workflow counters."""
     return {
         "agent_requests_total": agent_metrics["requests"],
         "agent_completed_total": agent_metrics["completed"],
@@ -50,15 +46,9 @@ async def agent(
     """Execute an independent policy-answer or validation-only agent request.
 
     Args:
-        request: Validated request retaining the caller's explicit scope and action details.
-        settings: Validated application configuration for this operation.
         agent_settings: Validated agent identities, service endpoints and work limits.
-        client: HTTP client configured for the required upstream service.
         access: Server-issued principal identity, customer entitlements and review permission.
         bank: Authenticated banking client, or None when unconfigured.
-
-    Returns:
-        AgentResponse value produced by this operation.
 
     Raises:
         HTTPException: Agent service unavailable.
@@ -98,16 +88,10 @@ async def submit(
     """Validate and submit only through the explicitly enabled legacy write endpoint.
 
     Args:
-        request: Validated request retaining the caller's explicit scope and action details.
         idempotency_key: Persisted operation key reused for the unchanged banking submission.
-        settings: Validated application configuration for this operation.
         agent_settings: Validated agent identities, service endpoints and work limits.
-        client: HTTP client configured for the required upstream service.
         access: Server-issued principal identity, customer entitlements and review permission.
         bank: Authenticated banking client, or None when unconfigured.
-
-    Returns:
-        SubmittedServiceRequest | AgentResponse value produced by this operation.
 
     Raises:
         HTTPException: Submission could not be confirmed. Retry with the same Idempotency-Key and unchanged request body; the bank may have received it.

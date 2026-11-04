@@ -31,10 +31,6 @@ async def answer_with_quality(
 ) -> EvaluatedAnswerResponse:
     """Generate once, score the exact retained evidence and return answer-quality metadata.
 
-    Args:
-        request: Validated request retaining the caller's explicit scope and action details.
-        settings: Validated application configuration for this operation.
-
     Returns:
         The single generated answer and its explicit quality/telemetry statuses.
 

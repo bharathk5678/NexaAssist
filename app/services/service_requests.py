@@ -26,9 +26,7 @@ async def submit_service_request(
     """Submit the exact allowed proposal and verify the banking receipt identity.
 
     Args:
-        request: Validated request retaining the caller's explicit scope and action details.
         validation: Retained policy and banking validation for the exact proposed action.
-        client: HTTP client configured for the required upstream service.
         access: Server-issued principal identity, customer entitlements and review permission.
         idempotency_key: Persisted operation key reused for the unchanged banking submission.
 

@@ -1,5 +1,3 @@
-"""Regression tests for phase gate."""
-
 from __future__ import annotations
 
 import copy
@@ -19,11 +17,6 @@ DATASET = Path("evaluation/datasets/answer.jsonl")
 
 @pytest.fixture
 def report() -> dict:
-    """Provide report for the phase gate scenario.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-    """
     cases = load_cases(DATASET)
     answered = sum(case.expected_status == "answered" for case in cases)
     return {
@@ -61,11 +54,6 @@ def report() -> dict:
 
 
 def test_each_metric_and_judge_mean_cannot_regress(report: dict) -> None:
-    """Verify each metric and judge mean cannot regress.
-
-    Args:
-        report: Measured quality or security report to validate.
-    """
     baseline = phase_gate.measured_baseline(report, DATASET)
     assert phase_gate.compare(report, baseline, DATASET)["status"] == "passed"
     assert baseline["case_count"] == 10
@@ -103,12 +91,6 @@ def test_each_metric_and_judge_mean_cannot_regress(report: dict) -> None:
     ],
 )
 def test_incomplete_or_invalid_evidence_cannot_become_baseline(report: dict, invalid: str) -> None:
-    """Verify incomplete or invalid evidence cannot become baseline.
-
-    Args:
-        report: Measured quality or security report to validate.
-        invalid: Invalid fixture or parametrized input for this scenario.
-    """
     if invalid == "partial":
         report["records"].pop()
     elif invalid == "status":
@@ -143,12 +125,6 @@ def test_incomplete_or_invalid_evidence_cannot_become_baseline(report: dict, inv
 
 @pytest.mark.parametrize("invalid", ["protocol", "dataset", "floors", "nonfinite"])
 def test_baseline_changes_are_explicit(report: dict, invalid: str) -> None:
-    """Verify baseline changes are explicit.
-
-    Args:
-        report: Measured quality or security report to validate.
-        invalid: Invalid fixture or parametrized input for this scenario.
-    """
     baseline = phase_gate.measured_baseline(report, DATASET)
     if invalid == "protocol":
         baseline["protocol"]["model"] = "different-model"
@@ -165,13 +141,6 @@ def test_baseline_changes_are_explicit(report: dict, invalid: str) -> None:
 def test_cli_captures_checks_blocks_regression_and_refuses_overwrite(
     report: dict, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Verify cli captures checks blocks regression and refuses overwrite.
-
-    Args:
-        report: Measured quality or security report to validate.
-        tmp_path: Isolated temporary directory for this test's files.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-    """
     path, baseline = tmp_path / "report.json", tmp_path / "baseline.json"
     path.write_text(json.dumps(report))
 

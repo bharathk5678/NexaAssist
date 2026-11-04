@@ -66,11 +66,7 @@ def _agent_client(uri: str) -> MongoClient[Any]:
 
 
 class MongoRunStore:
-    """Durable workflow checkpoints plus an atomic lease for each run mutation.
-
-    Args:
-        settings: Validated application configuration for this operation.
-    """
+    """Durable workflow checkpoints plus an atomic lease for each run mutation."""
 
     def __init__(self, settings: Settings) -> None:
         self.institution = settings.institution
@@ -93,11 +89,7 @@ class MongoRunStore:
 
     async def _call[T](self, operation: Callable[[], T]) -> T:
         def bounded() -> T:
-            """Execute the synchronous store operation within its MongoDB deadline.
-
-            Returns:
-                T value produced by this operation.
-            """
+            """Execute the synchronous store operation within its MongoDB deadline."""
             with timeout(5):
                 return operation()
 
@@ -138,8 +130,6 @@ class MongoRunStore:
 
         Args:
             run_id: Identifier of the saved workflow to read or resume.
-            lease: Lease supplied by the caller.
-            seconds: Seconds supplied by the caller.
 
         Returns:
             Claimed run record, or None if the lease is unavailable.
@@ -161,7 +151,6 @@ class MongoRunStore:
 
         Args:
             run_id: Identifier of the saved workflow to read or resume.
-            lease: Lease supplied by the caller.
             changes: Input mutations used to exercise validation boundaries.
 
         Returns:
@@ -184,7 +173,6 @@ class MongoRunStore:
 
         Args:
             run_id: Identifier of the saved workflow to read or resume.
-            lease: Lease supplied by the caller.
             status: HTTP or workflow status used by the scenario.
         """
         await self._call(

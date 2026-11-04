@@ -1,5 +1,3 @@
-"""Regression tests for retrieval."""
-
 from __future__ import annotations
 
 import asyncio
@@ -23,11 +21,6 @@ from app.services import retrieval as retrieval_service
 
 
 def settings() -> Settings:
-    """Provide settings for the retrieval scenario.
-
-    Returns:
-        Settings value produced by this operation.
-    """
     return Settings(
         _env_file=None,
         mongodb_uri="mongodb://unused",
@@ -41,7 +34,6 @@ def settings() -> Settings:
 
 
 def test_retrieval_filters_and_expands_parent() -> None:
-    """Verify retrieval filters and expands parent."""
     document = Document(
         id="POL-HL-V2_6.2_c01",
         page_content="6.2 Processing fee",
@@ -119,12 +111,6 @@ def test_retrieval_filters_and_expands_parent() -> None:
 def test_out_of_scope_parent_cannot_replace_scoped_child(
     changed_field: str, changed_value: str
 ) -> None:
-    """Verify out of scope parent cannot replace scoped child.
-
-    Args:
-        changed_field: Changed field fixture or parametrized input for this scenario.
-        changed_value: Changed value fixture or parametrized input for this scenario.
-    """
     metadata = {
         "institution": "NexaBank",
         "jurisdiction": "IN",
@@ -167,7 +153,6 @@ def test_out_of_scope_parent_cannot_replace_scoped_child(
 
 
 def test_retrieval_empty_and_missing_parent() -> None:
-    """Verify retrieval empty and missing parent."""
     store = Mock(spec=VectorStore)
     store.asimilarity_search_with_score = AsyncMock(return_value=[])
     parents = InMemoryStore()
@@ -191,11 +176,6 @@ def test_retrieval_empty_and_missing_parent() -> None:
 
 
 def test_request_rejects_invalid_input() -> None:
-    """Verify request rejects invalid input.
-
-    Raises:
-        AssertionError: The operation cannot satisfy its documented validation or execution contract.
-    """
     for payload in (
         {"query": " ", "as_of": "2026-10-01"},
         {"query": "fee", "as_of": "2026-10-01", "top_k": 0},
@@ -209,11 +189,6 @@ def test_request_rejects_invalid_input() -> None:
 
 
 def test_api_returns_safe_failure_and_validates_body(monkeypatch: Any) -> None:
-    """Verify api returns safe failure and validates body.
-
-    Args:
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-    """
     app = create_app()
     app.dependency_overrides[get_settings] = settings
     client = TestClient(app)
@@ -240,14 +215,6 @@ def test_api_returns_safe_failure_and_validates_body(monkeypatch: Any) -> None:
 
 
 def test_health_metrics_and_failure_counters(monkeypatch: Any) -> None:
-    """Verify health metrics and failure counters.
-
-    Args:
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-
-    Raises:
-        AssertionError: Expected a retrieval failure.
-    """
     retrieval_service.retrieval_metrics.clear()
     retrieval_service.retrieval_latencies.clear()
     response = RetrieveResponse(

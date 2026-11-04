@@ -21,23 +21,12 @@ logger = structlog.get_logger()
 async def answer_policy(request: RetrieveRequest, settings: Settings) -> AnswerResponse:
     """Generate one grounded answer and attach optional Datadog feedback identity.
 
-    Args:
-        request: Validated request retaining the caller's explicit scope and action details.
-        settings: Validated application configuration for this operation.
-
     Returns:
         Grounded answer, clarification or safe abstention with retrieval timings.
     """
 
     async def retrieve(value: RetrieveRequest) -> RetrieveResponse:
-        """Retrieve scoped policy evidence through the configured retrieval integration.
-
-        Args:
-            value: Candidate value supplied by validation or the calling integration.
-
-        Returns:
-            RetrieveResponse value produced by this operation.
-        """
+        """Retrieve scoped policy evidence through the configured retrieval integration."""
         return await retrieve_policy(value, settings)
 
     chain = build_answer_chain(RunnableLambda(retrieve), get_chat_model(settings), settings)

@@ -53,8 +53,6 @@ async def run_service(
 
     Args:
         access: Server-issued principal identity, customer entitlements and review permission.
-        settings: Validated application configuration for this operation.
-        config: Workflow settings or graph configuration supplied by the caller.
         rag: Bounded client for the RAG service.
         bank: Authenticated banking client, or None when unconfigured.
 
@@ -78,15 +76,7 @@ RunService = Annotated[AgentRunService, Depends(run_service)]
 
 @router.post("", response_model=AgentRunResponse, status_code=201)
 async def start(request: AgentRequest, service: RunService) -> AgentRunResponse:
-    """Start a named-owner durable workflow.
-
-    Args:
-        request: Validated request retaining the caller's explicit scope and action details.
-        service: Service supplied by the caller.
-
-    Returns:
-        AgentRunResponse value produced by this operation.
-    """
+    """Start a named-owner durable workflow."""
     return await service.start(request)
 
 
@@ -96,10 +86,6 @@ async def read(run_id: UUID, service: RunService) -> AgentRunResponse:
 
     Args:
         run_id: Identifier of the saved workflow to read or resume.
-        service: Service supplied by the caller.
-
-    Returns:
-        AgentRunResponse value produced by this operation.
     """
     return await service.get(run_id)
 
@@ -113,10 +99,6 @@ async def approve(
     Args:
         run_id: Identifier of the saved workflow to read or resume.
         decision: Reviewer decision bound to the exact retained proposal hash.
-        service: Service supplied by the caller.
-
-    Returns:
-        AgentRunResponse value produced by this operation.
     """
     return await service.approve(run_id, decision)
 
@@ -127,9 +109,5 @@ async def retry(run_id: UUID, service: RunService) -> AgentRunResponse:
 
     Args:
         run_id: Identifier of the saved workflow to read or resume.
-        service: Service supplied by the caller.
-
-    Returns:
-        AgentRunResponse value produced by this operation.
     """
     return await service.retry(run_id)

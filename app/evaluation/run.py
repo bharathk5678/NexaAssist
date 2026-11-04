@@ -73,9 +73,6 @@ class JudgeScore(BaseModel):
 def load_cases(path: Path) -> list[GoldenCase]:
     """Load the batch evaluation dataset using its existing golden-case contract.
 
-    Args:
-        path: Input file or resource path for this operation.
-
     Returns:
         Nonempty sequence of validated batch golden cases.
 
@@ -93,14 +90,7 @@ def load_cases(path: Path) -> list[GoldenCase]:
 
 
 def trace_summary(runs: list[Any]) -> list[dict[str, Any]]:
-    """Flatten retained chain spans into names, durations and failure indicators.
-
-    Args:
-        runs: Runs supplied by the caller.
-
-    Returns:
-        Ordered results produced by the documented operation.
-    """
+    """Flatten retained chain spans into names, durations and failure indicators."""
     spans = []
     for run in runs:
         spans.append(
@@ -122,10 +112,6 @@ async def collect_records(cases: list[GoldenCase], settings: Settings) -> list[d
 
     Args:
         cases: Validated golden inputs and expected outcomes.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        Ordered results produced by the documented operation.
     """
     model = get_chat_model(settings)
     judge_settings = settings.model_copy(
@@ -214,10 +200,6 @@ async def evaluate_ragas(records: list[dict[str, Any]], settings: Settings) -> d
 
     Args:
         records: Completed per-case evaluation records.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
     """
     from app.evaluation.ragas_metrics import RagasScorer
 
@@ -268,7 +250,6 @@ def quality_gate(report: dict[str, Any], minimum: float | None) -> bool:
 
     Args:
         report: Measured quality or security report to validate.
-        minimum: Minimum supplied by the caller.
 
     Returns:
         Whether the report meets the requested score and status conditions.
@@ -293,10 +274,6 @@ def publish_datadog_evaluations(records: list[dict[str, Any]], ragas: dict[str, 
 
     Args:
         records: Completed per-case evaluation records.
-        ragas: Ragas supplied by the caller.
-
-    Returns:
-        int value produced by this operation.
     """
     scores = iter(ragas["scores"])
     count = 0
@@ -335,10 +312,6 @@ async def run(cases: list[GoldenCase], settings: Settings) -> dict[str, Any]:
 
     Args:
         cases: Validated golden inputs and expected outcomes.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
     """
     records = await collect_records(cases, settings)
     ragas = await evaluate_ragas(records, settings)

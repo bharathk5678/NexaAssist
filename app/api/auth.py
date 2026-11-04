@@ -22,7 +22,6 @@ def get_validation_access(
     """Resolve a bearer credential into server-owned identity and customer entitlements.
 
     Args:
-        settings: Validated application configuration for this operation.
         credentials: Bearer credentials supplied at the authentication boundary.
 
     Returns:
@@ -57,7 +56,6 @@ def require_reviewer(
     """Require the configured feedback-review credential before serving protected routes.
 
     Args:
-        settings: Validated application configuration for this operation.
         credentials: Bearer credentials supplied at the authentication boundary.
 
     Raises:

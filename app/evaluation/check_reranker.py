@@ -21,9 +21,6 @@ from app.core.logging import configure_logging
 async def check() -> dict[str, object]:
     """Verify local reranker likelihoods against the supplied scoring contract.
 
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-
     Raises:
         ValueError: This smoke test only permits a local reranker endpoint.
     """

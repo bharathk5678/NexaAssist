@@ -11,9 +11,6 @@ from app.core.observability import TokenUsageLogger
 def get_chat_model(settings: Settings) -> ChatOpenAI:
     """Construct the configured Responses API chat model with bounded retries.
 
-    Args:
-        settings: Validated application configuration for this operation.
-
     Returns:
         Configured ChatOpenAI integration used by classification and generation.
     """

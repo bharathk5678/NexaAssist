@@ -52,8 +52,6 @@ def build_workflow(
     """Wire the model, retrieval adapter and optional banking capabilities into the graph.
 
     Args:
-        settings: Validated application configuration for this operation.
-        client: HTTP client configured for the required upstream service.
         access: Server-issued principal identity, customer entitlements and review permission.
         banking_client: Authenticated banking client, or None when the integration is disabled.
         agent_settings: Validated agent identities, service endpoints and work limits.
@@ -86,14 +84,7 @@ def build_workflow(
 
     async def classify(value: AgentRequest) -> IntentDecision:
         # Notes belong to the fixed bank payload, not to the routing model.
-        """Classify explicit request scope using the versioned structured intent prompt.
-
-        Args:
-            value: Candidate value supplied by validation or the calling integration.
-
-        Returns:
-            IntentDecision value produced by this operation.
-        """
+        """Classify explicit request scope using the versioned structured intent prompt."""
         routing_request = value.model_dump(mode="json")
         if routing_request["action_details"] is not None:
             routing_request["action_details"].pop("notes", None)
@@ -109,25 +100,14 @@ def build_workflow(
             )
 
     async def retrieve(value: RetrieveRequest) -> RetrieveResponse:
-        """Retrieve scoped policy evidence through the configured retrieval integration.
-
-        Args:
-            value: Candidate value supplied by validation or the calling integration.
-
-        Returns:
-            RetrieveResponse value produced by this operation.
-        """
+        """Retrieve scoped policy evidence through the configured retrieval integration."""
         return await retrieve_over_http(value, client)
 
     async def answer(value: RetrieveRequest, evidence: RetrieveResponse) -> AnswerResponse:
         """Generate a grounded answer using evidence retained for the request.
 
         Args:
-            value: Candidate value supplied by validation or the calling integration.
             evidence: Retained retrieval results and complete applicable amendments.
-
-        Returns:
-            AnswerResponse value produced by this operation.
         """
         chain = build_answer_chain(RunnableLambda(lambda _: evidence), llm, settings)
         return await chain.ainvoke(value, config={"callbacks": callbacks})
@@ -136,11 +116,7 @@ def build_workflow(
         """Validate the service proposal using policy evidence and current authorized banking facts.
 
         Args:
-            value: Candidate value supplied by validation or the calling integration.
             evidence: Retained retrieval results and complete applicable amendments.
-
-        Returns:
-            ValidationResult value produced by this operation.
         """
         assert banking_client is not None and access is not None
         with (
@@ -183,10 +159,7 @@ async def orchestrate(
     """Execute one independent validation-only or policy-answer graph request.
 
     Args:
-        request: Validated request retaining the caller's explicit scope and action details.
-        settings: Validated application configuration for this operation.
         agent_settings: Validated agent identities, service endpoints and work limits.
-        client: HTTP client configured for the required upstream service.
         access: Server-issued principal identity, customer entitlements and review permission.
         banking_client: Authenticated banking client, or None when the integration is disabled.
 

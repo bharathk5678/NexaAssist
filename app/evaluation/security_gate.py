@@ -14,14 +14,7 @@ from app.core.logging import configure_logging
 
 
 def finding_fingerprint(result: dict[str, Any]) -> str:
-    """Fingerprint a security rule, path and source content without exposing matches.
-
-    Args:
-        result: Result supplied by the caller.
-
-    Returns:
-        Text representation produced by the documented operation.
-    """
+    """Fingerprint a security rule, path and source content without exposing matches."""
     value = "\0".join((result["check_id"], result["path"], result["extra"]["lines"]))
     return hashlib.sha256(value.encode()).hexdigest()
 
@@ -57,9 +50,6 @@ def main(argv: list[str] | None = None) -> int:
 
     Args:
         argv: Optional CLI arguments; None uses the process command line.
-
-    Returns:
-        int value produced by this operation.
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("report", type=Path)

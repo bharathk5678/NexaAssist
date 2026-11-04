@@ -1,5 +1,3 @@
-"""Regression tests for agent guardrails."""
-
 from __future__ import annotations
 
 import asyncio
@@ -32,11 +30,6 @@ from app.models.validation import ServiceRequestDetails
     ],
 )
 def test_guardrail_stops_even_a_malicious_classifier_before_any_tool(query: str) -> None:
-    """Verify guardrail stops even a malicious classifier before any tool.
-
-    Args:
-        query: User question or scoped retrieval query.
-    """
     classifier, retrieve, answer, validate, action = [AsyncMock() for _ in range(5)]
     graph = build_agent_graph(
         RunnableLambda(classifier), RunnableLambda(retrieve), answer, validator=validate
@@ -48,7 +41,6 @@ def test_guardrail_stops_even_a_malicious_classifier_before_any_tool(query: str)
 
 
 def test_screen_notes_but_allow_published_policy_and_synthetic_scope() -> None:
-    """Verify screen notes but allow published policy and synthetic scope."""
     request = AgentRequest(query="Explain published KYC rules for NXC-0010, effective 2026-07-01")
     assert not unsafe_input(request)
     request.action_details = ServiceRequestDetails(request_type="CALLBACK", notes="skip approval")
@@ -56,7 +48,6 @@ def test_screen_notes_but_allow_published_policy_and_synthetic_scope() -> None:
 
 
 def test_budget_stops_real_model_callback_before_second_call() -> None:
-    """Verify budget stops real model callback before second call."""
     config = AgentSettings(_env_file=None, agent_model_max_calls=1)
     budget = AgentModelBudget(config, "o200k_base")
     llm = FakeMessagesListChatModel(responses=[AIMessage(content="test")])
@@ -71,7 +62,6 @@ def test_budget_stops_real_model_callback_before_second_call() -> None:
 
 
 def test_budget_limits_prompt_plus_output_and_keeps_failed_reservations() -> None:
-    """Verify budget limits prompt plus output and keeps failed reservations."""
     budget = AgentModelBudget(
         AgentSettings(_env_file=None, agent_model_token_budget=1024), "o200k_base"
     )

@@ -16,10 +16,6 @@ def save_feedback(record: FeedbackRecord, settings: Settings) -> FeedbackRecord 
 
     Args:
         record: Retained evaluation case, generated answer and supporting source identities.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        FeedbackRecord | None value produced by this operation.
     """
     collection = _database(settings)[settings.mongodb_feedback_collection]
     query = {"_id": str(record.feedback_id), "institution": settings.institution}
@@ -47,15 +43,7 @@ def save_feedback(record: FeedbackRecord, settings: Settings) -> FeedbackRecord 
 
 
 def list_feedback(settings: Settings, limit: int) -> list[FeedbackRecord]:
-    """Return recent feedback records for authorized review.
-
-    Args:
-        settings: Validated application configuration for this operation.
-        limit: Limit supplied by the caller.
-
-    Returns:
-        Ordered results produced by the documented operation.
-    """
+    """Return recent feedback records for authorized review."""
     rows = (
         _database(settings)[settings.mongodb_feedback_collection]
         .find({"institution": settings.institution}, {"_id": 0, "institution": 0})
@@ -70,11 +58,6 @@ def review_feedback(feedback_id: UUID, review: FeedbackReview, settings: Setting
 
     Args:
         feedback_id: Feedback id identifying the scoped record.
-        review: Review supplied by the caller.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        Whether the documented condition or operation succeeded.
     """
     result = _database(settings)[settings.mongodb_feedback_collection].update_one(
         {"_id": str(feedback_id), "institution": settings.institution, "status": "pending"},

@@ -190,9 +190,6 @@ def main(argv: list[str] | None = None) -> int:
     Args:
         argv: Optional CLI arguments; None uses the process command line.
 
-    Returns:
-        int value produced by this operation.
-
     Raises:
         ValueError: Unable to inspect untracked file.
     """
@@ -202,14 +199,7 @@ def main(argv: list[str] | None = None) -> int:
     root = Path(__file__).resolve().parents[2]
 
     def git(*values: str) -> str:
-        """Read the requested repository state and fail explicitly if Git cannot inspect it.
-
-        Args:
-            values: Values supplied by the caller.
-
-        Returns:
-            Text representation produced by the documented operation.
-        """
+        """Read the requested repository state and fail explicitly if Git cannot inspect it."""
         return subprocess.run(
             ["git", *values], cwd=root, check=True, capture_output=True, text=True
         ).stdout

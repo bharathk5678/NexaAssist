@@ -27,10 +27,6 @@ def request_run(
     """Call a durable-run endpoint and retain either a validated result or a safe UI error.
 
     Args:
-        client: HTTP client configured for the required upstream service.
-        method: Method supplied by the caller.
-        path: Input file or resource path for this operation.
-        token: Token supplied by the caller.
         body: Request payload used by this mock operation or test.
 
     Returns:
@@ -90,8 +86,6 @@ def agent_workspace(client: httpx.Client, as_of: date, product_id: str | None) -
     """Render the owner-to-reviewer service-request workflow and safe saved-run recovery.
 
     Args:
-        client: HTTP client configured for the required upstream service.
-        as_of: As of supplied by the caller.
         product_id: Product id identifying the scoped record.
 
     Example:

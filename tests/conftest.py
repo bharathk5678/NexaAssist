@@ -1,5 +1,3 @@
-"""Regression tests for conftest."""
-
 from __future__ import annotations
 
 from typing import Any
@@ -11,14 +9,6 @@ from app.core.config import Settings
 
 @pytest.fixture
 def workflow_settings(settings: Settings) -> Settings:
-    """Provide workflow settings for the conftest scenario.
-
-    Args:
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        Settings value produced by this operation.
-    """
     from uuid import uuid4
 
     return settings.model_copy(update={"mongodb_db": "nexa_agent_test_" + uuid4().hex})
@@ -26,15 +16,6 @@ def workflow_settings(settings: Settings) -> Settings:
 
 @pytest.fixture
 def run_store(workflow_settings: Settings, monkeypatch: pytest.MonkeyPatch):
-    """Provide run store for the conftest scenario.
-
-    Args:
-        workflow_settings: Test configuration with an isolated workflow database.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-
-    Yields:
-        Each fixture value or stored key produced by this operation.
-    """
     import os
 
     import mongomock
@@ -66,11 +47,6 @@ def run_store(workflow_settings: Settings, monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture
 def settings() -> Settings:
-    """Provide settings for the conftest scenario.
-
-    Returns:
-        Settings value produced by this operation.
-    """
     return Settings(
         _env_file=None,
         mongodb_uri="mongodb://unused",

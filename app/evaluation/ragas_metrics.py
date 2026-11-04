@@ -25,10 +25,6 @@ class StructuredJudge(InstructorBaseRagasLLM):
     def generate[T: BaseModel](self, prompt: str, response_model: type[T]) -> T:
         """Generate and validate the requested structured judge response synchronously.
 
-        Args:
-            prompt: Prompt supplied by the caller.
-            response_model: Response model supplied by the caller.
-
         Returns:
             Response validated against the requested structured output model.
         """
@@ -39,10 +35,6 @@ class StructuredJudge(InstructorBaseRagasLLM):
 
     async def agenerate[T: BaseModel](self, prompt: str, response_model: type[T]) -> T:
         """Generate and validate the requested structured judge response asynchronously.
-
-        Args:
-            prompt: Prompt supplied by the caller.
-            response_model: Response model supplied by the caller.
 
         Returns:
             Response validated against the requested structured output model.
@@ -67,10 +59,6 @@ class MetricEmbeddings(BaseRagasEmbedding):
     def embed_text(self, text: str, **kwargs: Any) -> list[float]:
         """Embed one metric input using the configured embedding integration.
 
-        Args:
-            text: Text supplied by the caller.
-            kwargs: Additional keyword arguments accepted by the adapted interface.
-
         Returns:
             Embedding vector for the supplied metric input.
         """
@@ -78,10 +66,6 @@ class MetricEmbeddings(BaseRagasEmbedding):
 
     async def aembed_text(self, text: str, **kwargs: Any) -> list[float]:
         """Embed one metric input asynchronously using the configured integration.
-
-        Args:
-            text: Text supplied by the caller.
-            kwargs: Additional keyword arguments accepted by the adapted interface.
 
         Returns:
             Embedding vector for the supplied metric input.

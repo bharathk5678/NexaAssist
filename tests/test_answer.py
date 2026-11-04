@@ -1,5 +1,3 @@
-"""Regression tests for answer."""
-
 from __future__ import annotations
 
 import asyncio
@@ -30,15 +28,6 @@ from app.models.retrieval import (
 
 
 def hit(number: int = 1, text: str = "Maximum amount is 7.5 crore.") -> RetrieveHit:
-    """Provide hit for the answer scenario.
-
-    Args:
-        number: Number fixture or parametrized input for this scenario.
-        text: Text fixture or parametrized input for this scenario.
-
-    Returns:
-        RetrieveHit value produced by this operation.
-    """
     return RetrieveHit(
         rank=number,
         score=0.9,
@@ -55,16 +44,6 @@ def hit(number: int = 1, text: str = "Maximum amount is 7.5 crore.") -> Retrieve
 
 
 def run_answer(settings: Settings, hits: list[RetrieveHit], draft: dict[str, Any]) -> Any:
-    """Provide run answer for the answer scenario.
-
-    Args:
-        settings: Validated application configuration for this operation.
-        hits: Ranked policy passages supplied by retrieval.
-        draft: Draft fixture or parametrized input for this scenario.
-
-    Returns:
-        Any value produced by this operation.
-    """
     response = RetrieveResponse(
         as_of=date(2026, 10, 1),
         results=hits,
@@ -79,11 +58,6 @@ def run_answer(settings: Settings, hits: list[RetrieveHit], draft: dict[str, Any
 
 
 def test_answer_returns_verified_quote(settings: Settings) -> None:
-    """Verify answer returns verified quote.
-
-    Args:
-        settings: Validated application configuration for this operation.
-    """
     response = run_answer(
         settings,
         [hit()],
@@ -110,13 +84,6 @@ def test_answer_returns_verified_quote(settings: Settings) -> None:
 def test_answer_abstains_on_invalid_citations(
     settings: Settings, answer: str, evidence: list[dict[str, Any]]
 ) -> None:
-    """Verify answer abstains on invalid citations.
-
-    Args:
-        settings: Validated application configuration for this operation.
-        answer: Generated answer whose exact text and citations are being evaluated.
-        evidence: Retained retrieval results and complete applicable amendments.
-    """
     response = run_answer(
         settings,
         [hit()],
@@ -131,11 +98,6 @@ def test_answer_abstains_on_invalid_citations(
 
 
 def test_empty_retrieval_can_clarify_scope(settings: Settings) -> None:
-    """Verify empty retrieval can clarify scope.
-
-    Args:
-        settings: Validated application configuration for this operation.
-    """
     response = run_answer(
         settings,
         [],
@@ -149,13 +111,6 @@ def test_empty_retrieval_can_clarify_scope(settings: Settings) -> None:
 def test_invalid_citations_get_only_one_repair_attempt(
     settings: Settings, repair_succeeds: bool, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Verify invalid citations get only one repair attempt.
-
-    Args:
-        settings: Validated application configuration for this operation.
-        repair_succeeds: Repair succeeds fixture or parametrized input for this scenario.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-    """
     annotation = Mock(side_effect=lambda **_: nullcontext())
     monkeypatch.setattr(observability, "LLMObs", Mock(enabled=True, annotation_context=annotation))
     invalid = {
@@ -206,12 +161,6 @@ def test_invalid_citations_get_only_one_repair_attempt(
 def test_clarification_uses_a_fixed_scope_question_without_model_policy_claims(
     settings: Settings, question: str
 ) -> None:
-    """Verify clarification uses a fixed scope question without model policy claims.
-
-    Args:
-        settings: Validated application configuration for this operation.
-        question: Question fixture or parametrized input for this scenario.
-    """
     response = run_answer(
         settings,
         [hit()],
@@ -230,11 +179,6 @@ def test_clarification_uses_a_fixed_scope_question_without_model_policy_claims(
 
 
 def test_unfittable_amendment_abstains_before_generation(settings: Settings) -> None:
-    """Verify unfittable amendment abstains before generation.
-
-    Args:
-        settings: Validated application configuration for this operation.
-    """
     amendment = hit(2, "applicability " * 5000)
     retrieved = RetrieveResponse(
         as_of=date(2026, 10, 1),
@@ -257,7 +201,6 @@ def test_unfittable_amendment_abstains_before_generation(settings: Settings) -> 
 
 
 def test_context_budget_deduplicates_and_preserves_whole_passages() -> None:
-    """Verify context budget deduplicates and preserves whole passages."""
     first = hit().model_copy(update={"parent_text": "large parent " * 2000})
     sources = assemble_context([first, first, hit(2), hit(3), hit(4)], 256, "o200k_base")
     payload = render_context(sources)
@@ -268,13 +211,11 @@ def test_context_budget_deduplicates_and_preserves_whole_passages() -> None:
 
 
 def test_context_places_best_two_passages_at_edges() -> None:
-    """Verify context places best two passages at edges."""
     sources = assemble_context([hit(i) for i in range(1, 6)], 2000, "o200k_base")
     assert [item.rank for item in sources.values()] == [1, 3, 5, 4, 2]
 
 
 def test_context_keeps_distinct_children_when_their_shared_parent_is_oversized() -> None:
-    """Verify context keeps distinct children when their shared parent is oversized."""
     parent = "Long policy section with several clauses. " * 2000
     first = hit(text="The processing fee is 0.35 percent.").model_copy(
         update={"parent_text": parent}
@@ -294,12 +235,6 @@ def test_context_keeps_distinct_children_when_their_shared_parent_is_oversized()
 def test_answer_api_validates_and_hides_provider_errors(
     settings: Settings, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Verify answer api validates and hides provider errors.
-
-    Args:
-        settings: Validated application configuration for this operation.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-    """
     app = create_app()
     app.dependency_overrides[get_settings] = lambda: settings
     monkeypatch.setattr(answer_api, "answer_policy", AsyncMock(side_effect=TimeoutError("secret")))
@@ -340,8 +275,6 @@ def test_answer_routes_hide_all_supported_upstream_errors(
     """Both answer routes retain safe errors, separate events and input validation.
 
     Args:
-        settings: Validated application configuration for this operation.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
         path: Answer endpoint under test.
         service: Service called by that endpoint.
         event: Expected endpoint-specific log event.

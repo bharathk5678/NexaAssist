@@ -20,9 +20,6 @@ def demo_report(dataset: Path) -> dict[str, object]:
 
     Args:
         dataset: Golden dataset file used by this evaluation.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
     """
     cases = load_golden(dataset)
     golden = cases[0]

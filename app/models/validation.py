@@ -47,9 +47,6 @@ class ServiceRequestProposal(ServiceRequestDetails):
     def required_loan_is_present(self) -> ServiceRequestProposal:
         """Require an owned loan selection for certificate and opt-in proposals.
 
-        Returns:
-            ServiceRequestProposal value produced by this operation.
-
         Raises:
             ValueError: This service-request proposal requires a selected loan.
         """
@@ -178,9 +175,6 @@ class ValidationResult(BaseModel):
     def proposal_matches_decision(self) -> ValidationResult:
         """Require evidence and a proposal exactly when validation is allowed.
 
-        Returns:
-            ValidationResult value produced by this operation.
-
         Raises:
             ValueError: An allowed proposal requires policy evidence.
         """
@@ -195,7 +189,6 @@ class ServiceRequestReceipt(BaseModel):
     """Validated service request receipt contract.
 
     Attributes:
-        service_request_id: Service request id retained by this contract.
         customer_id: Synthetic customer identifier within the authorized scope.
         request_type: Supported service-request category selected for the operation.
         loan_account_id: Existing loan account selected for ownership and eligibility checks.
@@ -216,9 +209,6 @@ class ServiceRequestReceipt(BaseModel):
     def valid_receipt_identity_and_time(self) -> ServiceRequestReceipt:
         """Reject blank receipt identities and timestamps without a timezone.
 
-        Returns:
-            ServiceRequestReceipt value produced by this operation.
-
         Raises:
             ValueError: Banking receipt requires a nonblank ID and timezone-aware timestamp.
         """
@@ -232,7 +222,6 @@ class SubmittedServiceRequest(BaseModel):
 
     Attributes:
         status: HTTP or workflow status used by the scenario.
-        service_request: Service request retained by this contract.
         evidence: Retained retrieval results and complete applicable amendments.
     """
 

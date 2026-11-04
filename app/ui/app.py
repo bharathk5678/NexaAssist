@@ -20,23 +20,12 @@ from app.ui.agent import agent_workspace
 
 @st.cache_resource
 def api_client(base_url: str) -> httpx.Client:
-    """Return the shared cached HTTP client for the selected API base URL.
-
-    Args:
-        base_url: Base url supplied by the caller.
-
-    Returns:
-        httpx.Client value produced by this operation.
-    """
+    """Return the shared cached HTTP client for the selected API base URL."""
     return httpx.Client(base_url=base_url, timeout=180)
 
 
 def show_answer(result: AnswerResponse) -> None:
-    """Render answer status and expand the exact cited policy evidence.
-
-    Args:
-        result: Result supplied by the caller.
-    """
+    """Render answer status and expand the exact cited policy evidence."""
     if result.status != "answered":
         st.warning(result.answer)
     else:
@@ -51,12 +40,7 @@ def show_answer(result: AnswerResponse) -> None:
 
 
 def feedback_form(client: httpx.Client, turn: dict[str, Any]) -> None:
-    """Submit feedback for the retained answer without replacing prior saved feedback.
-
-    Args:
-        client: HTTP client configured for the required upstream service.
-        turn: Turn supplied by the caller.
-    """
+    """Submit feedback for the retained answer without replacing prior saved feedback."""
     if turn.get("feedback_saved"):
         st.caption("Feedback saved for review.")
         return
@@ -85,11 +69,7 @@ def feedback_form(client: httpx.Client, turn: dict[str, Any]) -> None:
 
 
 def review_feedback(client: httpx.Client) -> None:
-    """Load feedback records and submit reviewer-authorized review updates.
-
-    Args:
-        client: HTTP client configured for the required upstream service.
-    """
+    """Load feedback records and submit reviewer-authorized review updates."""
     token = st.text_input(
         "Reviewer token",
         type="password",
@@ -144,22 +124,13 @@ def review_feedback(client: httpx.Client) -> None:
 
 
 def open_chat(identifier: str) -> None:
-    """Select the local conversation and return to the policy-chat workspace.
-
-    Args:
-        identifier: Identifier supplied by the caller.
-    """
+    """Select the local conversation and return to the policy-chat workspace."""
     st.session_state["active_chat"] = identifier
     st.session_state["workspace"] = "Policy chat"
 
 
 def send_question(client: httpx.Client, turn: dict[str, Any]) -> None:
-    """Call the existing API; chat history remains local to this UI session.
-
-    Args:
-        client: HTTP client configured for the required upstream service.
-        turn: Turn supplied by the caller.
-    """
+    """Call the existing API; chat history remains local to this UI session."""
     turn.pop("error", None)
     try:
         evaluating = turn["mode"] == "Answer" and turn.get("evaluate_quality", False)
@@ -196,10 +167,6 @@ def send_question(client: httpx.Client, turn: dict[str, Any]) -> None:
 
 def show_turn(client: httpx.Client, turn: dict[str, Any]) -> bool:
     """Render one question and its evidence, returning whether to retry it.
-
-    Args:
-        client: HTTP client configured for the required upstream service.
-        turn: Turn supplied by the caller.
 
     Returns:
         True when the user requests a retry for this retained turn.

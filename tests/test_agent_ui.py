@@ -1,5 +1,3 @@
-"""Regression tests for agent ui."""
-
 from __future__ import annotations
 
 import json
@@ -19,11 +17,6 @@ from app.ui import app as ui
 
 @pytest.fixture
 def run_view() -> dict:
-    """Provide run view for the agent ui scenario.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-    """
     now = datetime.now(UTC)
     return {
         "run_id": str(uuid4()),
@@ -58,15 +51,6 @@ def run_view() -> dict:
 
 @pytest.fixture
 def screen(monkeypatch: pytest.MonkeyPatch, run_view: dict):
-    """Provide screen for the agent ui scenario.
-
-    Args:
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-        run_view: Synthetic saved-run response used by the UI test.
-
-    Yields:
-        Each fixture value or stored key produced by this operation.
-    """
     calls: list[httpx.Request] = []
 
     def respond(request: httpx.Request) -> httpx.Response:
@@ -87,12 +71,6 @@ def screen(monkeypatch: pytest.MonkeyPatch, run_view: dict):
 
 @pytest.mark.parametrize("kind", get_args(ServiceRequestType.__value__))
 def test_start_uses_shared_schema_and_preserves_saved_run(screen, kind: str) -> None:
-    """Verify start uses shared schema and preserves saved run.
-
-    Args:
-        screen: Streamlit test application and recorded HTTP calls.
-        kind: Service-request or response type selected for this scenario.
-    """
     app, calls = screen
     app.text_input(key="agent_customer").set_value("NXC-0010")
     app.selectbox(key="agent_kind").select(kind)
@@ -111,12 +89,6 @@ def test_start_uses_shared_schema_and_preserves_saved_run(screen, kind: str) -> 
 
 
 def load_run(app: AppTest, run_view: dict) -> None:
-    """Provide load run for the agent ui scenario.
-
-    Args:
-        app: App fixture or parametrized input for this scenario.
-        run_view: Synthetic saved-run response used by the UI test.
-    """
     app.text_input(key="agent_run_id").set_value(run_view["run_id"])
     next(b for b in app.button if b.label == "Load saved run").click().run()
     assert not app.exception
@@ -126,13 +98,6 @@ def load_run(app: AppTest, run_view: dict) -> None:
 def test_reviewer_posts_loaded_hash_only_after_confirmation(
     screen, run_view: dict, decision: str
 ) -> None:
-    """Verify reviewer posts loaded hash only after confirmation.
-
-    Args:
-        screen: Streamlit test application and recorded HTTP calls.
-        run_view: Synthetic saved-run response used by the UI test.
-        decision: Reviewer decision bound to the exact retained proposal hash.
-    """
     app, calls = screen
     load_run(app, run_view)
     next(r for r in app.radio if r.label == "Reviewer decision").set_value(decision)
@@ -148,12 +113,6 @@ def test_reviewer_posts_loaded_hash_only_after_confirmation(
 
 
 def test_credential_change_clears_loaded_proposal(screen, run_view: dict) -> None:
-    """Verify credential change clears loaded proposal.
-
-    Args:
-        screen: Streamlit test application and recorded HTTP calls.
-        run_view: Synthetic saved-run response used by the UI test.
-    """
     app, calls = screen
     load_run(app, run_view)
     assert app.json
@@ -166,12 +125,6 @@ def test_credential_change_clears_loaded_proposal(screen, run_view: dict) -> Non
 
 
 def test_uncertain_action_retry_keeps_same_run_and_never_starts_new(screen, run_view: dict) -> None:
-    """Verify uncertain action retry keeps same run and never starts new.
-
-    Args:
-        screen: Streamlit test application and recorded HTTP calls.
-        run_view: Synthetic saved-run response used by the UI test.
-    """
     app, calls = screen
     run_view["status"] = "unconfirmed"
     load_run(app, run_view)
@@ -184,11 +137,6 @@ def test_uncertain_action_retry_keeps_same_run_and_never_starts_new(screen, run_
 
 
 def test_invalid_customer_and_run_id_do_not_call_api(screen) -> None:
-    """Verify invalid customer and run id do not call api.
-
-    Args:
-        screen: Streamlit test application and recorded HTTP calls.
-    """
     app, calls = screen
     app.text_input(key="agent_customer").set_value("not-a-customer")
     next(b for b in app.button if b.label == "Prepare for approval").click().run()
@@ -202,14 +150,6 @@ def test_invalid_customer_and_run_id_do_not_call_api(screen) -> None:
 def test_api_failures_hide_stale_data_and_raw_errors(
     screen, run_view: dict, monkeypatch: pytest.MonkeyPatch, failure: str
 ) -> None:
-    """Verify api failures hide stale data and raw errors.
-
-    Args:
-        screen: Streamlit test application and recorded HTTP calls.
-        run_view: Synthetic saved-run response used by the UI test.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-        failure: Failure mode selected by the parametrized test.
-    """
     app, calls = screen
     load_run(app, run_view)
 
@@ -236,12 +176,6 @@ def test_api_failures_hide_stale_data_and_raw_errors(
 
 
 def test_terminal_submitted_receipt_has_no_approval_or_retry(screen, run_view: dict) -> None:
-    """Verify terminal submitted receipt has no approval or retry.
-
-    Args:
-        screen: Streamlit test application and recorded HTTP calls.
-        run_view: Synthetic saved-run response used by the UI test.
-    """
     app, _ = screen
     run_view["status"] = "submitted"
     response = run_view["response"]
@@ -280,14 +214,6 @@ def test_terminal_submitted_receipt_has_no_approval_or_retry(screen, run_view: d
 def test_preparation_reports_safe_actionable_http_errors(
     screen, monkeypatch: pytest.MonkeyPatch, status: int, expected: str
 ) -> None:
-    """Verify preparation reports safe actionable http errors.
-
-    Args:
-        screen: Streamlit test application and recorded HTTP calls.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-        status: HTTP or workflow status used by the scenario.
-        expected: Expected outcome for the selected scenario.
-    """
     app, _ = screen
     calls: list[httpx.Request] = []
 
@@ -311,14 +237,6 @@ def test_preparation_reports_safe_actionable_http_errors(
 def test_failed_decision_or_retry_keeps_error_visible_and_saved_id(
     screen, run_view: dict, monkeypatch: pytest.MonkeyPatch, operation: str
 ) -> None:
-    """Verify failed decision or retry keeps error visible and saved id.
-
-    Args:
-        screen: Streamlit test application and recorded HTTP calls.
-        run_view: Synthetic saved-run response used by the UI test.
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-        operation: Workflow operation under test.
-    """
     app, _ = screen
     if operation == "retry":
         run_view["status"] = "unconfirmed"

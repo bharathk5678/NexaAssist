@@ -30,7 +30,6 @@ async def score_answer(
         answer: Generated answer whose exact text and citations are being evaluated.
         contexts: Exact policy passages retained for the evaluated generation.
         reference: Optional expected answer used by reference-based metrics.
-        settings: Validated application configuration for this operation.
 
     Returns:
         Every configured metric with an explicit scored, unavailable or error status.

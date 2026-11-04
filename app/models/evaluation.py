@@ -34,7 +34,6 @@ class QualityScore(BaseModel):
 
     Attributes:
         status: HTTP or workflow status used by the scenario.
-        value: Candidate value supplied by validation or the calling integration.
         reason: Safe explanation of a validation or metric availability outcome.
     """
 
@@ -49,14 +48,7 @@ class QualityScore(BaseModel):
     def normalize_roundoff(cls, value: object) -> object:
         # Cosine similarity can produce 1.0000000000000002 for identical vectors.
         # Only tolerate numerical roundoff; materially invalid scores still fail.
-        """Normalize permitted floating-point roundoff while rejecting invalid metric values.
-
-        Args:
-            value: Candidate value supplied by validation or the calling integration.
-
-        Returns:
-            object value produced by this operation.
-        """
+        """Normalize permitted floating-point roundoff while rejecting invalid metric values."""
         if isinstance(value, float):
             if 1 < value <= 1 + 1e-12:
                 return 1.0
@@ -67,9 +59,6 @@ class QualityScore(BaseModel):
     @model_validator(mode="after")
     def score_matches_status(self) -> QualityScore:
         """Require a numeric value exactly when a metric has been scored.
-
-        Returns:
-            QualityScore value produced by this operation.
 
         Raises:
             ValueError: Only scored metrics can contain a value.
@@ -103,9 +92,6 @@ class AnswerQuality(BaseModel):
     @model_validator(mode="after")
     def all_metrics_present(self) -> AnswerQuality:
         """Require the complete configured metric inventory in an answer-quality result.
-
-        Returns:
-            AnswerQuality value produced by this operation.
 
         Raises:
             ValueError: Every quality metric requires a score or an explicit status.

@@ -52,11 +52,7 @@ def diagnose_retrieval(
     """Check expected citation coverage, including nonempty but incorrect results.
 
     Args:
-        response: Response supplied by the caller.
         expected: Expected outcome for the selected scenario.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
 
     Raises:
         ValueError: Expected evidence must contain at least one citation.
@@ -95,12 +91,7 @@ def diagnose_expanded_context(
     This measures text availability, not semantic correctness or answer attribution.
 
     Args:
-        response: Response supplied by the caller.
         expected: Expected outcome for the selected scenario.
-        source_chunks: Source chunks supplied by the caller.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
 
     Raises:
         ValueError: Expected evidence must contain at least one citation.
@@ -142,15 +133,7 @@ def diagnose_expanded_context(
 def diagnose_parent_links(
     chunks: Sequence[Document], parents: Mapping[str, Document]
 ) -> dict[str, object]:
-    """Check existence, policy scope and body containment across the two stores.
-
-    Args:
-        chunks: Chunks supplied by the caller.
-        parents: Parents supplied by the caller.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-    """
+    """Check existence, policy scope and body containment across the two stores."""
     missing, mismatched, absent = [], [], []
     referenced = set()
     for chunk in chunks:
@@ -205,13 +188,6 @@ def diagnose_staleness(
 
     This checks stored chunk freshness, not the Atlas Search index's readiness.
 
-    Args:
-        source: Source supplied by the caller.
-        indexed: Indexed supplied by the caller.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-
     Raises:
         ValueError: Source snapshot must be nonempty and contain checksums.
     """
@@ -239,14 +215,6 @@ def diagnose_embeddings(
 ) -> dict[str, object]:
     """Check embedding compatibility; statistical distribution drift is not measured.
 
-    Args:
-        indexed: Indexed supplied by the caller.
-        expected_model: Expected model supplied by the caller.
-        expected_dimensions: Expected dimensions supplied by the caller.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-
     Raises:
         ValueError: Expected model and positive dimensions are required.
     """
@@ -267,11 +235,7 @@ def diagnose_embeddings(
 
 
 def demo_report() -> dict[str, object]:
-    """Synthetic snapshots and responses; no Atlas, embeddings, or model downloads.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-    """
+    """Synthetic snapshots and responses; no Atlas, embeddings, or model downloads."""
     model = str(Settings.model_fields["embedding_model"].default)
     dimensions = int(Settings.model_fields["embedding_dimensions"].default)
     source = [

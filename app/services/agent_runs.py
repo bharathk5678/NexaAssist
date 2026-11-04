@@ -34,12 +34,7 @@ logger = structlog.get_logger()
 
 
 class RunError(Exception):
-    """Carry a safe HTTP status and detail across the service/router boundary.
-
-    Args:
-        status_code: Status code supplied by the caller.
-        detail: Detail supplied by the caller.
-    """
+    """Carry a safe HTTP status and detail across the service/router boundary."""
 
     def __init__(self, status_code: int, detail: str) -> None:
         self.status_code, self.detail = status_code, detail
@@ -50,8 +45,6 @@ class AgentRunService:
     """Coordinate scoped durable runs and exact reviewer-authorized banking operations.
 
     Args:
-        settings: Validated application configuration for this operation.
-        config: Workflow settings or graph configuration supplied by the caller.
         rag: Bounded client for the RAG service.
         bank: Authenticated banking client, or None when unconfigured.
         store: Scoped run persistence and checkpoint adapter.
@@ -70,8 +63,6 @@ class AgentRunService:
         """Construct the scoped service with its durable MongoDB run store.
 
         Args:
-            settings: Validated application configuration for this operation.
-            config: Workflow settings or graph configuration supplied by the caller.
             rag: Bounded client for the RAG service.
             bank: Authenticated banking client, or None when unconfigured.
             access: Server-issued principal identity, customer entitlements and review permission.
@@ -144,12 +135,7 @@ class AgentRunService:
             """Recheck banking identity, execution lease and owner access before the external write.
 
             Args:
-                request: Validated request retaining the caller's explicit scope and action details.
                 validation: Retained policy and banking validation for the exact proposed action.
-                key: Key supplied by the caller.
-
-            Returns:
-                SubmittedServiceRequest value produced by this operation.
 
             Raises:
                 RunError: The run lease was lost; no new submission was started.
@@ -232,9 +218,6 @@ class AgentRunService:
 
     async def start(self, request: AgentRequest) -> AgentRunResponse:
         """Create an owner-bound run and begin classified proposal preparation.
-
-        Args:
-            request: Validated request retaining the caller's explicit scope and action details.
 
         Returns:
             Validated saved-run response reflecting the current workflow state.

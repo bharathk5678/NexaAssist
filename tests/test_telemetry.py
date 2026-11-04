@@ -1,5 +1,3 @@
-"""Regression tests for telemetry."""
-
 from __future__ import annotations
 
 import json
@@ -16,15 +14,7 @@ from app.core import observability
 
 
 def run_instrumented(script: str, *, llmobs_enabled: bool = False) -> list[dict[str, Any]]:
-    """Run an isolated instrumented script and parse its structured telemetry records.
-
-    Args:
-        script: Script fixture or parametrized input for this scenario.
-        llmobs_enabled: Llmobs enabled fixture or parametrized input for this scenario.
-
-    Returns:
-        Ordered results produced by the documented operation.
-    """
+    """Run an isolated instrumented script and parse its structured telemetry records."""
     result = subprocess.run(
         [str(Path(sys.executable).with_name("ddtrace-run")), sys.executable, "-c", script],
         cwd=Path(__file__).resolve().parents[1],
@@ -53,7 +43,6 @@ def run_instrumented(script: str, *, llmobs_enabled: bool = False) -> list[dict[
 
 
 def test_early_datadog_instrumentation_traces_api_and_correlates_json_logs() -> None:
-    """Verify early datadog instrumentation traces api and correlates json logs."""
     script = """
 import json
 import structlog
@@ -112,7 +101,6 @@ tracer.shutdown()
 
 
 def test_versioned_prompts_reach_llm_spans_and_remain_scoped() -> None:
-    """Verify versioned prompts reach llm spans and remain scoped."""
     script = """
 import asyncio
 import json
@@ -202,11 +190,6 @@ tracer.shutdown()
 def test_disabled_prompt_tracking_does_not_render_or_annotate(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Verify disabled prompt tracking does not render or annotate.
-
-    Args:
-        monkeypatch: Pytest fixture used to isolate dependencies for this scenario.
-    """
     prompt = Mock()
     datadog = Mock(enabled=False)
     monkeypatch.setattr(observability, "LLMObs", datadog)
@@ -217,7 +200,6 @@ def test_disabled_prompt_tracking_does_not_render_or_annotate(
 
 
 def test_api_workflows_keep_api_identity_when_ui_propagates_its_llm_application() -> None:
-    """Verify api workflows keep api identity when ui propagates its llm application."""
     script = """
 import asyncio
 import json

@@ -16,9 +16,6 @@ def token_encoder(name: str) -> tiktoken.Encoding:
 
     Args:
         name: Configured tokenizer or metric identifier.
-
-    Returns:
-        tiktoken.Encoding value produced by this operation.
     """
     return tiktoken.get_encoding(name)
 
@@ -28,9 +25,6 @@ def render_context(sources: dict[int, RetrieveHit]) -> str:
 
     Args:
         sources: Numbered policy passages and citation metadata retained for generation.
-
-    Returns:
-        Text representation produced by the documented operation.
     """
     return json.dumps(
         [
@@ -57,9 +51,6 @@ def assemble_context(
         hits: Ranked policy passages supplied by retrieval.
         max_tokens: Maximum serialized evidence tokens retained in the context.
         encoding: Tokenizer encoding used for bounded context or model-work estimates.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
     """
     encoder = token_encoder(encoding)
     sources: dict[int, RetrieveHit] = {}

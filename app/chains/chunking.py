@@ -50,14 +50,6 @@ def chunk_by_clause(elements: list[Element], max_characters: int, overlap: int) 
     Size: only a clause longer than `max_characters` is split. Its tables become their own
     chunks and its narrative is split at sentence boundaries with `overlap` characters
     repeated. Text before section 1 is section 0, "Front matter".
-
-    Args:
-        elements: Elements supplied by the caller.
-        max_characters: Max characters supplied by the caller.
-        overlap: Overlap supplied by the caller.
-
-    Returns:
-        Ordered results produced by the documented operation.
     """
     section_number, section = 0, "Front matter"
     clauses: list[_Clause] = [_Clause(section_number, section, None, None)]

@@ -10,9 +10,6 @@ from app.core.config import Settings
 def get_embeddings(settings: Settings) -> OpenAIEmbeddings:
     """Ingestion and retrieval must share this model and dimension.
 
-    Args:
-        settings: Validated application configuration for this operation.
-
     Returns:
         Configured OpenAIEmbeddings integration with the shared model and dimensions.
     """

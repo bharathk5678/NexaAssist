@@ -10,11 +10,6 @@ def rerank_prompt(query: str, document: str, as_of: str) -> str:
 
     Args:
         query: User question or scoped retrieval query.
-        document: Document supplied by the caller.
-        as_of: As of supplied by the caller.
-
-    Returns:
-        Text representation produced by the documented operation.
     """
     return (
         "<|im_start|>system\nJudge whether the Document meets the requirements based on "

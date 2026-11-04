@@ -17,7 +17,6 @@ class AgentModelBudget(AsyncCallbackHandler):
     """Reserve bounded model work before calls, including one possible provider retry.
 
     Args:
-        settings: Validated application configuration for this operation.
         encoding: Tokenizer encoding used for bounded context or model-work estimates.
     """
 
@@ -33,11 +32,6 @@ class AgentModelBudget(AsyncCallbackHandler):
         self, serialized: dict[str, Any], messages: list[list[BaseMessage]], **kwargs: Any
     ) -> None:
         """Reserve bounded work before a model call, including a possible provider retry.
-
-        Args:
-            serialized: Serialized supplied by the caller.
-            messages: Messages supplied by the caller.
-            kwargs: Additional keyword arguments accepted by the adapted interface.
 
         Raises:
             ValueError: Agent model-work budget exceeded.

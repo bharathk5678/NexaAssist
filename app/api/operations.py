@@ -22,11 +22,7 @@ async def health() -> dict[str, str]:
 
 @router.get("/metrics")
 async def metrics() -> dict[str, int | float]:
-    """Return process-local retrieval counters.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-    """
+    """Return process-local retrieval counters."""
     return {
         "retrieval_requests_total": retrieval_metrics["requests"],
         "retrieval_errors_total": retrieval_metrics["errors"],
@@ -37,9 +33,5 @@ async def metrics() -> dict[str, int | float]:
 
 @router.get("/metrics/latency")
 async def latency_metrics() -> dict[str, int | float]:
-    """Nearest-rank percentiles of the last 1000 successful requests in this process.
-
-    Returns:
-        Named values describing the documented operation or diagnostic outcome.
-    """
+    """Nearest-rank percentiles of the last 1000 successful requests in this process."""
     return latency_summary()

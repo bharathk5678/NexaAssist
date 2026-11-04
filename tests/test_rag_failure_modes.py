@@ -1,5 +1,3 @@
-"""Regression tests for rag failure modes."""
-
 from __future__ import annotations
 
 import pytest
@@ -13,7 +11,6 @@ from app.evaluation.rag_failure_modes import (
 
 
 def test_demo_distinguishes_misses_staleness_and_compatibility() -> None:
-    """Verify demo distinguishes misses staleness and compatibility."""
     report = demo_report()
     assert report["mode"] == "offline_demo"
     retrieval = report["retrieval"]
@@ -40,7 +37,6 @@ def test_demo_distinguishes_misses_staleness_and_compatibility() -> None:
 
 
 def test_unknown_snapshots_do_not_report_healthy() -> None:
-    """Verify unknown snapshots do not report healthy."""
     with pytest.raises(ValueError, match="Source snapshot"):
         diagnose_staleness([], [])
     with pytest.raises(ValueError, match="checksums"):
@@ -53,7 +49,6 @@ def test_unknown_snapshots_do_not_report_healthy() -> None:
 
 
 def test_reject_duplicate_chunk_ids_and_invalid_embedding_contract() -> None:
-    """Verify reject duplicate chunk ids and invalid embedding contract."""
     chunk = ChunkSnapshot(chunk_id="a", checksum="source")
     with pytest.raises(ValueError, match="duplicate"):
         diagnose_staleness([chunk], [chunk, chunk])

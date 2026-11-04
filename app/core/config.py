@@ -72,14 +72,7 @@ class Settings(BaseSettings):
     @field_validator("feedback_reviewer_token", mode="before")
     @classmethod
     def empty_reviewer_token(cls, value: object) -> object:
-        """Normalize an empty feedback reviewer token to an unconfigured value.
-
-        Args:
-            value: Candidate value supplied by validation or the calling integration.
-
-        Returns:
-            object value produced by this operation.
-        """
+        """Normalize an empty feedback reviewer token to an unconfigured value."""
         return None if value == "" else value
 
     openai_api_key: SecretStr
@@ -117,9 +110,6 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def valid_overlap(self) -> Settings:
         """Reject chunk overlap that would consume the entire chunk window.
-
-        Returns:
-            Settings value produced by this operation.
 
         Raises:
             ValueError: CHUNK_OVERLAP_CHARACTERS must be smaller than CHUNK_MAX_CHARACTERS.
@@ -210,9 +200,6 @@ class AgentSettings(BaseSettings):
     def unique_principals(self) -> AgentSettings:
         """Reject duplicate identities, duplicate tokens and reserved training identities.
 
-        Returns:
-            AgentSettings value produced by this operation.
-
         Raises:
             ValueError: Agent identity credentials must differ from the legacy training token.
         """
@@ -234,14 +221,7 @@ class AgentSettings(BaseSettings):
     @field_validator("banking_api_token", "agent_validation_token", mode="before")
     @classmethod
     def empty_validation_token(cls, value: object) -> object:
-        """Normalize an empty banking or legacy agent token to an unconfigured value.
-
-        Args:
-            value: Candidate value supplied by validation or the calling integration.
-
-        Returns:
-            object value produced by this operation.
-        """
+        """Normalize an empty banking or legacy agent token to an unconfigured value."""
         return None if value == "" else value
 
 

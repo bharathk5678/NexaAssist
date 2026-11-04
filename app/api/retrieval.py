@@ -21,13 +21,6 @@ async def retrieve(
 ) -> RetrieveResponse:
     """Serve policy retrieval and translate upstream failures into a safe HTTP response.
 
-    Args:
-        request: Validated request retaining the caller's explicit scope and action details.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        RetrieveResponse value produced by this operation.
-
     Raises:
         HTTPException: Retrieval service unavailable.
     """

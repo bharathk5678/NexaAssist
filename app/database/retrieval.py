@@ -16,23 +16,10 @@ from app.database.mongo import _database
 
 
 def build_amendment_search(settings: Settings) -> Runnable[dict[str, Any], list[Document]]:
-    """Load complete, in-scope circulars linked to the retrieved policy IDs.
-
-    Args:
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        Composable runnable retaining the supplied inputs and configured integration behavior.
-    """
+    """Load complete, in-scope circulars linked to the retrieved policy IDs."""
 
     def load(value: dict[str, Any]) -> list[Document]:
         """Load complete applicable amendment evidence from the configured corpus.
-
-        Args:
-            value: Candidate value supplied by validation or the calling integration.
-
-        Returns:
-            Ordered results produced by the documented operation.
 
         Raises:
             ValueError: Inconsistent amendment metadata.
@@ -97,14 +84,7 @@ def build_amendment_search(settings: Settings) -> Runnable[dict[str, Any], list[
         ]
 
     async def search(value: dict[str, Any]) -> list[Document]:
-        """Execute the configured scoped candidate search and return ranked documents.
-
-        Args:
-            value: Candidate value supplied by validation or the calling integration.
-
-        Returns:
-            Ordered results produced by the documented operation.
-        """
+        """Execute the configured scoped candidate search and return ranked documents."""
         return await asyncio.to_thread(load, value)
 
     return RunnableLambda(search).with_config(run_name="linked_policy_amendments")
@@ -113,25 +93,10 @@ def build_amendment_search(settings: Settings) -> Runnable[dict[str, Any], list[
 def build_hybrid_search(
     vector_store: MongoDBAtlasVectorSearch, settings: Settings
 ) -> Runnable[dict[str, Any], list[tuple[Document, float]]]:
-    """Atlas BM25 + vector search fused by RRF, with no automatic index creation.
-
-    Args:
-        vector_store: Vector store supplied by the caller.
-        settings: Validated application configuration for this operation.
-
-    Returns:
-        Composable runnable retaining the supplied inputs and configured integration behavior.
-    """
+    """Atlas BM25 + vector search fused by RRF, with no automatic index creation."""
 
     async def search(value: dict[str, Any]) -> list[tuple[Document, float]]:
-        """Execute the configured scoped candidate search and return ranked documents.
-
-        Args:
-            value: Candidate value supplied by validation or the calling integration.
-
-        Returns:
-            Ordered results produced by the documented operation.
-        """
+        """Execute the configured scoped candidate search and return ranked documents."""
         retriever = MongoDBAtlasHybridSearchRetriever(
             vectorstore=vector_store,
             search_index_name=settings.text_index_name,
@@ -149,11 +114,7 @@ def resolve_reference_contexts(settings: Settings, references: list[dict[str, An
     """Resolve golden source references to actual indexed text, in reference order.
 
     Args:
-        settings: Validated application configuration for this operation.
         references: Golden document/clause references to resolve in the configured corpus.
-
-    Returns:
-        Ordered results produced by the documented operation.
 
     Raises:
         ValueError: The operation cannot satisfy its documented validation or execution contract.

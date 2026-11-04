@@ -16,9 +16,6 @@ async def rag_client(
 ) -> AsyncIterator[httpx.AsyncClient]:
     """Yield a bounded HTTP client targeting the policy retrieval service.
 
-    Args:
-        settings: Validated application configuration for this operation.
-
     Yields:
         Bounded RAG HTTP client closed when the request dependency exits.
     """
@@ -34,9 +31,6 @@ async def banking_client(
     settings: Annotated[AgentSettings, Depends(get_agent_settings)],
 ) -> AsyncIterator[httpx.AsyncClient | None]:
     """Yield an authenticated bounded banking client, or None when unconfigured.
-
-    Args:
-        settings: Validated application configuration for this operation.
 
     Yields:
         Authenticated banking HTTP client, or None when unconfigured.
